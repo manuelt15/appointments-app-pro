@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Appointments App
 
-## Getting Started
+Aplicación de gestión de citas con autenticación, panel de administración y servidor MCP para integración con Claude Code.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Next.js 16** (App Router) + TypeScript
+- **MongoDB** + Mongoose
+- **NextAuth.js v5** — Email/password, Google OAuth, GitHub OAuth
+- **Tailwind CSS v4**
+- **MCP Server** — integración con Claude Code para gestionar citas por lenguaje natural
+
+## Desarrollo local
+
+### 1. Requisitos
+
+- Node.js 20+
+- MongoDB local o MongoDB Atlas
+
+### 2. Variables de entorno
+
+Crea un archivo `.env.local` en la raíz:
+
+```env
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017/appointments-pro
+
+# NextAuth v5
+AUTH_SECRET=           # genera con: openssl rand -base64 32
+AUTH_URL=http://localhost:3000
+
+# Google OAuth (opcional)
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+
+# GitHub OAuth (opcional)
+AUTH_GITHUB_ID=
+AUTH_GITHUB_SECRET=
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Instalar y arrancar
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+La app estará en http://localhost:3000.
 
-## Learn More
+## MCP — Integración con Claude Code
 
-To learn more about Next.js, take a look at the following resources:
+El servidor MCP permite gestionar citas desde Claude Code con lenguaje natural.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Configuración
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Crea `.mcp.json` en la raíz (está en `.gitignore`, no se sube al repo):
 
-## Deploy on Vercel
+```json
+{
+  "mcpServers": {
+    "appointments": {
+      "command": "node",
+      "args": ["./mcp/dist/index.js"],
+      "env": {
+        "MCP_API_URL": "http://localhost:3000",
+        "MCP_API_KEY": "tu-api-key"
+      }
+    }
+  }
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+La API key se genera en **Settings** dentro de la app.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Herramientas disponibles
+
+| Tool | Descripción |
+|---|---|
+| `list_appointments` | Listar citas con filtros |
+| `create_appointment` | Crear una nueva cita |
+| `update_appointment` | Editar o mover una cita |
+| `delete_appointment` | Cancelar o eliminar una cita |
+| `check_availability` | Ver huecos libres por empleado/sala |
+| `list_calendars` | Listar calendarios del negocio |
+| `list_employees` | Listar empleados |
+
+## Despliegue
+
+La app está optimizada para desplegarse en **Vercel** con **MongoDB Atlas**.
+
+Variables de entorno necesarias en producción: las mismas que en local, más `AUTH_URL` apuntando al dominio de producción.
+
+Recuerda actualizar las URLs de callback en Google Cloud Console y GitHub OAuth App al dominio de producción.

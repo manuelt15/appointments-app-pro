@@ -1,26 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Apple Design System colors */
+  --color-apple-black: #000000;
+  --color-apple-gray: #f5f5f7;
+  --color-apple-ink: #1d1d1f;
+  --color-apple-blue: #0071e3;
+  --color-apple-blue-link: #0066cc;
+  --color-apple-blue-bright: #2997ff;
+  --color-apple-secondary: #6e6e73;
+  --color-apple-border: #d2d2d7;
+  --color-apple-border-strong: #86868b;
+  --color-apple-graphite: #272729;
+  --color-apple-utility: #424245;
+
+  /* Typography */
+  --font-display: 'Inter Tight', 'SF Pro Display', Helvetica Neue, Helvetica, Arial, sans-serif;
+  --font-sans: 'Inter', 'SF Pro Text', Helvetica Neue, Helvetica, Arial, sans-serif;
+
+  --color-background: #ffffff;
+  --color-foreground: #1d1d1f;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
 }
