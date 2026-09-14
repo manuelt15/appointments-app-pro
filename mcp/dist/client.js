@@ -1,5 +1,5 @@
 import { config } from './config.js';
-export async function apiCall(path, options = {}) {
+async function request(path, options = {}) {
     const url = `${config.apiUrl}${path}`;
     const res = await fetch(url, {
         ...options,
@@ -11,7 +11,17 @@ export async function apiCall(path, options = {}) {
     });
     const json = await res.json();
     if (!res.ok) {
-        throw new Error(json.error?.message ?? `API error: ${res.status}`);
+        const message = typeof json.error === 'string' ? json.error : json.error?.message;
+        throw new Error(message ?? `API error: ${res.status}`);
     }
-    return json.data;
+    return json;
+}
+export async function apiCall(path, options = {}) {
+    return (await request(path, options)).data;
+}
+export async function apiCallWithMeta(path, options = {}) {
+    const response = await request(path, options);
+    if (!response.meta)
+        throw new Error('Paginated API response is missing metadata');
+    return { data: response.data, meta: response.meta };
 }

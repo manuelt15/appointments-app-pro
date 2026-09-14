@@ -41,5 +41,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# secrets
+# local agent settings and secrets
+/.claude/
 .mcp.json

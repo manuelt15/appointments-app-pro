@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
-import { apiCall } from './client.js'
+import { apiCall, apiCallWithMeta } from './client.js'
 
 const server = new McpServer({
   name: 'appointments-mcp',
@@ -19,21 +19,34 @@ server.tool(
     start: z.string().optional().describe('ISO8601 start of date range'),
     end: z.string().optional().describe('ISO8601 end of date range'),
     status: z.enum(['scheduled', 'confirmed', 'cancelled', 'completed', 'no_show']).optional(),
-    limit: z.number().optional().describe('Max results (default 100)'),
+    limit: z.number().int().min(1).max(1000).optional().describe('Maximum total results (default 100, max 1000)'),
   },
   async (params) => {
-    const qs = new URLSearchParams()
-    if (params.employee_id) qs.set('employee_id', params.employee_id)
-    if (params.room_id) qs.set('room_id', params.room_id)
-    if (params.calendar_id) qs.set('calendar_id', params.calendar_id)
-    if (params.start) qs.set('start', params.start)
-    if (params.end) qs.set('end', params.end)
-    if (params.status) qs.set('status', params.status)
-    if (params.limit) qs.set('limit', String(params.limit))
+    const maxResults = params.limit ?? 100
+    const pageSize = Math.min(200, maxResults)
+    const results: unknown[] = []
+    let page = 1
 
-    const data = await apiCall(`/api/appointments?${qs.toString()}`)
+    while (results.length < maxResults) {
+      const qs = new URLSearchParams({
+        page: String(page),
+        limit: String(pageSize),
+      })
+      if (params.employee_id) qs.set('employee_id', params.employee_id)
+      if (params.room_id) qs.set('room_id', params.room_id)
+      if (params.calendar_id) qs.set('calendar_id', params.calendar_id)
+      if (params.start) qs.set('start', params.start)
+      if (params.end) qs.set('end', params.end)
+      if (params.status) qs.set('status', params.status)
+
+      const response = await apiCallWithMeta<unknown[]>(`/api/appointments?${qs.toString()}`)
+      results.push(...response.data.slice(0, maxResults - results.length))
+      if (response.data.length === 0 || results.length >= response.meta.total) break
+      page += 1
+    }
+
     return {
-      content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+      content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
     }
   }
 )
@@ -48,9 +61,7 @@ server.tool(
     client_email: z.string().optional().describe('Client email'),
     client_phone: z.string().optional().describe('Client phone'),
     client_notes: z.string().optional().describe('Notes about the client or appointment'),
-    calendar_id: z.string().describe('Calendar UUID to assign the appointment to'),
-    employee_id: z.string().optional().describe('Employee UUID'),
-    room_id: z.string().optional().describe('Room UUID'),
+    calendar_id: z.string().describe('Calendar ID to assign the appointment to'),
     start_time: z.string().describe('ISO8601 start time'),
     end_time: z.string().describe('ISO8601 end time'),
     description: z.string().optional(),
@@ -66,8 +77,6 @@ server.tool(
         clientPhone: params.client_phone,
         clientNotes: params.client_notes,
         calendarId: params.calendar_id,
-        employeeId: params.employee_id,
-        roomId: params.room_id,
         startTime: params.start_time,
         endTime: params.end_time,
         description: params.description,
@@ -91,14 +100,13 @@ server.tool(
     client_email: z.string().optional().nullable(),
     client_phone: z.string().optional().nullable(),
     client_notes: z.string().optional().nullable(),
-    employee_id: z.string().optional().nullable(),
-    room_id: z.string().optional().nullable(),
+    calendar_id: z.string().optional().describe('Calendar ID to move the appointment to'),
     start_time: z.string().optional().describe('ISO8601 new start time (for moving)'),
     end_time: z.string().optional().describe('ISO8601 new end time (for moving)'),
     status: z.enum(['scheduled', 'confirmed', 'cancelled', 'completed', 'no_show']).optional(),
     description: z.string().optional().nullable(),
   },
-  async ({ id, title, client_name, client_email, client_phone, client_notes, employee_id, room_id, start_time, end_time, status, description }) => {
+  async ({ id, title, client_name, client_email, client_phone, client_notes, calendar_id, start_time, end_time, status, description }) => {
     const data = await apiCall(`/api/appointments/${id}`, {
       method: 'PUT',
       body: JSON.stringify({
@@ -107,8 +115,7 @@ server.tool(
         ...(client_email !== undefined && { clientEmail: client_email }),
         ...(client_phone !== undefined && { clientPhone: client_phone }),
         ...(client_notes !== undefined && { clientNotes: client_notes }),
-        ...(employee_id !== undefined && { employeeId: employee_id }),
-        ...(room_id !== undefined && { roomId: room_id }),
+        ...(calendar_id !== undefined && { calendarId: calendar_id }),
         ...(start_time !== undefined && { startTime: start_time }),
         ...(end_time !== undefined && { endTime: end_time }),
         ...(status !== undefined && { status }),
@@ -141,26 +148,40 @@ server.tool(
 // Tool: check_availability
 server.tool(
   'check_availability',
-  'Check available time slots for an employee or room on a given date',
+  'Check whether an exact time interval is available for one calendar, employee, or room',
   {
-    date: z.string().describe('Date in YYYY-MM-DD format'),
-    employee_id: z.string().optional().describe('Employee UUID'),
-    room_id: z.string().optional().describe('Room UUID'),
-    duration_minutes: z.number().optional().describe('Slot duration in minutes (default 30)'),
+    calendar_id: z.string().optional().describe('Calendar MongoDB ID'),
+    employee_id: z.string().optional().describe('Employee MongoDB ID'),
+    room_id: z.string().optional().describe('Room MongoDB ID'),
+    start_time: z.string().describe('ISO8601 interval start, including Z or an offset'),
+    end_time: z.string().describe('ISO8601 interval end, including Z or an offset'),
   },
   async (params) => {
-    const qs = new URLSearchParams()
-    qs.set('date', params.date)
+    const selectors = [params.calendar_id, params.employee_id, params.room_id].filter(Boolean)
+    if (selectors.length !== 1) {
+      throw new Error('Provide exactly one of calendar_id, employee_id, or room_id')
+    }
+
+    const qs = new URLSearchParams({
+      start_time: params.start_time,
+      end_time: params.end_time,
+    })
+    if (params.calendar_id) qs.set('calendar_id', params.calendar_id)
     if (params.employee_id) qs.set('employee_id', params.employee_id)
     if (params.room_id) qs.set('room_id', params.room_id)
-    if (params.duration_minutes) qs.set('duration_minutes', String(params.duration_minutes))
 
-    const data = await apiCall(`/api/availability?${qs.toString()}`)
-    const available = data.filter((s: { available: boolean }) => s.available)
+    const data = await apiCall<{
+      available: boolean
+      startTime: string
+      endTime: string
+      conflicts: unknown[]
+    }>(`/api/availability?${qs.toString()}`)
     return {
       content: [{
         type: 'text',
-        text: `Available slots on ${params.date}:\n${JSON.stringify(available, null, 2)}\n\nTotal available: ${available.length} slots`,
+        text: data.available
+          ? `The interval ${data.startTime} – ${data.endTime} is available.`
+          : `The interval is not available. Conflicts:\n${JSON.stringify(data.conflicts, null, 2)}`,
       }],
     }
   }

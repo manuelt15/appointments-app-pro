@@ -5,9 +5,24 @@ const MONGODB_URI = process.env.MONGODB_URI!
 
 if (!MONGODB_URI) throw new Error('MONGODB_URI is not defined')
 
-// Mongoose connection (for models)
-const mongooseCache = (global as any).__mongoose ?? { conn: null, promise: null }
-;(global as any).__mongoose = mongooseCache
+interface MongooseCache {
+  conn: typeof mongoose | null
+  promise: Promise<typeof mongoose> | null
+}
+
+interface MongoClientCache {
+  client: MongoClient | null
+  promise: Promise<MongoClient> | null
+}
+
+declare global {
+  var __mongoose: MongooseCache | undefined
+  var __mongoClient: MongoClientCache | undefined
+}
+
+// Cache connections across hot reloads in development.
+const mongooseCache = globalThis.__mongoose ?? { conn: null, promise: null }
+globalThis.__mongoose = mongooseCache
 
 export async function connectDB() {
   if (mongooseCache.conn) return mongooseCache.conn
@@ -18,9 +33,8 @@ export async function connectDB() {
   return mongooseCache.conn
 }
 
-// Native MongoClient (for NextAuth adapter)
-const mongoClientCache = (global as any).__mongoClient ?? { client: null, promise: null }
-;(global as any).__mongoClient = mongoClientCache
+const mongoClientCache = globalThis.__mongoClient ?? { client: null, promise: null }
+globalThis.__mongoClient = mongoClientCache
 
 if (!mongoClientCache.promise) {
   mongoClientCache.client = new MongoClient(MONGODB_URI)

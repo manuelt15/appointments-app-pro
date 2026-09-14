@@ -25,7 +25,7 @@ npm run build
 | `create_appointment` | Crear una nueva cita |
 | `update_appointment` | Editar o mover una cita |
 | `delete_appointment` | Cancelar o eliminar una cita |
-| `check_availability` | Ver huecos libres de un empleado/sala en una fecha |
+| `check_availability` | Comprobar un intervalo exacto por calendario, empleado o sala |
 | `list_calendars` | Listar todos los calendarios del negocio |
 | `list_employees` | Listar todos los empleados |
 

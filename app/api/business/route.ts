@@ -2,13 +2,14 @@ import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { auth } from '@/auth'
 import { apiSuccess, apiError } from '@/lib/api/response'
+import { isValidTimeZone } from '@/lib/datetime/timezone'
 import { connectDB } from '@/lib/mongodb/client'
 import { Business } from '@/lib/mongodb/models/Business'
 import { slugify } from '@/lib/utils'
 
 const CreateSchema = z.object({
   name: z.string().min(1),
-  timezone: z.string().default('Europe/Madrid'),
+  timezone: z.string().refine(isValidTimeZone, 'Invalid IANA timezone').default('Europe/Madrid'),
 })
 
 export async function POST(request: NextRequest) {

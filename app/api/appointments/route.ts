@@ -1,49 +1,32 @@
 import { NextRequest } from 'next/server'
-import { z } from 'zod'
 import { resolveAuth } from '@/lib/api/auth'
 import { apiSuccess, apiError } from '@/lib/api/response'
+import { buildConflictFilter } from '@/lib/appointments/conflicts'
+import {
+  AppointmentListQuerySchema,
+  buildAppointmentListFilter,
+} from '@/lib/appointments/list-query'
+import { SchedulingBusyError, withSchedulingLock } from '@/lib/appointments/scheduling-lock'
+import { CreateAppointmentSchema } from '@/lib/appointments/validation'
 import { connectDB } from '@/lib/mongodb/client'
 import { Appointment } from '@/lib/mongodb/models/Appointment'
 import { Calendar } from '@/lib/mongodb/models/Calendar'
-
-const CreateSchema = z.object({
-  title: z.string().min(1),
-  clientName: z.string().min(1),
-  clientEmail: z.email().optional().nullable(),
-  clientPhone: z.string().optional().nullable(),
-  clientNotes: z.string().optional().nullable(),
-  calendarId: z.string().min(1),
-  employeeId: z.string().optional().nullable(),
-  roomId: z.string().optional().nullable(),
-  startTime: z.string().datetime(),
-  endTime: z.string().datetime(),
-  description: z.string().optional().nullable(),
-  status: z.enum(['scheduled', 'confirmed', 'cancelled', 'completed', 'no_show']).default('scheduled'),
-  metadata: z.record(z.string(), z.unknown()).default({}),
-})
 
 export async function GET(request: NextRequest) {
   const auth = await resolveAuth(request)
   if (!auth) return apiError('Unauthorized', 401)
 
-  await connectDB()
   const { searchParams } = new URL(request.url)
-  const page = parseInt(searchParams.get('page') ?? '1')
-  const limit = parseInt(searchParams.get('limit') ?? '100')
-  const skip = (page - 1) * limit
+  const parsed = AppointmentListQuerySchema.safeParse(Object.fromEntries(searchParams.entries()))
+  if (!parsed.success) return apiError('Validation error', 400, parsed.error.flatten())
 
-  const filter: Record<string, unknown> = { businessId: auth.businessId }
-  if (searchParams.get('calendar_id')) filter.calendarId = searchParams.get('calendar_id')
-  if (searchParams.get('employee_id')) filter.employeeId = searchParams.get('employee_id')
-  if (searchParams.get('room_id')) filter.roomId = searchParams.get('room_id')
-  if (searchParams.get('status')) filter.status = searchParams.get('status')
-  if (searchParams.get('start')) filter.startTime = { $gte: new Date(searchParams.get('start')!) }
-  if (searchParams.get('end')) {
-    filter.startTime = { ...(filter.startTime as object), $lte: new Date(searchParams.get('end')!) }
-  }
+  await connectDB()
+  const { page, limit } = parsed.data
+  const skip = (page - 1) * limit
+  const filter = buildAppointmentListFilter(parsed.data, auth.businessId)
 
   const [data, total] = await Promise.all([
-    Appointment.find(filter).sort({ startTime: 1 }).skip(skip).limit(limit).lean(),
+    Appointment.find(filter).sort({ startTime: 1, _id: 1 }).skip(skip).limit(limit).lean(),
     Appointment.countDocuments(filter),
   ])
 
@@ -55,28 +38,48 @@ export async function POST(request: NextRequest) {
   if (!auth) return apiError('Unauthorized', 401)
 
   const body = await request.json()
-  const parsed = CreateSchema.safeParse(body)
+  const parsed = CreateAppointmentSchema.safeParse(body)
   if (!parsed.success) return apiError('Validation error', 400, parsed.error.flatten())
 
   await connectDB()
 
-  const calendar = await Calendar.findOne({ _id: parsed.data.calendarId, businessId: auth.businessId })
-  if (!calendar) return apiError('Calendar not found', 404)
+  try {
+    const result = await withSchedulingLock(auth.businessId, parsed.data.calendarId, async (lease, session) => {
+      const calendar = await Calendar.findOne({
+        _id: parsed.data.calendarId,
+        businessId: auth.businessId,
+        isActive: true,
+      }).session(session)
+      if (!calendar) return { kind: 'calendarNotFound' as const }
 
-  const conflict = await Appointment.findOne({
-    calendarId: parsed.data.calendarId,
-    status: { $ne: 'cancelled' },
-    startTime: { $lt: new Date(parsed.data.endTime) },
-    endTime: { $gt: new Date(parsed.data.startTime) },
-  })
-  if (conflict) return apiError('Time slot conflict detected', 409, { conflictId: conflict._id })
+      const conflict = await Appointment.findOne(buildConflictFilter({
+        businessId: auth.businessId,
+        calendarId: parsed.data.calendarId,
+        startTime: parsed.data.startTime,
+        endTime: parsed.data.endTime,
+      })).session(session)
+      if (conflict) return { kind: 'conflict' as const, conflictId: conflict._id.toString() }
 
-  const appointment = await Appointment.create({
-    ...parsed.data,
-    businessId: auth.businessId,
-    startTime: new Date(parsed.data.startTime),
-    endTime: new Date(parsed.data.endTime),
-  })
+      await lease.assertOwned()
+      const appointment = new Appointment({
+        ...parsed.data,
+        businessId: auth.businessId,
+        employeeId: calendar.employeeId,
+        roomId: calendar.roomId,
+        startTime: new Date(parsed.data.startTime),
+        endTime: new Date(parsed.data.endTime),
+      })
+      await appointment.save({ session: session ?? undefined })
+      return { kind: 'created' as const, appointment }
+    })
 
-  return apiSuccess(appointment, 201)
+    if (result.kind === 'calendarNotFound') return apiError('Calendar not found', 404)
+    if (result.kind === 'conflict') {
+      return apiError('Time slot conflict detected', 409, { conflictId: result.conflictId })
+    }
+    return apiSuccess(result.appointment, 201)
+  } catch (error) {
+    if (error instanceof SchedulingBusyError) return apiError(error.message, 503)
+    throw error
+  }
 }

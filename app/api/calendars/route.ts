@@ -10,8 +10,14 @@ export async function GET(request: NextRequest) {
   const auth = await resolveAuth(request)
   if (!auth) return apiError('Unauthorized', 401)
 
+  const includeId = new URL(request.url).searchParams.get('include_id')
+  if (includeId && !/^[a-f\d]{24}$/i.test(includeId)) return apiError('Invalid calendar ID', 400)
+
   await connectDB()
-  const calendars = await Calendar.find({ businessId: auth.businessId, isActive: true }).lean()
+  const calendars = await Calendar.find({
+    businessId: auth.businessId,
+    ...(includeId ? { $or: [{ isActive: true }, { _id: includeId }] } : { isActive: true }),
+  }).lean()
 
   const [employees, rooms] = await Promise.all([
     Employee.find({ businessId: auth.businessId }).lean(),

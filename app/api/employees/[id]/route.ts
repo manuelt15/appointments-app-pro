@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { resolveAuth } from '@/lib/api/auth'
 import { apiSuccess, apiError } from '@/lib/api/response'
+import { SchedulingBusyError, withSchedulingLock } from '@/lib/appointments/scheduling-lock'
 import { connectDB } from '@/lib/mongodb/client'
 import { Employee } from '@/lib/mongodb/models/Employee'
 import { Calendar } from '@/lib/mongodb/models/Calendar'
@@ -38,17 +39,41 @@ export async function DELETE(_req: NextRequest, ctx: RouteContext<'/api/employee
 
   await connectDB()
   const { id } = await ctx.params
-  const employee = await Employee.findOneAndUpdate(
-    { _id: id, businessId: auth.businessId },
-    { isActive: false }
-  )
+  const employee = await Employee.findOne({ _id: id, businessId: auth.businessId })
   if (!employee) return apiError('Not found', 404)
 
-  await Calendar.updateMany({ employeeId: id, businessId: auth.businessId }, { isActive: false })
-  await Appointment.updateMany(
-    { employeeId: id, businessId: auth.businessId, status: 'scheduled' },
-    { status: 'cancelled' }
-  )
+  const calendars = await Calendar.find({ employeeId: id, businessId: auth.businessId }).select('_id')
 
-  return apiSuccess({ deleted: true })
+  try {
+    for (const calendar of calendars) {
+      const calendarId = calendar._id.toString()
+      await withSchedulingLock(auth.businessId, calendarId, async (lease, session) => {
+        await lease.assertOwned()
+        await Calendar.updateOne(
+          { _id: calendarId, businessId: auth.businessId },
+          { $set: { isActive: false } },
+          { session: session ?? undefined }
+        )
+        await Appointment.updateMany(
+          {
+            calendarId,
+            businessId: auth.businessId,
+            status: { $in: ['scheduled', 'confirmed'] },
+            startTime: { $gte: new Date() },
+          },
+          { $set: { status: 'cancelled' }, $inc: { __v: 1 } },
+          { session: session ?? undefined }
+        )
+      })
+    }
+
+    await Employee.updateOne(
+      { _id: id, businessId: auth.businessId },
+      { $set: { isActive: false } }
+    )
+    return apiSuccess({ deleted: true })
+  } catch (error) {
+    if (error instanceof SchedulingBusyError) return apiError(error.message, 503)
+    throw error
+  }
 }

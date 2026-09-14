@@ -1,7 +1,12 @@
 'use client'
-import { useState, useEffect } from 'react'
+
+import { useEffect, useState } from 'react'
+import { Copy, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Copy, Trash2, Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import type { ApiKey } from '@/types'
 
 export default function SettingsPage() {
@@ -9,107 +14,159 @@ export default function SettingsPage() {
   const [newKeyName, setNewKeyName] = useState('')
   const [newKey, setNewKey] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [listLoading, setListLoading] = useState(true)
+  const [listError, setListError] = useState('')
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [deleteTarget, setDeleteTarget] = useState<ApiKey | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
-    fetch('/api/api-keys')
-      .then((r) => r.json())
-      .then((d) => setKeys(d.data ?? []))
-  }, [])
+    const controller = new AbortController()
 
-  async function createKey(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    const res = await fetch('/api/api-keys', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newKeyName }),
-    })
-    const data = await res.json()
-    if (!res.ok) {
-      toast.error(data.error ?? 'Failed to create key')
-    } else {
-      setNewKey(data.data.key)
-      setKeys((prev) => [...prev, data.data])
-      setNewKeyName('')
+    async function loadKeys() {
+      try {
+        const response = await fetch('/api/api-keys', { signal: controller.signal })
+        if (!response.ok) throw new Error('API keys could not be loaded.')
+        const data = await response.json()
+        setKeys(data.data ?? [])
+        setListError('')
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return
+        setListError(error instanceof Error ? error.message : 'API keys could not be loaded.')
+      } finally {
+        if (!controller.signal.aborted) setListLoading(false)
+      }
     }
-    setLoading(false)
+
+    loadKeys()
+    return () => controller.abort()
+  }, [refreshKey])
+
+  async function createKey(event: React.FormEvent) {
+    event.preventDefault()
+    setLoading(true)
+
+    try {
+      const response = await fetch('/api/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newKeyName }),
+      })
+      const data = await response.json().catch(() => null)
+      if (!response.ok) throw new Error(data?.error ?? 'Failed to create key')
+
+      setNewKey(data.data.key)
+      setKeys((current) => [...current, data.data])
+      setNewKeyName('')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create key')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  async function deleteKey(id: string) {
-    await fetch(`/api/api-keys/${id}`, { method: 'DELETE' })
-    setKeys((prev) => prev.filter((k) => k._id !== id))
-    toast.success('Key revoked')
+  async function deleteKey() {
+    if (!deleteTarget) return
+    setDeleting(true)
+
+    try {
+      const response = await fetch(`/api/api-keys/${deleteTarget._id}`, { method: 'DELETE' })
+      if (!response.ok) throw new Error('Failed to revoke key')
+      setKeys((current) => current.filter((key) => key._id !== deleteTarget._id))
+      setDeleteTarget(null)
+      toast.success('Key revoked')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to revoke key')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  async function copyKey() {
+    if (!newKey) return
+    try {
+      await navigator.clipboard.writeText(newKey)
+      toast.success('Copied')
+    } catch {
+      toast.error('Could not copy the key')
+    }
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="px-6 py-4 border-b border-[#d2d2d7] bg-white">
-        <h1 className="text-xl font-semibold text-[#1d1d1f]">Settings</h1>
-        <p className="text-sm text-[#6e6e73]">Manage API keys and integrations</p>
-      </div>
-      <div className="flex-1 p-6 max-w-2xl space-y-6">
+    <div className="flex min-h-full flex-col">
+      <header className="border-b bg-card px-4 py-4 sm:px-6">
+        <h1 className="text-xl font-semibold tracking-[-0.02em]">Settings</h1>
+        <p className="text-sm text-body">Manage API keys and integrations</p>
+      </header>
+
+      <div className="w-full max-w-2xl space-y-6 p-4 sm:p-6">
         {newKey && (
-          <div className="bg-[#f5f5f7] rounded-2xl border border-[#d2d2d7] p-4 space-y-2">
-            <p className="text-sm font-medium text-[#1d1d1f]">New API key — copy it now, it won't be shown again</p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 text-xs font-mono text-[#1d1d1f] bg-white border border-[#d2d2d7] rounded-lg px-3 py-2 truncate">{newKey}</code>
-              <button
-                onClick={() => { navigator.clipboard.writeText(newKey); toast.success('Copied') }}
-                className="p-2 text-[#6e6e73] hover:text-[#1d1d1f] transition-colors"
-              >
-                <Copy className="w-4 h-4" />
-              </button>
+          <section className="space-y-3 rounded-lg border bg-muted p-4" aria-live="polite">
+            <div>
+              <h2 className="text-sm font-medium">New API key</h2>
+              <p className="text-sm text-body">Copy it now. It won&apos;t be shown again.</p>
             </div>
-            <button onClick={() => setNewKey(null)} className="text-xs text-[#6e6e73] hover:text-[#1d1d1f]">Dismiss</button>
-          </div>
+            <div className="flex min-w-0 items-center gap-2">
+              <code className="min-w-0 flex-1 truncate rounded-sm border bg-card px-3 py-2 font-mono text-xs">{newKey}</code>
+              <Button type="button" variant="outline" size="icon" aria-label="Copy new API key" onClick={copyKey}>
+                <Copy />
+              </Button>
+            </div>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setNewKey(null)}>Dismiss</Button>
+          </section>
         )}
 
-        <div className="bg-white rounded-2xl border border-[#d2d2d7] p-6 space-y-4">
-          <h2 className="text-base font-semibold text-[#1d1d1f]">API Keys</h2>
-          <form onSubmit={createKey} className="flex gap-2">
-            <input
-              type="text"
-              value={newKeyName}
-              onChange={(e) => setNewKeyName(e.target.value)}
-              required
-              placeholder="Key name (e.g. MCP Server)"
-              className="flex-1 rounded-lg border border-[#86868b] px-3 py-2 text-sm text-[#1d1d1f] placeholder-[#6e6e73] focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3]"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center gap-1.5 py-2 px-4 rounded-full bg-[#0071e3] text-white text-sm font-medium hover:bg-[#0066cc] transition-colors disabled:opacity-50"
-            >
-              <Plus className="w-4 h-4" />
-              Create
-            </button>
+        <section className="space-y-5 rounded-lg border bg-card p-5 sm:p-6" aria-labelledby="api-keys-title">
+          <h2 id="api-keys-title" className="text-base font-semibold">API keys</h2>
+          <form onSubmit={createKey} className="flex flex-col gap-2 sm:flex-row sm:items-end" aria-busy={loading}>
+            <div className="min-w-0 flex-1 space-y-2">
+              <Label htmlFor="key-name">Key name</Label>
+              <Input id="key-name" value={newKeyName} onChange={(event) => setNewKeyName(event.target.value)} required placeholder="MCP Server" />
+            </div>
+            <Button type="submit" disabled={loading} className="w-full sm:w-auto">
+              <Plus />{loading ? 'Creating…' : 'Create key'}
+            </Button>
           </form>
 
-          {keys.length === 0 ? (
-            <p className="text-sm text-[#6e6e73]">No API keys yet.</p>
+          {listLoading ? (
+            <p className="text-sm text-body" role="status">Loading API keys…</p>
+          ) : listError ? (
+            <div role="alert">
+              <p className="text-sm text-body">{listError}</p>
+              <Button variant="outline" className="mt-3" onClick={() => { setListLoading(true); setRefreshKey((key) => key + 1) }}>Try again</Button>
+            </div>
+          ) : keys.length === 0 ? (
+            <p className="text-sm text-body">No API keys yet.</p>
           ) : (
-            <ul className="divide-y divide-[#d2d2d7]">
+            <ul className="divide-y">
               {keys.map((key) => (
-                <li key={key._id} className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="text-sm font-medium text-[#1d1d1f]">{key.name}</p>
-                    <p className="text-xs text-[#6e6e73]">
+                <li key={key._id} className="flex min-w-0 items-center justify-between gap-4 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{key.name}</p>
+                    <p className="text-xs text-body">
                       Created {new Date(key.createdAt).toLocaleDateString()}
                       {key.lastUsedAt && ` · Last used ${new Date(key.lastUsedAt).toLocaleDateString()}`}
                     </p>
                   </div>
-                  <button
-                    onClick={() => deleteKey(key._id)}
-                    className="p-2 text-[#6e6e73] hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <Button type="button" variant="ghost" size="icon" aria-label={`Revoke ${key.name}`} onClick={() => setDeleteTarget(key)}>
+                    <Trash2 />
+                  </Button>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </section>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Revoke API key?"
+        description={`${deleteTarget?.name ?? 'This key'} will stop working immediately.`}
+        confirmLabel="Revoke key"
+        loading={deleting}
+        onConfirm={deleteKey}
+      />
     </div>
   )
 }

@@ -14,7 +14,7 @@ Aplicación de gestión de citas con autenticación, panel de administración y 
 
 ### 1. Requisitos
 
-- Node.js 20+
+- Node.js 20.19+, 22.13+ o 24+ (se recomienda una versión LTS; Node 23 no está soportado por todo el toolchain)
 - MongoDB local o MongoDB Atlas
 
 ### 2. Variables de entorno
@@ -42,8 +42,11 @@ AUTH_GITHUB_SECRET=
 
 ```bash
 npm install
+npm --prefix mcp install
 npm run dev
 ```
+
+El segundo comando instala las dependencias del servidor MCP, que mantiene su propio `package.json`.
 
 La app estará en http://localhost:3000.
 
@@ -80,7 +83,7 @@ La API key se genera en **Settings** dentro de la app.
 | `create_appointment` | Crear una nueva cita |
 | `update_appointment` | Editar o mover una cita |
 | `delete_appointment` | Cancelar o eliminar una cita |
-| `check_availability` | Ver huecos libres por empleado/sala |
+| `check_availability` | Comprobar un intervalo exacto por calendario, empleado o sala |
 | `list_calendars` | Listar calendarios del negocio |
 | `list_employees` | Listar empleados |
 
