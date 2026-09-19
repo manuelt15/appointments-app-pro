@@ -51,11 +51,15 @@ export default function NewBusinessPage() {
   }
 
   return (
-    <AuthCard title="Set up your business" subtitle="You’re almost there. Add the details used for scheduling.">
+    <AuthCard
+      title="Name your business"
+      subtitle="This is the team whose shifts you will plan. The timezone decides the hours every shift is shown in, so pick the one your staff actually works in."
+    >
       <form onSubmit={handleSubmit} className="space-y-4" aria-busy={loading}>
         <div className="space-y-2">
           <Label htmlFor="business-name">Business name</Label>
           <Input id="business-name" value={name} onChange={(event) => setName(event.target.value)} required autoComplete="organization" placeholder="Acme Clinic" />
+          <p className="text-xs text-body">The name your team knows. You can change it later in Settings.</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="timezone">Timezone</Label>

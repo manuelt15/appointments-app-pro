@@ -4,15 +4,17 @@ import type { ReactNode } from 'react'
 import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 
-export function AuthCard({ title, subtitle, children }: { title: string; subtitle: ReactNode; children: ReactNode }) {
+export function AuthCard({ title, subtitle, footer, children }: { title: string; subtitle: ReactNode; footer?: ReactNode; children: ReactNode }) {
   return (
     <main className="flex min-h-dvh items-center justify-center bg-background p-4">
       <section className="w-full max-w-sm space-y-6 rounded-lg border bg-card p-6 shadow-[0_1px_1px_rgb(0_0_0/0.04)] sm:p-8" aria-labelledby="auth-title">
         <div>
-          <h1 id="auth-title" className="text-2xl font-semibold tracking-[-0.04em]">{title}</h1>
+          <p className="text-sm font-semibold tracking-[-0.02em]">Shift App</p>
+          <h1 id="auth-title" className="mt-4 text-2xl font-semibold tracking-[-0.04em]">{title}</h1>
           <p className="mt-1 text-sm text-body">{subtitle}</p>
         </div>
         {children}
+        {footer && <p className="text-center text-sm text-body">{footer}</p>}
       </section>
     </main>
   )

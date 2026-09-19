@@ -32,6 +32,8 @@
   --color-body: var(--body);
   --color-faint: var(--faint);
   --color-warning: var(--warning);
+  --color-birthday: var(--birthday);
+  --color-birthday-foreground: var(--birthday-foreground);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -76,6 +78,8 @@
   --body: #4d4d4d;
   --faint: #a1a1a1;
   --warning: #f5a623;
+  --birthday: #7928ca;
+  --birthday-foreground: #5b1e99;
   --chart-1: #007cf0;
   --chart-2: #00dfd8;
   --chart-3: #7928ca;

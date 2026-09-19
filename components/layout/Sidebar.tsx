@@ -4,15 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
-import { CalendarDays, DoorOpen, LogOut, Menu, Settings, Users } from 'lucide-react'
+import { CalendarDays, LogOut, Menu, Settings, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 
 const NAVIGATION = [
-  { href: '/dashboard', label: 'Calendar', icon: CalendarDays },
+  { href: '/dashboard', label: 'Schedule', icon: CalendarDays },
   { href: '/employees', label: 'Employees', icon: Users },
-  { href: '/rooms', label: 'Rooms', icon: DoorOpen },
   { href: '/settings', label: 'Settings', icon: Settings },
 ]
 

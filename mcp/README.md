@@ -1,12 +1,14 @@
-# Appointments MCP Server
+# Shift App MCP Server
 
-Servidor MCP que permite a Claude Code gestionar citas vía la API REST de la app.
+Servidor MCP que permite a Claude Code gestionar los turnos vía la API REST de
+la app.
 
 El binario compilado está en `dist/` — no necesitas compilar nada para usarlo.
 
 ## Uso
 
-Sigue las instrucciones del README principal (sección "MCP — Integración con Claude Code").
+Sigue las instrucciones del README principal (sección "MCP — Integración con
+Claude Code").
 
 ## Desarrollo / modificar el servidor
 
@@ -21,17 +23,17 @@ npm run build
 
 | Tool | Descripción |
 |---|---|
-| `list_appointments` | Listar citas con filtros opcionales |
-| `create_appointment` | Crear una nueva cita |
-| `update_appointment` | Editar o mover una cita |
-| `delete_appointment` | Cancelar o eliminar una cita |
-| `check_availability` | Comprobar un intervalo exacto por calendario, empleado o sala |
-| `list_calendars` | Listar todos los calendarios del negocio |
-| `list_employees` | Listar todos los empleados |
+| `list_shifts` | Listar turnos con filtros de empleado, tipo y rango de fechas |
+| `create_shift` | Programar un bloque de tiempo para un empleado |
+| `update_shift` | Editar, mover o reasignar un turno existente |
+| `delete_shift` | Eliminar un turno del cuadrante |
+| `check_coverage` | Saber quién está programado en un intervalo |
+| `list_employees` | Listar todos los empleados del negocio |
 
 ## Variables de entorno
 
-El servidor lee su configuración del bloque `env` en `.mcp.json` (raíz del proyecto):
+El servidor lee su configuración del bloque `env` en `.mcp.json` (raíz del
+proyecto):
 
 | Variable | Descripción |
 |---|---|

@@ -9,7 +9,7 @@ export default function EmployeesPage() {
       <header className="flex flex-col gap-4 border-b bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div>
           <h1 className="text-xl font-semibold tracking-[-0.02em]">Employees</h1>
-          <p className="text-sm text-body">Manage your team members</p>
+          <p className="text-sm text-body">Everyone here gets a column in the schedule. Add your staff before planning shifts.</p>
         </div>
         <Button asChild className="w-full sm:w-auto">
           <Link href="/employees/new"><Plus />Add employee</Link>

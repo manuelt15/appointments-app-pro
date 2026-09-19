@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Copy, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,11 @@ export default function SettingsPage() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [deleteTarget, setDeleteTarget] = useState<ApiKey | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const origin = useSyncExternalStore(
+    () => () => {},
+    () => window.location.origin,
+    () => 'https://your-app.example'
+  )
 
   useEffect(() => {
     const controller = new AbortController()
@@ -96,7 +101,7 @@ export default function SettingsPage() {
     <div className="flex min-h-full flex-col">
       <header className="border-b bg-card px-4 py-4 sm:px-6">
         <h1 className="text-xl font-semibold tracking-[-0.02em]">Settings</h1>
-        <p className="text-sm text-body">Manage API keys and integrations</p>
+        <p className="text-sm text-body">API keys and integrations</p>
       </header>
 
       <div className="w-full max-w-2xl space-y-6 p-4 sm:p-6">
@@ -117,7 +122,27 @@ export default function SettingsPage() {
         )}
 
         <section className="space-y-5 rounded-lg border bg-card p-5 sm:p-6" aria-labelledby="api-keys-title">
-          <h2 id="api-keys-title" className="text-base font-semibold">API keys</h2>
+          <div className="space-y-2">
+            <h2 id="api-keys-title" className="text-base font-semibold">API keys</h2>
+            <p className="text-sm text-body">
+              An API key lets a program read and change this schedule without signing in as you.
+              It is how the MCP server connects, so you can ask Claude things like who works on
+              Friday or to book next week&apos;s shifts.
+            </p>
+          </div>
+
+          <div className="space-y-2 rounded-md border border-dashed p-4">
+            <p className="text-sm font-medium">How to use it</p>
+            <p className="text-sm text-body">
+              Send it in the <code className="rounded-sm bg-muted px-1 py-0.5 font-mono text-xs">x-api-key</code> header on any request:
+            </p>
+            <pre className="overflow-x-auto rounded-sm border bg-muted p-3 font-mono text-xs"><code>{'curl ' + origin + '/api/shifts \\\n  -H "x-api-key: YOUR_KEY"'}</code></pre>
+            <p className="text-sm text-body">
+              The key carries the same access as your account, so treat it like a password.
+              It is shown once when created, and revoking it cuts off anything still using it.
+            </p>
+          </div>
+
           <form onSubmit={createKey} className="flex flex-col gap-2 sm:flex-row sm:items-end" aria-busy={loading}>
             <div className="min-w-0 flex-1 space-y-2">
               <Label htmlFor="key-name">Key name</Label>
