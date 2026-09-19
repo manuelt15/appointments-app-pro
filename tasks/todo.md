@@ -125,8 +125,10 @@ Backup previo de la base local en el scratchpad de la sesión.
 ### Pendiente
 
 - [ ] Elegir proveedor de email y completar `sendEmail` en `lib/schedule/email.ts`.
-- [ ] Renombrar el proyecto a `shift-app-pro` y actualizar README y `package.json`.
-- [ ] Decidir qué se lleva a producción antes de desplegar.
+- [x] Actualizar README, `package.json` y documentación al nombre Shift App.
+- [ ] Renombrar repositorio y proyecto de Vercel a `shift-app-pro`: aplazado a propósito,
+      porque cambia la URL y obliga a rehacer los callbacks de OAuth. Los pasos están
+      documentados en el README, sección "Nombre del proyecto".
 
 ## Tanda 8: historial mensual, vacaciones y marca
 

@@ -120,6 +120,50 @@ El botón de envío del cuadrante prepara un mensaje por empleado pero **no
 entrega nada todavía**: falta elegir proveedor. El único punto a tocar es
 `sendEmail` en `lib/schedule/email.ts`, junto con `isEmailConfigured`.
 
+## Nombre del proyecto
+
+El producto se llama **Shift App**, pero el repositorio y el proyecto de Vercel
+conservan el nombre original de cuando era una app de citas:
+
+| Sitio | Nombre actual | Nombre previsto |
+|---|---|---|
+| Repositorio GitHub | `manuelt15/appointments-app-pro` | `shift-app-pro` |
+| Proyecto Vercel | `appointments-app-pro` | `shift-app-pro` |
+| URL de producción | `appointments-app-pro.vercel.app` | `shift-app-pro.vercel.app` |
+| Base de datos Atlas | `appointments-pro-prod` | sin cambios |
+
+Los paquetes npm (`shift-app-pro` y `@shift-app/mcp`) y toda la documentación ya
+usan el nombre nuevo. Solo faltan los tres primeros de la tabla.
+
+### Cómo renombrarlo cuando toque
+
+Renombrar cambia la URL de producción y **rompe el login con Google y GitHub**
+hasta que se actualicen los callbacks. Los cuatro pasos van seguidos, en este
+orden, y el último es obligatorio:
+
+1. **Vercel**: Settings → General → Project Name → `shift-app-pro`.
+2. **`AUTH_URL`**, o la autenticación deja de funcionar por completo:
+   ```bash
+   vercel env rm AUTH_URL production --yes
+   echo "https://shift-app-pro.vercel.app" | vercel env add AUTH_URL production
+   ```
+3. **Google Cloud Console** → Credenciales → cliente OAuth:
+   - URI de redireccionamiento: `https://shift-app-pro.vercel.app/api/auth/callback/google`
+   - Origen de JavaScript: `https://shift-app-pro.vercel.app`
+
+   Hay que entrar con la cuenta dueña del proyecto de Google Cloud.
+4. **GitHub OAuth App** → Authorization callback URL:
+   `https://shift-app-pro.vercel.app/api/auth/callback/github`
+5. **Redesplegar**, porque `AUTH_URL` se lee en tiempo de build.
+
+El repositorio se renombra desde GitHub → Settings → Repository name. GitHub
+mantiene una redirección desde el nombre viejo, pero conviene actualizar el
+remoto local:
+
+```bash
+git remote set-url origin https://github.com/manuelt15/shift-app-pro.git
+```
+
 ## Despliegue
 
 Optimizada para **Vercel** con **MongoDB Atlas**.
