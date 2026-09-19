@@ -47,7 +47,8 @@ export default function RegisterPage() {
   return (
     <AuthCard
       title="Create account"
-      subtitle={<>Already have an account? <Link href="/login" className="text-link underline-offset-4 can-hover:hover:underline">Sign in</Link></>}
+      subtitle="Set up your team's shift schedule: add employees, plan their hours and track time off."
+      footer={<>Already have an account? <Link href="/login" className="text-link underline-offset-4 can-hover:hover:underline">Sign in</Link></>}
     >
       <OAuthButtons callbackUrl="/business/new" />
       <AuthSeparator />

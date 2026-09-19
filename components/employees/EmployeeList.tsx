@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Trash2, User } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -79,13 +80,18 @@ export default function EmployeeList() {
       <ul className="divide-y overflow-hidden rounded-lg border bg-card">
         {employees.map((employee) => (
           <li key={employee._id} className="flex min-w-0 items-center justify-between gap-4 px-4 py-4 sm:px-5">
-            <div className="flex min-w-0 items-center gap-3">
+            <Link
+              href={`/employees/${employee._id}`}
+              className="flex min-w-0 flex-1 items-center gap-3 rounded-sm can-hover:hover:opacity-80"
+            >
               <span className="size-8 shrink-0 rounded-full" style={{ backgroundColor: employee.color }} aria-hidden="true" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{employee.fullName}</p>
-                {employee.email && <p className="truncate text-xs text-body">{employee.email}</p>}
+                <p className="truncate text-xs text-body">
+                  {[employee.email, employee.phone].filter(Boolean).join(' · ') || 'View history'}
+                </p>
               </div>
-            </div>
+            </Link>
             <Button type="button" variant="ghost" size="icon" aria-label={`Remove ${employee.fullName}`} onClick={() => setDeleteTarget(employee)}>
               <Trash2 />
             </Button>
@@ -96,7 +102,7 @@ export default function EmployeeList() {
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         title="Remove employee?"
-        description={`${deleteTarget?.fullName ?? 'This employee'} will be deactivated and their future appointments will be cancelled.`}
+        description={`${deleteTarget?.fullName ?? 'This employee'} will be deactivated and their upcoming shifts removed.`}
         confirmLabel="Remove employee"
         loading={deleting}
         onConfirm={handleDelete}

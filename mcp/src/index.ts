@@ -4,21 +4,21 @@ import { z } from 'zod'
 import { apiCall, apiCallWithMeta } from './client.js'
 
 const server = new McpServer({
-  name: 'appointments-mcp',
-  version: '1.0.0',
+  name: 'staff-schedule-mcp',
+  version: '2.0.0',
 })
 
-// Tool: list_appointments
+const SHIFT_TYPES = ['shift', 'vacation', 'sick_leave', 'time_off'] as const
+
+// Tool: list_shifts
 server.tool(
-  'list_appointments',
-  'List appointments with optional filters',
+  'list_shifts',
+  'List scheduled shifts with optional filters',
   {
-    employee_id: z.string().optional().describe('Filter by employee UUID'),
-    room_id: z.string().optional().describe('Filter by room UUID'),
-    calendar_id: z.string().optional().describe('Filter by calendar UUID'),
+    employee_id: z.string().optional().describe('Filter by employee ID'),
+    type: z.enum(SHIFT_TYPES).optional().describe('Filter by shift type'),
     start: z.string().optional().describe('ISO8601 start of date range'),
     end: z.string().optional().describe('ISO8601 end of date range'),
-    status: z.enum(['scheduled', 'confirmed', 'cancelled', 'completed', 'no_show']).optional(),
     limit: z.number().int().min(1).max(1000).optional().describe('Maximum total results (default 100, max 1000)'),
   },
   async (params) => {
@@ -33,13 +33,11 @@ server.tool(
         limit: String(pageSize),
       })
       if (params.employee_id) qs.set('employee_id', params.employee_id)
-      if (params.room_id) qs.set('room_id', params.room_id)
-      if (params.calendar_id) qs.set('calendar_id', params.calendar_id)
+      if (params.type) qs.set('type', params.type)
       if (params.start) qs.set('start', params.start)
       if (params.end) qs.set('end', params.end)
-      if (params.status) qs.set('status', params.status)
 
-      const response = await apiCallWithMeta<unknown[]>(`/api/appointments?${qs.toString()}`)
+      const response = await apiCallWithMeta<unknown[]>(`/api/shifts?${qs.toString()}`)
       results.push(...response.data.slice(0, maxResults - results.length))
       if (response.data.length === 0 || results.length >= response.meta.total) break
       page += 1
@@ -51,151 +49,110 @@ server.tool(
   }
 )
 
-// Tool: create_appointment
+// Tool: create_shift
 server.tool(
-  'create_appointment',
-  'Create a new appointment',
+  'create_shift',
+  'Schedule a block of time for an employee',
   {
-    title: z.string().describe('Appointment title'),
-    client_name: z.string().describe('Client full name'),
-    client_email: z.string().optional().describe('Client email'),
-    client_phone: z.string().optional().describe('Client phone'),
-    client_notes: z.string().optional().describe('Notes about the client or appointment'),
-    calendar_id: z.string().describe('Calendar ID to assign the appointment to'),
+    employee_id: z.string().describe('Employee ID the shift belongs to'),
     start_time: z.string().describe('ISO8601 start time'),
     end_time: z.string().describe('ISO8601 end time'),
-    description: z.string().optional(),
-    status: z.enum(['scheduled', 'confirmed']).optional().default('scheduled'),
+    type: z.enum(SHIFT_TYPES).optional().default('shift').describe('Working shift, vacation, sick leave or time off'),
+    notes: z.string().optional().describe('Optional note about this shift'),
   },
   async (params) => {
-    const data = await apiCall('/api/appointments', {
+    const data = await apiCall('/api/shifts', {
       method: 'POST',
       body: JSON.stringify({
-        title: params.title,
-        clientName: params.client_name,
-        clientEmail: params.client_email,
-        clientPhone: params.client_phone,
-        clientNotes: params.client_notes,
-        calendarId: params.calendar_id,
+        employeeId: params.employee_id,
         startTime: params.start_time,
         endTime: params.end_time,
-        description: params.description,
-        status: params.status,
+        type: params.type,
+        notes: params.notes,
       }),
     })
     return {
-      content: [{ type: 'text', text: `Appointment created:\n${JSON.stringify(data, null, 2)}` }],
+      content: [{ type: 'text', text: `Shift created:\n${JSON.stringify(data, null, 2)}` }],
     }
   }
 )
 
-// Tool: update_appointment
+// Tool: update_shift
 server.tool(
-  'update_appointment',
-  'Update or move an existing appointment',
+  'update_shift',
+  'Update, move or reassign an existing shift',
   {
-    id: z.string().describe('Appointment UUID'),
-    title: z.string().optional(),
-    client_name: z.string().optional(),
-    client_email: z.string().optional().nullable(),
-    client_phone: z.string().optional().nullable(),
-    client_notes: z.string().optional().nullable(),
-    calendar_id: z.string().optional().describe('Calendar ID to move the appointment to'),
-    start_time: z.string().optional().describe('ISO8601 new start time (for moving)'),
-    end_time: z.string().optional().describe('ISO8601 new end time (for moving)'),
-    status: z.enum(['scheduled', 'confirmed', 'cancelled', 'completed', 'no_show']).optional(),
-    description: z.string().optional().nullable(),
+    id: z.string().describe('Shift ID'),
+    employee_id: z.string().optional().describe('Reassign the shift to this employee'),
+    start_time: z.string().optional().describe('ISO8601 new start time'),
+    end_time: z.string().optional().describe('ISO8601 new end time'),
+    type: z.enum(SHIFT_TYPES).optional(),
+    notes: z.string().optional().nullable(),
   },
-  async ({ id, title, client_name, client_email, client_phone, client_notes, calendar_id, start_time, end_time, status, description }) => {
-    const data = await apiCall(`/api/appointments/${id}`, {
+  async ({ id, employee_id, start_time, end_time, type, notes }) => {
+    const data = await apiCall(`/api/shifts/${id}`, {
       method: 'PUT',
       body: JSON.stringify({
-        ...(title !== undefined && { title }),
-        ...(client_name !== undefined && { clientName: client_name }),
-        ...(client_email !== undefined && { clientEmail: client_email }),
-        ...(client_phone !== undefined && { clientPhone: client_phone }),
-        ...(client_notes !== undefined && { clientNotes: client_notes }),
-        ...(calendar_id !== undefined && { calendarId: calendar_id }),
+        ...(employee_id !== undefined && { employeeId: employee_id }),
         ...(start_time !== undefined && { startTime: start_time }),
         ...(end_time !== undefined && { endTime: end_time }),
-        ...(status !== undefined && { status }),
-        ...(description !== undefined && { description }),
+        ...(type !== undefined && { type }),
+        ...(notes !== undefined && { notes }),
       }),
     })
     return {
-      content: [{ type: 'text', text: `Appointment updated:\n${JSON.stringify(data, null, 2)}` }],
+      content: [{ type: 'text', text: `Shift updated:\n${JSON.stringify(data, null, 2)}` }],
     }
   }
 )
 
-// Tool: delete_appointment
+// Tool: delete_shift
 server.tool(
-  'delete_appointment',
-  'Cancel or permanently delete an appointment',
+  'delete_shift',
+  'Remove a shift from the schedule',
   {
-    id: z.string().describe('Appointment UUID'),
-    hard: z.boolean().optional().describe('If true, permanently deletes. Default: soft cancel (status=cancelled)'),
+    id: z.string().describe('Shift ID'),
   },
-  async ({ id, hard }) => {
-    const qs = hard ? '?hard=true' : ''
-    await apiCall(`/api/appointments/${id}${qs}`, { method: 'DELETE' })
+  async ({ id }) => {
+    await apiCall(`/api/shifts/${id}`, { method: 'DELETE' })
     return {
-      content: [{ type: 'text', text: hard ? `Appointment ${id} permanently deleted.` : `Appointment ${id} cancelled.` }],
+      content: [{ type: 'text', text: `Shift ${id} deleted.` }],
     }
   }
 )
 
-// Tool: check_availability
+// Tool: check_coverage
 server.tool(
-  'check_availability',
-  'Check whether an exact time interval is available for one calendar, employee, or room',
+  'check_coverage',
+  'Check who is scheduled to work during a time interval',
   {
-    calendar_id: z.string().optional().describe('Calendar MongoDB ID'),
-    employee_id: z.string().optional().describe('Employee MongoDB ID'),
-    room_id: z.string().optional().describe('Room MongoDB ID'),
+    employee_id: z.string().optional().describe('Narrow the check to a single employee'),
     start_time: z.string().describe('ISO8601 interval start, including Z or an offset'),
     end_time: z.string().describe('ISO8601 interval end, including Z or an offset'),
   },
   async (params) => {
-    const selectors = [params.calendar_id, params.employee_id, params.room_id].filter(Boolean)
-    if (selectors.length !== 1) {
-      throw new Error('Provide exactly one of calendar_id, employee_id, or room_id')
-    }
-
     const qs = new URLSearchParams({
       start_time: params.start_time,
       end_time: params.end_time,
     })
-    if (params.calendar_id) qs.set('calendar_id', params.calendar_id)
     if (params.employee_id) qs.set('employee_id', params.employee_id)
-    if (params.room_id) qs.set('room_id', params.room_id)
 
     const data = await apiCall<{
-      available: boolean
+      covered: boolean
       startTime: string
       endTime: string
-      conflicts: unknown[]
-    }>(`/api/availability?${qs.toString()}`)
+      working: unknown[]
+      away: unknown[]
+    }>(`/api/coverage?${qs.toString()}`)
     return {
       content: [{
         type: 'text',
-        text: data.available
-          ? `The interval ${data.startTime} – ${data.endTime} is available.`
-          : `The interval is not available. Conflicts:\n${JSON.stringify(data.conflicts, null, 2)}`,
+        text: data.covered
+          ? `Working between ${data.startTime} and ${data.endTime}:\n${JSON.stringify(data.working, null, 2)}`
+          : `Nobody is scheduled between ${data.startTime} and ${data.endTime}.${
+              data.away.length ? `\nAway:\n${JSON.stringify(data.away, null, 2)}` : ''
+            }`,
       }],
-    }
-  }
-)
-
-// Tool: list_calendars
-server.tool(
-  'list_calendars',
-  'List all calendars (employees and rooms) for the business',
-  {},
-  async () => {
-    const data = await apiCall('/api/calendars')
-    return {
-      content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
     }
   }
 )
@@ -216,7 +173,7 @@ server.tool(
 async function main() {
   const transport = new StdioServerTransport()
   await server.connect(transport)
-  console.error('Appointments MCP server running')
+  console.error('Staff schedule MCP server running')
 }
 
 main().catch(console.error)

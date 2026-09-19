@@ -5,6 +5,10 @@ const EmployeeSchema = new Schema({
   userId: { type: String },
   fullName: { type: String, required: true },
   email: { type: String },
+  phone: { type: String },
+  // Calendar dates as plain YYYY-MM-DD: no timezone can shift them a day.
+  birthday: { type: String },
+  startDate: { type: String },
   color: { type: String, required: true, default: '#6366f1' },
   isActive: { type: Boolean, required: true, default: true },
 }, { timestamps: true })

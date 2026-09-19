@@ -38,7 +38,8 @@ export default function LoginPage() {
   return (
     <AuthCard
       title="Sign in"
-      subtitle={<>Don&apos;t have an account? <Link href="/register" className="text-link underline-offset-4 can-hover:hover:underline">Create one</Link></>}
+      subtitle="Plan who works and when, and keep your team's schedule in one place."
+      footer={<>Don&apos;t have an account? <Link href="/register" className="text-link underline-offset-4 can-hover:hover:underline">Create one</Link></>}
     >
       <OAuthButtons callbackUrl="/dashboard" />
       <AuthSeparator />

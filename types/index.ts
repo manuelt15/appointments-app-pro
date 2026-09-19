@@ -1,4 +1,4 @@
-export type AppointmentStatus = 'scheduled' | 'confirmed' | 'cancelled' | 'completed' | 'no_show'
+export type ShiftType = 'shift' | 'vacation' | 'sick_leave' | 'time_off'
 
 export interface Business {
   _id: string
@@ -15,54 +15,27 @@ export interface Employee {
   userId?: string
   fullName: string
   email?: string
+  phone?: string
+  /** Plain YYYY-MM-DD. */
+  birthday?: string
+  /** Plain YYYY-MM-DD. */
+  startDate?: string
   color: string
   isActive: boolean
   createdAt: string
 }
 
-export interface Room {
+export interface Shift {
   _id: string
   businessId: string
-  name: string
-  capacity: number
-  color: string
-  isActive: boolean
-  createdAt: string
-}
-
-export interface Calendar {
-  _id: string
-  businessId: string
-  name: string
-  employeeId?: string
-  roomId?: string
-  isActive: boolean
-  createdAt: string
-  employee?: Employee
-  room?: Room
-}
-
-export interface Appointment {
-  _id: string
-  businessId: string
-  calendarId: string
-  employeeId?: string
-  roomId?: string
-  clientName: string
-  clientEmail?: string
-  clientPhone?: string
-  clientNotes?: string
-  title: string
-  description?: string
+  employeeId: string
   startTime: string
   endTime: string
-  status: AppointmentStatus
-  metadata?: Record<string, unknown>
+  type: ShiftType
+  notes?: string
   createdAt: string
   updatedAt: string
-  calendar?: Calendar
   employee?: Employee
-  room?: Room
 }
 
 export interface ApiKey {

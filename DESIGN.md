@@ -1,6 +1,6 @@
-# Appointments Pro — Geist Design System
+# Shift App — Geist Design System
 
-Esta guía adapta el sistema Geist de Vercel a una aplicación de gestión de citas. Es la fuente visual del proyecto y sustituye al sistema Apple anterior.
+Esta guía adapta el sistema Geist de Vercel a una aplicación de planificación de turnos. Es la fuente visual del proyecto y sustituye al sistema Apple anterior.
 
 ## Principios
 

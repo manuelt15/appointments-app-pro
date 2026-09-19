@@ -1,5 +1,5 @@
 import { auth } from '@/auth'
-import GlobalCalendar from '@/components/calendar/GlobalCalendar'
+import ShiftCalendar from '@/components/calendar/ShiftCalendar'
 import { connectDB } from '@/lib/mongodb/client'
 import { Business } from '@/lib/mongodb/models/Business'
 
@@ -18,11 +18,11 @@ export default async function DashboardPage() {
   return (
     <div className="flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col md:h-dvh">
       <header className="border-b bg-card px-4 py-4 sm:px-6">
-        <h1 className="text-xl font-semibold tracking-[-0.02em]">Calendar</h1>
-        <p className="truncate text-sm text-body">{business?.name}</p>
+        <h1 className="text-xl font-semibold tracking-[-0.02em]">Schedule</h1>
+        <p className="text-sm text-body">Who works when. Pick any empty cell to add a shift, or an existing one to change it.</p>
       </header>
       <div className="min-h-0 flex-1 p-3 sm:p-4">
-        <GlobalCalendar timeZone={business?.timezone ?? 'Europe/Madrid'} />
+        <ShiftCalendar timeZone={business?.timezone ?? 'Europe/Madrid'} />
       </div>
     </div>
   )

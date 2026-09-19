@@ -1,7 +1,7 @@
 {
-  "name": "@appointments-app/mcp",
+  "name": "@shift-app/mcp",
   "version": "1.0.0",
-  "description": "MCP server for appointments management",
+  "description": "MCP server for staff shift scheduling",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

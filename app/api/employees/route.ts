@@ -4,11 +4,16 @@ import { resolveAuth } from '@/lib/api/auth'
 import { apiSuccess, apiError } from '@/lib/api/response'
 import { connectDB } from '@/lib/mongodb/client'
 import { Employee } from '@/lib/mongodb/models/Employee'
-import { Calendar } from '@/lib/mongodb/models/Calendar'
+import { isCalendarDate } from '@/lib/shifts/calendar-date'
+
+const calendarDate = z.string().refine(isCalendarDate, 'Expected a YYYY-MM-DD date')
 
 const CreateSchema = z.object({
   fullName: z.string().min(1),
   email: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  birthday: calendarDate.optional().nullable(),
+  startDate: calendarDate.optional().nullable(),
   color: z.string().default('#6366f1'),
 })
 
@@ -31,13 +36,6 @@ export async function POST(request: NextRequest) {
 
   await connectDB()
   const employee = await Employee.create({ ...parsed.data, businessId: auth.businessId })
-
-  // Auto-create calendar (replaces DB trigger)
-  await Calendar.create({
-    businessId: auth.businessId,
-    name: `${employee.fullName}'s Calendar`,
-    employeeId: employee._id.toString(),
-  })
 
   return apiSuccess(employee, 201)
 }

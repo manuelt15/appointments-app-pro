@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Appointments Pro',
-  description: 'Professional appointment scheduling',
+  title: 'Staff Schedule',
+  description: 'Employee shift scheduling',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
