@@ -1,5 +1,13 @@
 # Plan activo
 
+## Handovers
+
+- [2026-09-20 · De citas a turnos, y a producción](handovers-archive/HANDOVER-2026-09-20-de-citas-a-turnos.md)
+  — el cambio de dominio entero, el despliegue y el vaciado de la base de producción.
+
+Ver también [lecciones](lessons.md).
+
+
 ## Base shadcn + flujo crítico de citas
 
 - [x] Sustituir `DESIGN.md` por la guía Geist/Vercel adaptada a esta aplicación.
@@ -137,3 +145,16 @@ Backup previo de la base local en el scratchpad de la sesión.
 - [x] Sustituir el mensaje del panel, que describía un arrastre que ya no existe.
 - [x] Favicon propio en `app/icon.svg` y excluirlo del matcher de `proxy.ts`.
 - [x] Blindar `tsconfig.json` contra los ficheros duplicados que genera iCloud.
+
+## Abierto al cerrar el 2026-09-20
+
+- [ ] Elegir proveedor de email y completar `sendEmail` en `lib/schedule/email.ts`.
+- [ ] Renombrar repositorio, proyecto de Vercel y URL a `shift-app-pro`. Pasos en el
+      README, sección "Nombre del proyecto". Rompe el login hasta actualizar los callbacks
+      de Google y GitHub.
+- [ ] Generar api key nueva en Settings y pegarla en `.mcp.json`, que quedó con un
+      placeholder apuntando a `localhost:3000`.
+- [ ] Mover el repo fuera de `~/Desktop`, que iCloud sincroniza y duplica ficheros dentro
+      de `.next`. Mitigado en `tsconfig.json`, no resuelto.
+- [ ] Decidir si la base de producción se renombra de `appointments-pro-prod`. Hacerlo
+      ahora cuesta poco: solo hay una cuenta y un negocio dentro.

@@ -64,3 +64,55 @@ Se veía bien en el HTML (`<link rel="icon">` correcto) y solo se detectaba pidi
 la URL: devolvía 307 en vez del SVG. Al tocar ficheros especiales de Next en `app/`,
 comprobar el matcher del proxy, y verificar el recurso con una petición, no mirando
 el marcado.
+
+## Mongoose cachea el modelo: los campos nuevos se descartan en silencio
+
+Se añadieron `phone`, `birthday` y `startDate` al esquema de `Employee`. La validación
+rechazaba correctamente una fecha inválida, pero los tres campos **llegaban vacíos** a la
+base. El código estaba bien.
+
+La causa es que Mongoose registra el modelo una vez (`models.Employee ?? model(...)`) y el
+servidor de desarrollo conservaba el esquema anterior. En modo estricto, los campos que no
+están en el esquema se descartan sin avisar.
+
+Al reiniciar el dev server, los tres se guardaron. **Al añadir campos a un modelo, reiniciar
+antes de concluir que el código falla.**
+
+## Un `exclude` de tsconfig no admite `[0-9]`
+
+Para frenar los duplicados de iCloud se añadió `"**/* [0-9].ts"` al `exclude` de
+`tsconfig.json`. No sirvió de nada: TypeScript solo admite `*`, `?` y `**/` en esos globs,
+no clases de caracteres.
+
+El patrón correcto es `"**/* ?.ts"`. Se comprobó dejando los ficheros duplicados en su
+sitio a propósito y confirmando que `tsc` pasaba igualmente. **Un exclude que no excluye
+se ve idéntico a uno que funciona hasta que aparece el fichero que debía filtrar.**
+
+## Un test más limpio que la realidad no prueba nada
+
+La exportación semanal daba "Nothing scheduled" para empleados que sí tenían turnos.
+`shift.employeeId === employee._id` comparaba una cadena contra un `ObjectId`, porque
+`.lean()` devuelve `ObjectId` aunque se tipe la llamada como `.lean<Employee[]>()`. El
+genérico solo silencia a TypeScript.
+
+Ni `tsc` ni los tests lo vieron: **los tests usaban cadenas, igual que el navegador**, que
+recibe los datos ya serializados en JSON. El único sitio donde el dato es un `ObjectId` es
+el servidor, y ahí no había test.
+
+Se resolvió con una frontera explícita, `lib/schedule/serialize.ts`, cubierta por tests que
+usan un doble de `ObjectId`. **Al testear lógica que corre en servidor, los datos de prueba
+deben parecerse a los de Mongo, no a los del navegador.**
+
+## Un 200 no significa que el fichero exista
+
+Al verificar que una imagen borrada ya no se servía, `curl` devolvía 200. No era la imagen:
+era el `index.html` del SPA, porque el `vercel.json` reescribe cualquier ruta a la raíz.
+
+**Para comprobar si un asset existe en producción, mirar `content-type` y tamaño, no el
+código de estado.** Aplica a cualquier SPA con rewrite catch-all.
+
+## El proxy de auth también intercepta ficheros especiales de Next
+
+Ya está contado arriba con el favicon, pero conviene recordarlo al añadir cualquier fichero
+nuevo en `app/` que se sirva por URL propia: comprobar el matcher de `proxy.ts` y verificar
+el recurso pidiéndolo, no leyendo el HTML.
