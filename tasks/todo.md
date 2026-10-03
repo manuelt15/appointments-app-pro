@@ -195,5 +195,6 @@ por rango y los cálculos de `lib/shifts/history.ts`. Meses en la zona horaria d
 - [x] verify: tsc, eslint, tests, claro/oscuro y móvil en el navegador.
 - [x] Alturas en móvil: la estructura mide lo que la pantalla (`h-dvh`, con `h-screen` de reserva) y
       solo hace scroll `<main>`; sin rebote del documento. Sidebar con divisores de puntos.
-- [ ] `buildEmployeeWeeks` (PDF y emails del calendario) formatea horas en la zona del servidor:
-      en Vercel (UTC) saldrían 1-2 h desplazadas para Madrid. Home ya usa la zona del negocio.
+- [x] `buildEmployeeWeeks` (PDF y emails del calendario) formatea horas en la zona del servidor:
+      en Vercel (UTC) saldrían 1-2 h desplazadas para Madrid. Arreglado: semana, días y horas en
+      la zona del negocio, con tests que fallaban con `TZ=UTC`.
