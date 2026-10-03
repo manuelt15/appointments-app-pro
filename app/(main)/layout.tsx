@@ -20,12 +20,12 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   if (!business) redirect('/business/new')
 
   return (
-    <div className="flex min-h-dvh bg-background">
+    <div className="flex h-screen overflow-hidden bg-background supports-[height:100dvh]:h-dvh">
       <Sidebar
         business={{ _id: business._id.toString(), name: business.name }}
-        user={{ name: session.user.name, image: session.user.image }}
+        user={{ name: session.user.name, email: session.user.email, image: session.user.image, provider: session.user.provider }}
       />
-      <main className="min-w-0 flex-1 overflow-auto pt-14 md:pt-0">
+      <main className="min-w-0 flex-1 overflow-y-auto overscroll-contain pt-14 md:pt-0">
         {children}
       </main>
     </div>

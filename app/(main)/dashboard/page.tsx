@@ -16,7 +16,7 @@ export default async function DashboardPage() {
     .lean<DashboardBusiness>()
 
   return (
-    <div className="flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col md:h-dvh">
+    <div className="flex h-full min-h-0 flex-col">
       <header className="border-b bg-card px-4 py-4 sm:px-6">
         <h1 className="text-xl font-semibold tracking-[-0.02em]">Schedule</h1>
         <p className="text-sm text-body">Who works when. Pick any empty cell to add a shift, or an existing one to change it.</p>

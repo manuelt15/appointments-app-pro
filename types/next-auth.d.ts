@@ -7,6 +7,8 @@ declare module 'next-auth' {
       name?: string | null
       email?: string | null
       image?: string | null
+      /** google, github or credentials. Missing on sessions started before it was recorded. */
+      provider?: string
     }
   }
 }
