@@ -119,8 +119,10 @@ el recurso pidiéndolo, no leyendo el HTML.
 
 ## Emular el tema en el panel del navegador deja la pestaña falseada
 
-Para probar el modo "System" forcé `prefers-color-scheme: dark` en la pestaña del panel y no
-lo deshice: la app quedó en oscuro con el sistema en claro y pareció un bug del tema.
-
-**Toda emulación de viewport o color scheme que se ponga para verificar se revierte en el
-mismo paso.** Y "System" en el panel refleja el tema de la app de Claude, no siempre el de macOS.
+**Corrección (2026-10-03):** "estoy en System y se ve oscuro, y el mío es claro".
+**Causa:** para probar "System" forcé `prefers-color-scheme: dark` en la pestaña del panel
+con `resize_window` y no lo deshice; la app obedecía a la emulación, no al sistema.
+**Fix:** `resize_window` con `colorScheme: light` y comprobar `matchMedia` en la página.
+**Regla:** toda emulación de viewport o color scheme que se ponga para verificar se revierte
+en el mismo paso. Y "System" en el panel refleja el tema de la app de Claude, no siempre el
+de macOS.

@@ -2,6 +2,8 @@
 
 ## Handovers
 
+- [2026-10-03 · Home, historial, navegación y zona horaria del PDF](handovers-archive/HANDOVER-2026-10-03-home-historial-navegacion.md)
+  — sidebar nuevo, modo oscuro, `/home` de entrada, `/history` con PDF y fix de zona horaria; todo en `main`.
 - [2026-09-20 · De citas a turnos, y a producción](handovers-archive/HANDOVER-2026-09-20-de-citas-a-turnos.md)
   — el cambio de dominio entero, el despliegue y el vaciado de la base de producción.
 
@@ -198,3 +200,15 @@ por rango y los cálculos de `lib/shifts/history.ts`. Meses en la zona horaria d
 - [x] `buildEmployeeWeeks` (PDF y emails del calendario) formatea horas en la zona del servidor:
       en Vercel (UTC) saldrían 1-2 h desplazadas para Madrid. Arreglado: semana, días y horas en
       la zona del negocio, con tests que fallaban con `TZ=UTC`.
+
+## Abierto al cerrar el 2026-10-03
+
+- [ ] Comprobar el despliegue de producción en Vercel tras el push de `41dc0c1` a `main`.
+- [ ] Modo oscuro: los estilos de react-big-calendar ganan a nuestras overrides `.rbc-*`
+      (van en `@layer components`); vista Mes con días claros. Repasar también modal,
+      Employees, Settings y login en oscuro.
+- [ ] Campo de imagen en `Business`; hoy todos usan `public/business-default.svg`.
+- [ ] Unificar cómo cuentan las horas de un turno nocturno entre meses la ficha de
+      empleado (todo al mes de inicio) y el historial (repartido).
+- [ ] Decidir si se borra la rama `feat/shift-scheduling` (anterior a esta sesión).
+- [ ] Defensas de iCloud en `.gitignore` (`* [0-9]`, `* [0-9].*`, …): ofrecidas, sin aplicar.
