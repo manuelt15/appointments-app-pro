@@ -211,4 +211,4 @@ por rango y los cálculos de `lib/shifts/history.ts`. Meses en la zona horaria d
 - [ ] Unificar cómo cuentan las horas de un turno nocturno entre meses la ficha de
       empleado (todo al mes de inicio) y el historial (repartido).
 - [ ] Decidir si se borra la rama `feat/shift-scheduling` (anterior a esta sesión).
-- [ ] Defensas de iCloud en `.gitignore` (`* [0-9]`, `* [0-9].*`, …): ofrecidas, sin aplicar.
+- [x] Defensas de iCloud en `.gitignore` (`* [0-9]`, `* [0-9].*`, …): aplicadas en `d441361`.
