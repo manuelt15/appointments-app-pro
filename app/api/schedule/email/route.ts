@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server'
-import { addDays } from 'date-fns'
 import { resolveAuth } from '@/lib/api/auth'
 import { apiSuccess, apiError } from '@/lib/api/response'
 import { connectDB } from '@/lib/mongodb/client'
@@ -13,7 +12,7 @@ import {
   sendEmail,
 } from '@/lib/schedule/email'
 import { toPlainEmployee, toPlainShift } from '@/lib/schedule/serialize'
-import { buildEmployeeWeeks, resolveWeekStart } from '@/lib/schedule/week'
+import { buildEmployeeWeeks, resolveWeekStart, weekEnd } from '@/lib/schedule/week'
 
 export async function POST(request: NextRequest) {
   const auth = await resolveAuth(request)
@@ -21,15 +20,18 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => ({}))
   await connectDB()
-  const weekStart = resolveWeekStart(body?.week ?? null)
-  const weekEnd = addDays(weekStart, 7)
+  const business = await Business.findById(auth.businessId)
+    .select('name timezone')
+    .lean<{ name: string; timezone?: string }>()
+  const timeZone = business?.timezone ?? 'Europe/Madrid'
+  const weekStart = resolveWeekStart(body?.week ?? null, timeZone)
+  const end = weekEnd(weekStart, timeZone)
 
-  const [business, employees, shifts] = await Promise.all([
-    Business.findById(auth.businessId).select('name').lean<{ name: string }>(),
+  const [employees, shifts] = await Promise.all([
     Employee.find({ businessId: auth.businessId, isActive: true }).lean(),
     Shift.find({
       businessId: auth.businessId,
-      startTime: { $lt: weekEnd },
+      startTime: { $lt: end },
       endTime: { $gt: weekStart },
     }).lean(),
   ])
@@ -37,9 +39,10 @@ export async function POST(request: NextRequest) {
   const weeks = buildEmployeeWeeks(
     employees.map(toPlainEmployee),
     shifts.map(toPlainShift),
-    weekStart
+    weekStart,
+    timeZone
   )
-  const { ready, skipped } = prepareWeeklyEmails(business?.name ?? 'the team', weekStart, weeks)
+  const { ready, skipped } = prepareWeeklyEmails(business?.name ?? 'the team', weekStart, timeZone, weeks)
 
   if (!isEmailConfigured()) {
     return apiSuccess({

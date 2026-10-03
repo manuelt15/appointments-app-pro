@@ -1,7 +1,5 @@
-import { addDays, format, startOfWeek } from 'date-fns'
+import moment from 'moment-timezone'
 import type { Employee, Shift, ShiftType } from '@/types'
-
-export const WEEK_OPTIONS = { weekStartsOn: 1 } as const
 
 export const TYPE_LABELS: Record<ShiftType, string> = {
   shift: 'Shift',
@@ -12,7 +10,10 @@ export const TYPE_LABELS: Record<ShiftType, string> = {
 
 export interface WeekDayEntry {
   day: Date
+  /** "Mon 14", in business time. */
   label: string
+  /** "Monday 14 September", in business time. */
+  fullLabel: string
   entries: string[]
 }
 
@@ -29,22 +30,25 @@ function overlaps(shift: Shift, dayStart: Date, dayEnd: Date) {
 
 /**
  * One row per employee with what they do each day, shared by the PDF and the
- * emails so both always describe the same week.
+ * emails so both always describe the same week. Days run midnight to midnight
+ * in the business's time zone, never the server's.
  */
 export function buildEmployeeWeeks(
   employees: Employee[],
   shifts: Shift[],
-  weekStart: Date
+  weekStart: Date,
+  timeZone: string
 ): EmployeeWeek[] {
-  const days = Array.from({ length: 7 }, (_, index) => addDays(weekStart, index))
+  const days = Array.from({ length: 7 }, (_, index) => moment(weekStart).tz(timeZone).add(index, 'day'))
+  const time = (date: Date) => moment(date).tz(timeZone).format('HH:mm')
 
   return employees.map((employee) => {
     const own = shifts.filter((shift) => shift.employeeId === employee._id)
     let hours = 0
 
     const rows = days.map((day) => {
-      const dayStart = day
-      const dayEnd = addDays(day, 1)
+      const dayStart = day.toDate()
+      const dayEnd = day.clone().add(1, 'day').toDate()
       const entries: string[] = []
 
       for (const shift of own) {
@@ -56,13 +60,13 @@ export function buildEmployeeWeeks(
           const from = start < dayStart ? dayStart : start
           const to = end > dayEnd ? dayEnd : end
           hours += (to.getTime() - from.getTime()) / 3_600_000
-          entries.push(`${format(from, 'HH:mm')} - ${format(to, 'HH:mm')}`)
+          entries.push(`${time(from)} - ${time(to)}`)
         } else {
           entries.push(TYPE_LABELS[shift.type])
         }
       }
 
-      return { day, label: format(day, 'EEE d'), entries }
+      return { day: dayStart, label: day.format('ddd D'), fullLabel: day.format('dddd D MMMM'), entries }
     })
 
     return {
@@ -74,12 +78,19 @@ export function buildEmployeeWeeks(
   })
 }
 
-export function weekRangeLabel(weekStart: Date) {
-  return `${format(weekStart, 'd MMM')} - ${format(addDays(weekStart, 6), 'd MMM yyyy')}`
+export function weekRangeLabel(weekStart: Date, timeZone: string) {
+  const start = moment(weekStart).tz(timeZone)
+  return `${start.format('D MMM')} - ${start.clone().add(6, 'day').format('D MMM YYYY')}`
 }
 
-export function resolveWeekStart(value: string | null) {
+/** Monday 00:00 of the week holding `value`, in the business's time zone. */
+export function resolveWeekStart(value: string | null, timeZone: string) {
   const parsed = value ? new Date(value) : new Date()
   const date = Number.isNaN(parsed.getTime()) ? new Date() : parsed
-  return startOfWeek(date, WEEK_OPTIONS)
+  return moment(date).tz(timeZone).startOf('isoWeek').toDate()
+}
+
+/** The next Monday 00:00 in business time: not always 168 hours later, because of DST. */
+export function weekEnd(weekStart: Date, timeZone: string) {
+  return moment(weekStart).tz(timeZone).add(1, 'week').toDate()
 }
