@@ -44,3 +44,9 @@ next-env.d.ts
 # local agent settings and secrets
 /.claude/
 .mcp.json
+
+# iCloud duplicates ("file 2.ts", "file 10"): the repo lives under ~/Desktop
+* [0-9]
+* [0-9].*
+* [0-9][0-9]
+* [0-9][0-9].*
