@@ -158,3 +158,42 @@ Backup previo de la base local en el scratchpad de la sesión.
       de `.next`. Mitigado en `tsconfig.json`, no resuelto.
 - [ ] Decidir si la base de producción se renombra de `appointments-pro-prod`. Hacerlo
       ahora cuesta poco: solo hay una cuenta y un negocio dentro.
+
+## Tanda 9: historial del negocio (2026-10-03)
+
+Página propia `/history`, con icono en el sidebar. Sin cambios de backend: usa `GET /api/shifts`
+por rango y los cálculos de `lib/shifts/history.ts`. Meses en la zona horaria del negocio.
+
+- [x] Helper puro `lib/shifts/business-history.ts` con tests: límites de mes en la zona del
+      negocio, resumen de los 12 meses del año y filas por empleado (turnos, horas, días
+      trabajados, ausencias) → verify: `npm test` en verde.
+- [x] `app/(main)/history/page.tsx`: lee del servidor timezone y empleados, incluidos los
+      dados de baja, para que sus turnos antiguos lleven nombre → verify: carga sin errores.
+- [x] Selector de año (‹ 2026 ›) y lista de sus 12 meses con horas y nº de empleados; al
+      pulsar un mes se abre → verify: cambiar de año y de mes en el navegador.
+- [x] Resumen del mes: horas, turnos, empleados que trabajaron y ausencias.
+- [x] Tabla por empleado; al pulsar una fila se abre su ficha `/employees/[id]`.
+- [x] Filtros: "Solo quienes trabajaron" (activo por defecto), empleado y tipo; afectan a la
+      tabla y al detalle → verify: filtrar en el navegador y cuadrar totales.
+- [x] Detalle de turnos del mes: fecha, empleado, horario, horas, tipo y notas.
+- [x] Icono "History" en el sidebar, con tooltip → verify: tsc, eslint, claro y oscuro.
+- [x] Selector de año desplegable (últimos 10 años) además de las flechas.
+- [x] "Download PDF" del mes con los filtros activos, generado en el navegador con pdf-lib
+      (`lib/schedule/history-pdf.ts`, con tests de varias páginas y caracteres no WinAnsi).
+- [x] Móvil: cabecera con logo + flecha a la izquierda; el menú entra deslizando desde la izquierda.
+
+## Tanda 10: Home (2026-10-03)
+
+- [x] Helper `lib/schedule/home-week.ts` con tests: semana actual (lunes a domingo) en la zona
+      del negocio, por empleado sus días con horario o ausencia, horas, y quién no tiene nada.
+- [x] `app/(main)/home/page.tsx` (server): bienvenida con imagen del negocio, nombre y mensaje
+      breve; resumen de la semana con quién trabaja, qué días y en qué horario.
+- [x] Avisos: "X empleados sin horario esta semana" (con sus nombres) y "No hay horario para
+      esta semana" si no hay ningún turno; los dos con enlace a Schedule / New shift.
+- [x] Icono de casa en el sidebar, el primero; Home pasa a ser la página de entrada (raíz,
+      login, OAuth, proxy y alta de negocio) → verify: login lleva a /home.
+- [x] verify: tsc, eslint, tests, claro/oscuro y móvil en el navegador.
+- [x] Alturas en móvil: la estructura mide lo que la pantalla (`h-dvh`, con `h-screen` de reserva) y
+      solo hace scroll `<main>`; sin rebote del documento. Sidebar con divisores de puntos.
+- [ ] `buildEmployeeWeeks` (PDF y emails del calendario) formatea horas en la zona del servidor:
+      en Vercel (UTC) saldrían 1-2 h desplazadas para Madrid. Home ya usa la zona del negocio.

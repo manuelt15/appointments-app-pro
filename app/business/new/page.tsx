@@ -41,7 +41,7 @@ export default function NewBusinessPage() {
         throw new Error(data?.error ?? 'Failed to create business')
       }
 
-      router.push('/dashboard')
+      router.push('/home')
       router.refresh()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to create business')

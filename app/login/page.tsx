@@ -26,7 +26,7 @@ export default function LoginPage() {
         toast.error('Invalid email or password')
         return
       }
-      router.push('/dashboard')
+      router.push('/home')
       router.refresh()
     } catch {
       toast.error('Sign in failed. Try again.')
@@ -41,7 +41,7 @@ export default function LoginPage() {
       subtitle="Plan who works and when, and keep your team's schedule in one place."
       footer={<>Don&apos;t have an account? <Link href="/register" className="text-link underline-offset-4 can-hover:hover:underline">Create one</Link></>}
     >
-      <OAuthButtons callbackUrl="/dashboard" />
+      <OAuthButtons callbackUrl="/home" />
       <AuthSeparator />
       <form onSubmit={handleCredentials} className="space-y-4" aria-busy={loading}>
         <div className="space-y-2">

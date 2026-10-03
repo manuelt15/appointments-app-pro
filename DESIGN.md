@@ -40,6 +40,21 @@ Gradientes de marca, limitados a superficies promocionales o ilustraciones:
 - Preview: `#7928ca` → `#ff0080`
 - Ship: `#ff4d4d` → `#f9cb28`
 
+La imagen por defecto del negocio (`public/business-default.svg`) usa el gradiente
+Develop: es la marca del negocio, no decoración de producto.
+
+### Modo oscuro
+
+Tokens bajo `.dark` en `app/globals.css`; los componentes no cambian, solo los tokens.
+
+- canvas `#0a0a0a`, card/popover `#111111`, ink `#ededed`
+- body `#a1a1a1`, faint `#707070`, muted surface `#1f1f1f`
+- border `#262626`, input `#2e2e2e`
+- link `#52a8ff`, focus `#3291ff`, destructive `#ff5757`
+
+Preferencia: sistema (por defecto), claro u oscuro, guardada en `localStorage`
+(`theme`) y aplicada antes de pintar por el script de `components/layout/theme.tsx`.
+
 ## Tipografía
 
 - UI y texto: Geist Sans, fallback Arial/sans-serif.
@@ -67,6 +82,8 @@ Escala de 4px: `4, 8, 12, 16, 24, 32, 40, 64, 96, 128`.
 - Tablet `≥768px`: grids de dos columnas cuando haya espacio real.
 - Desktop `≥1024px`: navegación completa y calendario semanal.
 - Usar `dvh` para layouts que ocupan viewport.
+- El shell de la app (`app/(main)/layout.tsx`) mide `h-dvh` y solo hace scroll `<main>`.
+  Las páginas usan `h-full` o `min-h-full`, nunca `100dvh` propio.
 
 ## Forma y elevación
 
@@ -79,6 +96,15 @@ Escala de 4px: `4, 8, 12, 16, 24, 32, 40, 64, 96, 128`.
 - Nivel 2 (diálogos/menús): `0 2px 2px rgb(0 0 0 / 0.04), 0 8px 16px -4px rgb(0 0 0 / 0.08)`.
 
 ## Componentes de producto
+
+### Sidebar
+
+- Raíl de 64px con iconos y tooltip a la derecha; desplegado, 240px con etiquetas.
+- Separadores: línea de 1px, inset y con `foreground/15`, no bordes a todo el ancho.
+- **New shift** es la única acción con color: azul `#0070f3` sólido en ambos temas,
+  porque `#52a8ff` con texto blanco no da contraste.
+- Usuario: tarjeta con avatar, nombre completo (sin truncar) y email; el menú con
+  Sign out se abre a la derecha en escritorio y hacia arriba en el drawer móvil.
 
 ### Button
 

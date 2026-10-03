@@ -19,7 +19,7 @@ export default auth((req) => {
   }
 
   if (isAuthenticated && (pathname === '/login' || pathname === '/register')) {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
+    return NextResponse.redirect(new URL('/home', req.url))
   }
 
   return NextResponse.next()

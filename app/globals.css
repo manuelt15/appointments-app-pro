@@ -96,6 +96,42 @@
   --sidebar-ring: #0070f3;
 }
 
+.dark {
+  color-scheme: dark;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card: #111111;
+  --card-foreground: #ededed;
+  --popover: #111111;
+  --popover-foreground: #ededed;
+  --primary: #ededed;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1f1f1f;
+  --secondary-foreground: #ededed;
+  --muted: #1f1f1f;
+  --muted-foreground: #8f8f8f;
+  --accent: #1f1f1f;
+  --accent-foreground: #ededed;
+  --destructive: #ff5757;
+  --border: #262626;
+  --input: #2e2e2e;
+  --ring: #3291ff;
+  --link: #52a8ff;
+  --body: #a1a1a1;
+  --faint: #707070;
+  --warning: #f5a623;
+  --birthday: #a855f7;
+  --birthday-foreground: #d8b4fe;
+  --sidebar: #111111;
+  --sidebar-foreground: #ededed;
+  --sidebar-primary: #ededed;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #1f1f1f;
+  --sidebar-accent-foreground: #ededed;
+  --sidebar-border: #262626;
+  --sidebar-ring: #3291ff;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -104,7 +140,13 @@
   }
 
   html {
-    @apply font-sans;
+    @apply bg-background font-sans;
+  }
+
+  /* The app shell scrolls inside <main>; stop the page itself from rubber-banding. */
+  html,
+  body {
+    overscroll-behavior-y: none;
   }
 
   body {

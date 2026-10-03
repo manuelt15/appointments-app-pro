@@ -1,16 +1,18 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Calendar, momentLocalizer, Views, type View } from 'react-big-calendar'
 import withDragAndDrop, { type EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 import { addDays, addMonths, addWeeks, format, startOfWeek } from 'date-fns'
-import { ChevronLeft, ChevronRight, FileDown, Mail, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FileDown, Mail } from 'lucide-react'
 import moment from 'moment-timezone'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css'
 import { toast } from 'sonner'
 import ShiftModal from './ShiftModal'
 import WeekMatrix, { type MatrixShift } from './WeekMatrix'
+import WeekPicker from './WeekPicker'
 import { Button } from '@/components/ui/button'
 import { collectPaginatedResults } from '@/lib/shifts/pagination'
 import { calendarDateToIso, getCalendarLoadRange, toCalendarDate } from '@/lib/datetime/timezone'
@@ -51,6 +53,12 @@ interface Props {
 
 const DnDCalendar = withDragAndDrop<CalendarEvent>(Calendar)
 
+function newShiftSlot(timeZone: string) {
+  const start = toCalendarDate(new Date(), timeZone)
+  start.setHours(DEFAULT_SHIFT_START, 0, 0, 0)
+  return { start, end: new Date(start.getTime() + DEFAULT_SHIFT_HOURS * 3600 * 1000) }
+}
+
 export default function ShiftCalendar({ timeZone }: Props) {
   const [view, setView] = useState<View>(Views.WEEK)
   const [events, setEvents] = useState<CalendarEvent[]>([])
@@ -62,6 +70,20 @@ export default function ShiftCalendar({ timeZone }: Props) {
   const [refreshKey, setRefreshKey] = useState(0)
   const [sending, setSending] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // The sidebar's "New shift" button links here with ?new=shift.
+  const newShiftRequested = searchParams.get('new') === 'shift'
+  const [newShiftHandled, setNewShiftHandled] = useState(false)
+  if (newShiftRequested !== newShiftHandled) {
+    setNewShiftHandled(newShiftRequested)
+    if (newShiftRequested) setModal(newShiftSlot(timeZone))
+  }
+
+  useEffect(() => {
+    if (newShiftRequested) router.replace('/dashboard', { scroll: false })
+  }, [newShiftRequested, router])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -205,12 +227,6 @@ export default function ShiftCalendar({ timeZone }: Props) {
     }
   }
 
-  function openNewShift() {
-    const start = toCalendarDate(new Date(), timeZone)
-    start.setHours(DEFAULT_SHIFT_START, 0, 0, 0)
-    setModal({ start, end: new Date(start.getTime() + DEFAULT_SHIFT_HOURS * 3600 * 1000) })
-  }
-
   function openCell(employeeId: string, day: Date) {
     const start = new Date(day)
     start.setHours(DEFAULT_SHIFT_START, 0, 0, 0)
@@ -244,7 +260,7 @@ export default function ShiftCalendar({ timeZone }: Props) {
           <Button type="button" variant="outline" onClick={() => setDate(toCalendarDate(new Date(), timeZone))}>
             Today
           </Button>
-          <span className="ml-1 text-sm font-medium" aria-live="polite">{rangeLabel}</span>
+          <WeekPicker date={date} today={toCalendarDate(new Date(), timeZone)} label={rangeLabel} onSelect={setDate} />
         </div>
 
         <div className="flex items-center gap-2">
@@ -285,9 +301,6 @@ export default function ShiftCalendar({ timeZone }: Props) {
             title="Download this week as PDF"
           >
             <FileDown />
-          </Button>
-          <Button type="button" onClick={openNewShift}>
-            <Plus />New shift
           </Button>
         </div>
       </div>
