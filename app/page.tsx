@@ -11,5 +11,5 @@ export default async function RootPage() {
   const business = await Business.findOne({ ownerId: session.user.id })
   if (!business) redirect('/business/new')
 
-  redirect('/dashboard')
+  redirect('/home')
 }
