@@ -116,3 +116,11 @@ código de estado.** Aplica a cualquier SPA con rewrite catch-all.
 Ya está contado arriba con el favicon, pero conviene recordarlo al añadir cualquier fichero
 nuevo en `app/` que se sirva por URL propia: comprobar el matcher de `proxy.ts` y verificar
 el recurso pidiéndolo, no leyendo el HTML.
+
+## Emular el tema en el panel del navegador deja la pestaña falseada
+
+Para probar el modo "System" forcé `prefers-color-scheme: dark` en la pestaña del panel y no
+lo deshice: la app quedó en oscuro con el sistema en claro y pareció un bug del tema.
+
+**Toda emulación de viewport o color scheme que se ponga para verificar se revierte en el
+mismo paso.** Y "System" en el panel refleja el tema de la app de Claude, no siempre el de macOS.

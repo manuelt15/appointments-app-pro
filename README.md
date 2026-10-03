@@ -19,13 +19,39 @@ trabajar a la vez.
 
 ## Qué incluye
 
+- **Home** (`/home`), la página de entrada tras el login: bienvenida con el nombre
+  del negocio y un resumen de la semana en curso, con quién trabaja, en qué
+  horario y cuántas horas. Avisa si algún empleado activo no tiene nada asignado
+  esa semana o si la semana está vacía. Las ausencias cuentan como asignadas.
 - **Cuadrante semanal** en matriz: una fila por empleado, una columna por día,
-  con las horas semanales de cada persona y el fin de semana sombreado.
+  con las horas semanales de cada persona y el fin de semana sombreado. El rango
+  de fechas abre un selector para saltar a cualquier semana sin ir de una en una.
 - **Vista mensual** para mover turnos entre días.
+- **Historial** (`/history`): los 12 meses de un año con horas y personas, y por
+  mes un resumen, una tabla por empleado y todos los registros. Se filtra por
+  empleado, por tipo y por "solo quien trabajó", y se descarga en PDF tal como se
+  ve. Incluye a los empleados dados de baja.
 - **Ficha de empleado** con contacto, cumpleaños, antigüedad, historial mes a mes
   y saldo anual de vacaciones.
 - **Exportación** del cuadrante semanal a PDF.
 - **Envío por email** del horario a cada empleado (pendiente de configurar proveedor).
+
+Todos los cálculos por día, semana o mes de la Home y del historial usan la zona
+horaria del negocio (`Business.timezone`), no la del servidor ni la del navegador.
+
+### Interfaz
+
+- **Sidebar** estrecho de iconos con tooltips, que se despliega con la flecha.
+  Arriba, la imagen del negocio y el botón **New shift**, que abre el formulario
+  de turno desde cualquier página (`/dashboard?new=shift`). Abajo, el tema, los
+  ajustes y la tarjeta del usuario, con el menú de **Sign out** y el proveedor
+  con el que entró.
+- **Modo oscuro** con tres estados: sistema (por defecto), claro y oscuro. Se
+  aplica antes de pintar la página, sin parpadeo, y se guarda en el navegador.
+- **Móvil**: cabecera con la imagen del negocio y un menú que entra desde la
+  izquierda. La estructura mide lo que la pantalla y solo hace scroll el
+  contenido, para que Safari y Chrome no descoloquen nada al mostrar u ocultar
+  sus barras.
 
 ## Desarrollo local
 
