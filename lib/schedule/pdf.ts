@@ -1,5 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
-import { format } from 'date-fns'
+import moment from 'moment-timezone'
 import type { EmployeeWeek } from './week'
 import { weekRangeLabel } from './week'
 
@@ -20,6 +20,7 @@ function hexToRgb(hex: string) {
 export async function buildSchedulePdf(
   businessName: string,
   weekStart: Date,
+  timeZone: string,
   weeks: EmployeeWeek[]
 ) {
   const pdf = await PDFDocument.create()
@@ -32,7 +33,7 @@ export async function buildSchedulePdf(
   const line = rgb(0.85, 0.85, 0.85)
 
   page.drawText(businessName, { x: MARGIN, y: PAGE.height - MARGIN, size: 16, font: bold, color: ink })
-  page.drawText(weekRangeLabel(weekStart), {
+  page.drawText(weekRangeLabel(weekStart, timeZone), {
     x: MARGIN, y: PAGE.height - MARGIN - 18, size: 10, font, color: soft,
   })
 
@@ -42,7 +43,7 @@ export async function buildSchedulePdf(
   const days = weeks[0]?.days ?? []
 
   days.forEach((day, index) => {
-    page.drawText(format(day.day, 'EEE d'), {
+    page.drawText(day.label, {
       x: MARGIN + NAME_COLUMN + index * dayWidth + 4,
       y: tableTop - 14,
       size: 9,
@@ -104,7 +105,7 @@ export async function buildSchedulePdf(
     })
   }
 
-  page.drawText(`Generated ${format(new Date(), 'd MMM yyyy HH:mm')}`, {
+  page.drawText(`Generated ${moment().tz(timeZone).format('D MMM YYYY HH:mm')}`, {
     x: MARGIN, y: MARGIN - 12, size: 7.5, font, color: soft,
   })
 

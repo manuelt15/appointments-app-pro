@@ -1,4 +1,3 @@
-import { format } from 'date-fns'
 import type { EmployeeWeek } from './week'
 import { weekRangeLabel } from './week'
 
@@ -22,6 +21,7 @@ export interface EmailPreparation {
 export function prepareWeeklyEmails(
   businessName: string,
   weekStart: Date,
+  timeZone: string,
   weeks: EmployeeWeek[]
 ): EmailPreparation {
   const ready: PreparedEmail[] = []
@@ -39,18 +39,18 @@ export function prepareWeeklyEmails(
 
     const lines = week.days.map((day) => {
       const what = day.entries.length > 0 ? day.entries.join(', ') : 'Off'
-      return `${format(day.day, 'EEEE d MMMM')}: ${what}`
+      return `${day.fullLabel}: ${what}`
     })
 
     ready.push({
       employeeId: week.employee._id,
       employeeName: week.employee.fullName,
       to: week.employee.email,
-      subject: `Your schedule for ${weekRangeLabel(weekStart)}`,
+      subject: `Your schedule for ${weekRangeLabel(weekStart, timeZone)}`,
       body: [
         `Hi ${week.employee.fullName},`,
         '',
-        `Here is your schedule at ${businessName} for ${weekRangeLabel(weekStart)}.`,
+        `Here is your schedule at ${businessName} for ${weekRangeLabel(weekStart, timeZone)}.`,
         '',
         ...lines,
         '',
