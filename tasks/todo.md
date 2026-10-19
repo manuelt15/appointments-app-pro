@@ -156,7 +156,7 @@ Backup previo de la base local en el scratchpad de la sesión.
       de Google y GitHub.
 - [ ] Generar api key nueva en Settings y pegarla en `.mcp.json`, que quedó con un
       placeholder apuntando a `localhost:3000`.
-- [ ] Mover el repo fuera de `~/Desktop`, que iCloud sincroniza y duplica ficheros dentro
+- [x] Mover el repo fuera de `~/Desktop`, que iCloud sincroniza y duplica ficheros dentro
       de `.next`. Mitigado en `tsconfig.json`, no resuelto.
 - [ ] Decidir si la base de producción se renombra de `appointments-pro-prod`. Hacerlo
       ahora cuesta poco: solo hay una cuenta y un negocio dentro.
@@ -210,5 +210,23 @@ por rango y los cálculos de `lib/shifts/history.ts`. Meses en la zona horaria d
 - [ ] Campo de imagen en `Business`; hoy todos usan `public/business-default.svg`.
 - [ ] Unificar cómo cuentan las horas de un turno nocturno entre meses la ficha de
       empleado (todo al mes de inicio) y el historial (repartido).
-- [ ] Decidir si se borra la rama `feat/shift-scheduling` (anterior a esta sesión).
+- [x] Decidir si se borra la rama `feat/shift-scheduling` (anterior a esta sesión): solo existía
+      en local, ya integrada en `main`; desapareció al retirar la carpeta el 2026-10-19.
 - [x] Defensas de iCloud en `.gitignore` (`* [0-9]`, `* [0-9].*`, …): aplicadas en `d441361`.
+
+## Abierto al retirar la carpeta local (2026-10-19)
+
+La copia de `~/Desktop/prueba_claude_pro/appointments-app-pro` se borró: el código y esta
+memoria están en GitHub. Para volver a trabajar, clonar en `~/Developer/appointments-app-pro`
+con la cuenta `manuelt15` y copiar desde `~/Developer/_env-backups/`:
+`appointments-app-pro.env.local` como `.env.local` y `appointments-app-pro.mcp.json` como
+`.mcp.json` (este sigue con la api key de relleno y apuntando a `localhost:3000`).
+
+- [ ] **Conectar con Claude desde Settings.** Hoy Settings explica la api key y da un `curl`,
+      pero no dice dónde está el servidor MCP ni cómo configurarlo. Añadir un bloque con un
+      `.mcp.json` listo para copiar (con `MCP_API_URL` = el origin de la app) y un enlace al
+      repo con los pasos. En el README, una sección para usar el MCP contra producción, no
+      solo contra `localhost`.
+- [ ] **Publicar el servidor MCP en npm** (`@shift-app/mcp` o el nombre que se elija) para que
+      el usuario no tenga que clonar el repo: el `.mcp.json` pasaría a `npx`. Necesita cuenta
+      de npm; encaja con el renombrado a `shift-app-pro`.
