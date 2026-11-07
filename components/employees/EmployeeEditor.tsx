@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import EmployeeForm from '@/components/employees/EmployeeForm'
 import { Button } from '@/components/ui/button'
+import { LoadingState } from '@/components/ui/loading-state'
 import type { Employee } from '@/types'
 
 export default function EmployeeEditor({ employeeId }: { employeeId: string }) {
@@ -35,7 +36,7 @@ export default function EmployeeEditor({ employeeId }: { employeeId: string }) {
   }, [employeeId])
 
   if (loading) {
-    return <div className="grid min-h-full place-items-center text-sm text-body" role="status">Loading employee…</div>
+    return <div className="grid min-h-full place-items-center"><LoadingState label="Getting the employee" /></div>
   }
 
   if (error || !employee) {

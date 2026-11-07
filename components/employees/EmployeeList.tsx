@@ -6,6 +6,7 @@ import { Trash2, User } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { LoadingState } from '@/components/ui/loading-state'
 import type { Employee } from '@/types'
 
 export default function EmployeeList() {
@@ -55,7 +56,7 @@ export default function EmployeeList() {
     }
   }
 
-  if (loading) return <p className="text-sm text-body" role="status">Loading employees…</p>
+  if (loading) return <LoadingState label="Getting the team" />
 
   if (error) {
     return (

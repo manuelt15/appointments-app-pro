@@ -14,6 +14,7 @@ import ShiftModal from './ShiftModal'
 import WeekMatrix, { type MatrixShift } from './WeekMatrix'
 import WeekPicker from './WeekPicker'
 import { Button } from '@/components/ui/button'
+import { LoadingState } from '@/components/ui/loading-state'
 import { collectPaginatedResults } from '@/lib/shifts/pagination'
 import { calendarDateToIso, getCalendarLoadRange, toCalendarDate } from '@/lib/datetime/timezone'
 import { cn } from '@/lib/utils'
@@ -316,7 +317,7 @@ export default function ShiftCalendar({ timeZone }: Props) {
 
       <div className="min-h-0 flex-1 overflow-hidden rounded-lg border bg-card p-2 shadow-[0_1px_1px_rgb(0_0_0/0.04)]">
         {loading && loadedRange !== rangeKey ? (
-          <div className="grid h-full place-items-center text-sm text-body" role="status">Loading schedule…</div>
+          <div className="grid h-full place-items-center"><LoadingState label="Getting the schedule" /></div>
         ) : error ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-sm text-body" role="alert">
             <p>{error}</p>

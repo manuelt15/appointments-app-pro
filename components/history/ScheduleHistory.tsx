@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { LoadingState } from '@/components/ui/loading-state'
 import { TYPE_LABELS } from '@/lib/schedule/week'
 import {
   businessMonthRange,
@@ -323,7 +324,7 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={5} className="px-4 py-6 text-center text-body" role="status">Loading history…</td></tr>
+                    <tr><td colSpan={5} className="px-4 py-6"><LoadingState label="Getting history" className="mx-auto" /></td></tr>
                   ) : rows.length === 0 ? (
                     <tr><td colSpan={5} className="px-4 py-6 text-center text-body">Nobody worked in {monthLabel}.</td></tr>
                   ) : rows.map((row) => {
@@ -363,7 +364,7 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={6} className="px-4 py-6 text-center text-body" role="status">Loading history…</td></tr>
+                    <tr><td colSpan={6} className="px-4 py-6"><LoadingState label="Getting history" className="mx-auto" /></td></tr>
                   ) : details.length === 0 ? (
                     <tr><td colSpan={6} className="px-4 py-6 text-center text-body">No entries in {monthLabel}.</td></tr>
                   ) : details.map((shift) => {

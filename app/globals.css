@@ -245,3 +245,15 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* LoadingState (components/ui/loading-state.tsx). Under reduced motion the global rule above
+   runs each animation once and instantly, which leaves the pixels at their dim inline opacity. */
+@keyframes pixel-on {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 1; }
+}
+
+@keyframes shimmer-text {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}

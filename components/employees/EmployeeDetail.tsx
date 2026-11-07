@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { differenceInCalendarDays, format, formatDistanceToNowStrict } from 'date-fns'
 import { ArrowLeft, Cake, ChevronLeft, ChevronRight, Mail, Pencil, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { LoadingState } from '@/components/ui/loading-state'
 import { parseCalendarDate } from '@/lib/shifts/calendar-date'
 import { monthsWithShifts, shiftsInMonth, summariseHistory } from '@/lib/shifts/history'
 import { vacationBalance, vacationDaysInMonth } from '@/lib/shifts/vacation'
@@ -63,7 +64,7 @@ export default function EmployeeDetail({ employeeId }: { employeeId: string }) {
   }, [employeeId])
 
   if (loading) {
-    return <div className="grid min-h-full place-items-center text-sm text-body" role="status">Loading employee…</div>
+    return <div className="grid min-h-full place-items-center"><LoadingState label="Getting the employee" /></div>
   }
 
   if (error || !employee) {

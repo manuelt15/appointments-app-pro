@@ -159,6 +159,9 @@ Escala de 4px: `4, 8, 12, 16, 24, 32, 40, 64, 96, 128`.
 - Mantener una jerarquía de grises deliberada.
 - Usar primitives de `components/ui` antes de crear controles ad hoc.
 - Diseñar primero los estados loading, vacío, error, disabled y focus.
+- Toda carga de contenido usa `LoadingState` (`components/ui/loading-state.tsx`): rejilla de
+  píxeles, etiqueta con brillo y tiempo transcurrido. Nunca un "Loading…" en texto plano.
+  Etiquetas en forma "Getting the schedule", sin la palabra loading.
 
 ### Don't
 
