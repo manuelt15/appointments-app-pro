@@ -155,7 +155,7 @@ export default function SettingsPage() {
           </form>
 
           {listLoading ? (
-            <LoadingState label="Getting API keys" />
+            <LoadingState label="Just a moment" />
           ) : listError ? (
             <div role="alert">
               <p className="text-sm text-body">{listError}</p>

@@ -161,7 +161,8 @@ Escala de 4px: `4, 8, 12, 16, 24, 32, 40, 64, 96, 128`.
 - Diseñar primero los estados loading, vacío, error, disabled y focus.
 - Toda carga de contenido usa `LoadingState` (`components/ui/loading-state.tsx`): rejilla de
   píxeles, etiqueta con brillo y tiempo transcurrido. Nunca un "Loading…" en texto plano.
-  Etiquetas en forma "Getting the schedule", sin la palabra loading.
+  Etiquetas cercanas, para una persona que no programa ("Putting your week together",
+  "Gathering your team"): nada técnico y nunca la palabra loading.
 
 ### Don't
 

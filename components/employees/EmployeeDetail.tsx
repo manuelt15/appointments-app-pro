@@ -64,7 +64,7 @@ export default function EmployeeDetail({ employeeId }: { employeeId: string }) {
   }, [employeeId])
 
   if (loading) {
-    return <div className="grid min-h-full place-items-center"><LoadingState label="Getting the employee" /></div>
+    return <div className="grid min-h-full place-items-center"><LoadingState label="Opening their profile" /></div>
   }
 
   if (error || !employee) {

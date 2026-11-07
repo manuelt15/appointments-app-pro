@@ -56,7 +56,7 @@ export default function EmployeeList() {
     }
   }
 
-  if (loading) return <LoadingState label="Getting the team" />
+  if (loading) return <LoadingState label="Gathering your team" />
 
   if (error) {
     return (

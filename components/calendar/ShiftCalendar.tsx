@@ -317,7 +317,7 @@ export default function ShiftCalendar({ timeZone }: Props) {
 
       <div className="min-h-0 flex-1 overflow-hidden rounded-lg border bg-card p-2 shadow-[0_1px_1px_rgb(0_0_0/0.04)]">
         {loading && loadedRange !== rangeKey ? (
-          <div className="grid h-full place-items-center"><LoadingState label="Getting the schedule" /></div>
+          <div className="grid h-full place-items-center"><LoadingState label="Putting your week together" /></div>
         ) : error ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-sm text-body" role="alert">
             <p>{error}</p>

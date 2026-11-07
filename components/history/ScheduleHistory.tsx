@@ -324,7 +324,7 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={5} className="px-4 py-6"><LoadingState label="Getting history" className="mx-auto" /></td></tr>
+                    <tr><td colSpan={5} className="px-4 py-6"><LoadingState label="Looking back at past weeks" className="mx-auto" /></td></tr>
                   ) : rows.length === 0 ? (
                     <tr><td colSpan={5} className="px-4 py-6 text-center text-body">Nobody worked in {monthLabel}.</td></tr>
                   ) : rows.map((row) => {
@@ -364,7 +364,7 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={6} className="px-4 py-6"><LoadingState label="Getting history" className="mx-auto" /></td></tr>
+                    <tr><td colSpan={6} className="px-4 py-6"><LoadingState label="Looking back at past weeks" className="mx-auto" /></td></tr>
                   ) : details.length === 0 ? (
                     <tr><td colSpan={6} className="px-4 py-6 text-center text-body">No entries in {monthLabel}.</td></tr>
                   ) : details.map((shift) => {
