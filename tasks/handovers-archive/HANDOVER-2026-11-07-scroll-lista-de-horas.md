@@ -1,4 +1,4 @@
-# Handover 2026-11-07: scroll de la lista de horas y recarga del calendario
+# Handover 2026-11-07: scroll de horas, recarga del calendario y loader propio
 
 ## Qué se hizo
 - Clon restaurado en `~/Developer/appointments-app-pro` con `.env.local` y `.mcp.json`
@@ -37,6 +37,21 @@
   calendario ya los tiene. Es una petición pequeña; pasarle los empleados por props obliga a
   cubrir el caso del botón "New shift" del sidebar, que abre el modal antes de que cargue
   el calendario.
+
+## Loader propio en vez de "Loading…" (tercer cambio del día)
+- Componente nuevo `components/ui/loading-state.tsx` a partir del que pasó Manuel: rejilla de
+  píxeles 3x3 (variantes `drive`, `dots`, `orbit`), etiqueta con brillo y contador en mono.
+  Adaptado a los tokens de la app (`--foreground`, `--body`); fuera la variante "Surfer",
+  que reproducía un vídeo alojado en un Blob de Vercel ajeno.
+- Keyframes `pixel-on` y `shimmer-text` en `app/globals.css`. La regla global de reduced
+  motion deja las animaciones en una iteración instantánea: la rejilla queda tenue.
+- Sustituye los siete "Loading …" en texto: calendario, ajustes (API keys), historial (dos
+  tablas), ficha y edición de empleado, y lista del equipo. Regla añadida a `DESIGN.md`.
+- Verificado con la red retrasada 4 s desde la consola: loader visible en calendario,
+  equipo, historial y ajustes (también en oscuro), píxeles animándose (opacidad de 0,15 a
+  0,99). Sin errores en consola. `vitest` 112, `tsc`, `eslint` y `next build` correctos.
+- Sin tocar: los textos de los botones mientras guardan ("Saving…", "Creating…", "Signing
+  in…", "Working…", "Preparing…") y los "…" de las cifras del historial.
 
 ## Qué queda
 - Al abrir el selector, la lista empieza en 00:00 en vez de centrarse en la hora elegida:
