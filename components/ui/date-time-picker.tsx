@@ -93,8 +93,10 @@ export function DateTimePicker({ id, value, onChange, disabled }: Props) {
     setOpen(false)
   }
 
+  // modal: the picker lives inside ShiftModal's Dialog, whose scroll lock blocks the wheel on
+  // anything portalled outside it. A modal Popover takes over that lock for its own content.
   return (
-    <Popover open={open} onOpenChange={handleOpenChange}>
+    <Popover modal open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           id={id}
