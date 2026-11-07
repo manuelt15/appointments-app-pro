@@ -66,6 +66,9 @@ export default function ShiftCalendar({ timeZone }: Props) {
   const [date, setDate] = useState(() => toCalendarDate(new Date(), timeZone))
   const [modal, setModal] = useState<{ shift?: Shift; start?: Date; end?: Date; employeeId?: string } | null>(null)
   const [loading, setLoading] = useState(true)
+  // Which range the events on screen belong to. A reload after saving keeps the grid in place;
+  // only a range that has never loaded (first visit, another week) shows the loading state.
+  const [loadedRange, setLoadedRange] = useState('')
   const [error, setError] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
   const [sending, setSending] = useState(false)
@@ -85,20 +88,25 @@ export default function ShiftCalendar({ timeZone }: Props) {
     if (newShiftRequested) router.replace('/dashboard', { scroll: false })
   }, [newShiftRequested, router])
 
+  // The load range is the whole month plus a week each side, so moving between weeks of the
+  // same month needs no request and no loading state.
+  const { start: rangeStart, end: rangeEnd } = getCalendarLoadRange(date, timeZone)
+  const rangeKey = `${rangeStart}|${rangeEnd}`
+
   useEffect(() => {
     const controller = new AbortController()
+    const requestedRange = `${rangeStart}|${rangeEnd}`
 
     async function loadSchedule() {
       setLoading(true)
       setError('')
 
       try {
-        const range = getCalendarLoadRange(date, timeZone)
         const [shifts, employeeResponse] = await Promise.all([
           collectPaginatedResults<Shift>(async (page) => {
             const query = new URLSearchParams({
-              start: range.start,
-              end: range.end,
+              start: rangeStart,
+              end: rangeEnd,
               limit: '200',
               page: String(page),
             })
@@ -129,6 +137,7 @@ export default function ShiftCalendar({ timeZone }: Props) {
             ? (colorById[shift.employeeId] ?? 'var(--foreground)')
             : 'var(--faint)',
         })))
+        setLoadedRange(requestedRange)
       } catch (loadError) {
         if (loadError instanceof DOMException && loadError.name === 'AbortError') return
         setError('The schedule could not be loaded.')
@@ -139,7 +148,7 @@ export default function ShiftCalendar({ timeZone }: Props) {
 
     loadSchedule()
     return () => controller.abort()
-  }, [date, refreshKey, timeZone])
+  }, [rangeStart, rangeEnd, refreshKey, timeZone])
 
   async function handleEventDrop({ event, start, end }: EventInteractionArgs<CalendarEvent>) {
     try {
@@ -306,7 +315,7 @@ export default function ShiftCalendar({ timeZone }: Props) {
       </div>
 
       <div className="min-h-0 flex-1 overflow-hidden rounded-lg border bg-card p-2 shadow-[0_1px_1px_rgb(0_0_0/0.04)]">
-        {loading ? (
+        {loading && loadedRange !== rangeKey ? (
           <div className="grid h-full place-items-center text-sm text-body" role="status">Loading schedule…</div>
         ) : error ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-sm text-body" role="alert">
