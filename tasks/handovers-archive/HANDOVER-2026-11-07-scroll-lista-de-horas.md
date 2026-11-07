@@ -50,6 +50,9 @@
 - Verificado con la red retrasada 4 s desde la consola: loader visible en calendario,
   equipo, historial y ajustes (también en oscuro), píxeles animándose (opacidad de 0,15 a
   0,99). Sin errores en consola. `vitest` 112, `tsc`, `eslint` y `next build` correctos.
+- Etiquetas cambiadas a petición de Manuel por frases de app normal, sin nada técnico:
+  "Putting your week together", "Gathering your team", "Opening their profile",
+  "Looking back at past weeks" y "Just a moment" (ajustes).
 - Sin tocar: los textos de los botones mientras guardan ("Saving…", "Creating…", "Signing
   in…", "Working…", "Preparing…") y los "…" de las cifras del historial.
 

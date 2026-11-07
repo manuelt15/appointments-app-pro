@@ -126,3 +126,14 @@ con `resize_window` y no lo deshice; la app obedecía a la emulación, no al sis
 **Regla:** toda emulación de viewport o color scheme que se ponga para verificar se revierte
 en el mismo paso. Y "System" en el panel refleja el tema de la app de Claude, no siempre el
 de macOS.
+
+## Textos de la interfaz escritos como programador
+
+**Corrección (2026-11-07):** "si vas a agregar textos al loader que sean textos que no sean
+nada técnicos, que sean para una app normal".
+**Causa:** las etiquetas del loader salieron como "Getting history" o "Getting API keys":
+describían la petición, no lo que vive la persona.
+**Fix:** frases cercanas ("Putting your week together", "Gathering your team") y la regla
+escrita en `DESIGN.md`.
+**Regla:** todo texto visible se escribe para quien usa la app, no para quien la programa:
+nada de "fetch", "API", "data", "loading" ni nombres de colecciones.
