@@ -2,6 +2,8 @@
 
 ## Handovers
 
+- [2026-11-07 · Scroll de la lista de horas](handovers-archive/HANDOVER-2026-11-07-scroll-lista-de-horas.md)
+  - `Popover modal` en el `DateTimePicker` para que la lista de horas haga scroll dentro del modal de turno.
 - [2026-10-03 · Home, historial, navegación y zona horaria del PDF](handovers-archive/HANDOVER-2026-10-03-home-historial-navegacion.md)
   — sidebar nuevo, modo oscuro, `/home` de entrada, `/history` con PDF y fix de zona horaria; todo en `main`.
 - [2026-09-20 · De citas a turnos, y a producción](handovers-archive/HANDOVER-2026-09-20-de-citas-a-turnos.md)
