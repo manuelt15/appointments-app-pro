@@ -106,8 +106,9 @@ export default function SettingsPage() {
       </header>
 
       <div className="w-full max-w-2xl space-y-6 p-4 sm:p-6">
+        <p role="status" className="sr-only">{newKey ? 'API key generated.' : ''}</p>
         {newKey && (
-          <section className="space-y-3 rounded-lg border bg-muted p-4" aria-live="polite">
+          <section className="space-y-3 rounded-lg border bg-muted p-4">
             <div>
               <h2 className="text-sm font-medium">New API key</h2>
               <p className="text-sm text-body">Copy it now. It won&apos;t be shown again.</p>
