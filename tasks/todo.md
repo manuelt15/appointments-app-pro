@@ -2,6 +2,11 @@
 
 ## Handovers
 
+- [2026-11-08 · zod de la app a 4.6.7 (agotamiento de memoria al validar)](handovers-archive/HANDOVER-2026-11-08-zod-raiz-app.md)
+  — hallazgo -015: la dependencia directa zod ^4.3.6 estaba en el rango vulnerable
+  <4.6.6 de GHSA-mrhx-c7xc-m3w5 / CVE-2023-54404; sube a ^4.6.6 (resuelve 4.6.7, la
+  misma versión que el MCP) y guarda con 4 tests RED/GREEN (declarada/resuelta/instalada
+  + el array acotado termina pronto). Incluye resumen acumulado F2 y pendientes.
 - [2026-11-08 · Texto legible sobre el color del empleado](handovers-archive/HANDOVER-2026-11-08-texto-sobre-color-empleado.md)
   — hallazgo -004: `readableForeground` compartido por WeekMatrix y
   ShiftCalendar elige negro o blanco puro según el color del empleado;
