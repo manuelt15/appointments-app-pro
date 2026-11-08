@@ -22,7 +22,9 @@ import { describe, expect, it } from 'vitest'
  * react-day-picker para sus días.
  *
  * Se vigila SOLO la región de días de cada picker. El listbox de horas del
- * DateTimePicker (hallazgo -007) queda fuera de la región a propósito.
+ * DateTimePicker (hallazgo -007, resuelto: grupo de botones nativos con
+ * aria-pressed, guard propio en time-list-aria.test.ts) queda fuera de la
+ * región a propósito.
  *
  * Este guard se pone en rojo si la rejilla de días vuelve a declarar un grid
  * sin filas/flechas, si pierde el role="group", si los días dejan de ser
@@ -38,13 +40,15 @@ interface Check {
 }
 
 const DAYS_REGION_START = 'grid grid-cols-7'
-const DAYS_REGION_END = 'role="listbox"'
+const DAYS_REGION_END = 'aria-label="Time"'
 
 const cache = new Map<string, string>()
 
 /** Zona de la rejilla de días: desde el contenedor grid-cols-7 hasta el
- *  listbox de horas (si existe). Lo que haya después (hallazgo -007) no se
- *  vigila aquí. */
+ *  contenedor de horas (si existe). Lo que haya después (hallazgo -007,
+ *  que tiene su propio guard en time-list-aria.test.ts) no se vigila
+ *  aquí. El límite ancla en aria-label="Time", que sobrevive al arreglo
+ *  del -007 (el ancla anterior, role="listbox", desapareció con él). */
 function daysRegion(file: string): string {
   let content = cache.get(file)
   if (content === undefined) {

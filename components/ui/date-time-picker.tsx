@@ -167,10 +167,14 @@ export function DateTimePicker({ id, value, onChange, disabled }: Props) {
           </div>
         </div>
 
+        {/* Hours are plain buttons in a labeled group: a role="listbox" would demand
+            aria-activedescendant and arrow-key focus management that this picker doesn't
+            implement. The chosen hour is exposed with aria-pressed, the button-valid way
+            to say "selected". data-selected feeds the scroll-to-selected effect above. */}
         <div
           ref={timeListRef}
           className="max-h-64 w-full overflow-y-auto p-2 sm:w-32"
-          role="listbox"
+          role="group"
           aria-label="Time"
         >
           {TIME_SLOTS.map((slot) => {
@@ -181,8 +185,7 @@ export function DateTimePicker({ id, value, onChange, disabled }: Props) {
               <button
                 key={slot.label}
                 type="button"
-                role="option"
-                aria-selected={isSelected}
+                aria-pressed={isSelected}
                 data-selected={isSelected}
                 onClick={() => pickTime(slot.hours, slot.minutes)}
                 className={cn(

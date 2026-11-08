@@ -2,6 +2,11 @@
 
 ## Handovers
 
+- [2026-11-08 · Listbox de horas del DateTimePicker](handovers-archive/HANDOVER-2026-11-08-listbox-horas-picker.md)
+  — hallazgo -007: la lista de horas fingía un listbox sin aria-activedescendant ni
+  flechas y tapaba el rol de botón; pasa a `role="group"` etiquetado con horas como
+  botones nativos y selección con aria-pressed; guard de 7 checks. El guard del -006
+  solo cambia su ancla de región (`role="listbox"` desaparece), no sus checks.
 - [2026-11-08 · Grids ARIA inválidas de los pickers de fecha](handovers-archive/HANDOVER-2026-11-08-grid-aria-pickers.md)
   — hallazgo -006: el contenedor de días de DatePicker/DateTimePicker declaraba
   `role="grid"` sin `role="row"` ni flechas y tapaba el rol de botón; pasa a
