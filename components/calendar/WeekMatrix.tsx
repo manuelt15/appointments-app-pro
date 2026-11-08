@@ -159,6 +159,7 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
                             className="w-full rounded-sm px-2 py-1.5 text-left text-xs transition-shadow can-hover:hover:ring-2 can-hover:hover:ring-ring/60"
                             style={{ backgroundColor: employee.color, color: readableForeground(employee.color) }}
                           >
+                            <span className="sr-only">{employee.fullName} on {format(day, 'd MMMM')}: </span>
                             <span className="block font-medium">
                               {span.continuesBefore && '… '}
                               {format(span.start, 'HH:mm')} – {format(span.end, 'HH:mm')}

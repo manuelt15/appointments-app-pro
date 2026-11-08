@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { expect, it, vi } from 'vitest'
-import type { Employee } from '../../types'
+import type { Employee, Shift } from '../../types'
 
 vi.mock('@/lib/design/readable-foreground', async () => import('../../lib/design/readable-foreground'))
 vi.mock('@/lib/shifts/calendar-date', async () => import('../../lib/shifts/calendar-date'))
@@ -21,4 +21,26 @@ it('renders a week caption and scoped column and row headers (021)', () => {
   expect(columns).toHaveLength(8)
   for (const column of columns) expect(column[0]).toContain('scope="col"')
   expect(html).toMatch(/<th scope="row"/)
+})
+
+it('distinguishes identical shift times by employee while keeping time and notes (022)', () => {
+  const employees = ['Alice Test', 'Bob Test'].map((fullName, i) => ({
+    _id: String(i), fullName, color: '#0070f3',
+  } as Employee))
+  const html = renderToStaticMarkup(createElement(WeekMatrix, {
+    date: new Date(2026, 10, 2), employees,
+    shifts: employees.map((employee) => ({
+      shift: { _id: employee._id, employeeId: employee._id, type: 'shift', notes: 'Front desk' } as Shift,
+      start: new Date(2026, 10, 2, 9), end: new Date(2026, 10, 2, 17),
+    })),
+    onSelectShift: () => {}, onSelectCell: () => {},
+  }))
+  const buttons = [...html.matchAll(/<button\b[^>]*>[\s\S]*?<\/button>/g)]
+    .map(([button]) => button).filter((button) => button.includes('Front desk'))
+  expect(buttons).toHaveLength(2)
+  for (const [i, button] of buttons.entries()) {
+    expect(button).toContain(`<span class="sr-only">${employees[i].fullName} on 2 November: </span>`)
+    expect(button).toContain('09:00 – 17:00')
+    expect(button).toContain('Front desk')
+  }
 })
