@@ -262,10 +262,10 @@ export default function ShiftCalendar({ timeZone }: Props) {
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="icon" aria-label="Previous" onClick={() => shiftDate(-1)}>
+          <Button type="button" variant="outline" size="icon" aria-label={view === Views.MONTH ? 'Previous month' : 'Previous week'} onClick={() => shiftDate(-1)}>
             <ChevronLeft />
           </Button>
-          <Button type="button" variant="outline" size="icon" aria-label="Next" onClick={() => shiftDate(1)}>
+          <Button type="button" variant="outline" size="icon" aria-label={view === Views.MONTH ? 'Next month' : 'Next week'} onClick={() => shiftDate(1)}>
             <ChevronRight />
           </Button>
           <Button type="button" variant="outline" onClick={() => setDate(toCalendarDate(new Date(), timeZone))}>
