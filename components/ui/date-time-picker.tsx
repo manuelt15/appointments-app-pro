@@ -135,9 +135,11 @@ export function DateTimePicker({ id, value, onChange, disabled }: Props) {
             </Button>
           </div>
 
-          <div className="grid grid-cols-7 gap-0.5" role="grid">
+          {/* Days are plain buttons in a labeled group: a role="grid" would demand
+              rows and arrow-key focus that this picker doesn't implement. */}
+          <div className="grid grid-cols-7 gap-0.5" role="group" aria-label="Days">
             {weekdays.map((weekday, index) => (
-              <span key={index} role="columnheader" className="grid h-8 place-items-center text-xs text-body">
+              <span key={index} className="grid h-8 place-items-center text-xs text-body">
                 {weekday}
               </span>
             ))}
@@ -148,8 +150,7 @@ export function DateTimePicker({ id, value, onChange, disabled }: Props) {
                 <button
                   key={day.toISOString()}
                   type="button"
-                  role="gridcell"
-                  aria-selected={isSelected}
+                  aria-pressed={isSelected}
                   aria-label={format(day, 'd MMMM yyyy')}
                   onClick={() => pickDay(day)}
                   className={cn(

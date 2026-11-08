@@ -2,6 +2,12 @@
 
 ## Handovers
 
+- [2026-11-08 · Grids ARIA inválidas de los pickers de fecha](handovers-archive/HANDOVER-2026-11-08-grid-aria-pickers.md)
+  — hallazgo -006: el contenedor de días de DatePicker/DateTimePicker declaraba
+  `role="grid"` sin `role="row"` ni flechas y tapaba el rol de botón; pasa a
+  `role="group" aria-label="Days"` con días como botones nativos y selección
+  con `aria-pressed`; guard de 16 checks en vitest. Semántica igual, interacción
+  intacta.
 - [2026-11-08 · zod de la app a 4.6.7 (agotamiento de memoria al validar)](handovers-archive/HANDOVER-2026-11-08-zod-raiz-app.md)
   — hallazgo -015: la dependencia directa zod ^4.3.6 estaba en el rango vulnerable
   <4.6.6 de GHSA-mrhx-c7xc-m3w5 / CVE-2023-54404; sube a ^4.6.6 (resuelve 4.6.7, la
