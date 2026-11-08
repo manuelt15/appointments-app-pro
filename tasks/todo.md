@@ -2,6 +2,11 @@
 
 ## Handovers
 
+- [2026-11-08 · Texto legible sobre el color del empleado](handovers-archive/HANDOVER-2026-11-08-texto-sobre-color-empleado.md)
+  — hallazgo -004: `readableForeground` compartido por WeekMatrix y
+  ShiftCalendar elige negro o blanco puro según el color del empleado;
+  notas y hover sin opacidad (el hover es un ring); guard numérico de
+  102 casos en vitest.
 - [2026-11-08 · Mover/redimensionar turnos con teclado (falso positivo)](handovers-archive/HANDOVER-2026-11-08-teclado-mover-turnos.md)
   — el hallazgo -003 no es real: el modal de edición (Start/End, PUT igual que el arrastre)
   ES la vía de teclado; guard de 25 checks en `components/calendar/keyboard-move.test.ts`.
