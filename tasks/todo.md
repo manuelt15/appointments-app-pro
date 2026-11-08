@@ -2,6 +2,9 @@
 
 ## Handovers
 
+- [2026-11-08 · Contraste AA de los tokens de texto secundario](handovers-archive/HANDOVER-2026-11-08-contraste-tokens-wcag.md)
+  — `--faint` y `--muted-foreground` a WCAG 1.4.3 AA en ambos temas, incluido el
+  texto de los eventos de ausencia; guard numérico de 34 casos en vitest.
 - [2026-11-07 · Scroll de la lista de horas y recarga del calendario](handovers-archive/HANDOVER-2026-11-07-scroll-lista-de-horas.md)
   - `Popover modal` para el scroll de horas; la rejilla ya no se vacía al guardar ni recarga entre semanas del mismo mes.
 - [2026-10-03 · Home, historial, navegación y zona horaria del PDF](handovers-archive/HANDOVER-2026-10-03-home-historial-navegacion.md)
