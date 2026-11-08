@@ -19,8 +19,8 @@ Esta guía adapta el sistema Geist de Vercel a una aplicación de planificación
 - `card`, `popover` / elevado: `#ffffff`
 - `foreground` / ink: `#171717`
 - body: `#4d4d4d`
-- muted foreground: `#8f8f8f`
-- faint: `#a1a1a1`
+- muted foreground: `#666666`
+- faint: `#6d6d6d`
 - border/input / hairline: `#ebebeb`
 - muted surface: `#f2f2f2`
 - link/focus: `#0070f3`
@@ -28,6 +28,10 @@ Esta guía adapta el sistema Geist de Vercel a una aplicación de planificación
 - destructive: `#ee0000`
 - destructive pressed: `#c50000`
 - warning: `#f5a623`
+
+Los tokens de texto secundario (body, muted-foreground y faint) superan
+WCAG 1.4.3 AA (≥ 4,5:1) sobre sus superficies reales (card, popover,
+canvas, muted y celda "hoy"); lo vigila `lib/design/wcag-contrast.test.ts`.
 
 Acentos decorativos, solo cuando aporten significado:
 - cyan `#50e3c2`
@@ -48,7 +52,7 @@ Develop: es la marca del negocio, no decoración de producto.
 Tokens bajo `.dark` en `app/globals.css`; los componentes no cambian, solo los tokens.
 
 - canvas `#0a0a0a`, card/popover `#111111`, ink `#ededed`
-- body `#a1a1a1`, faint `#707070`, muted surface `#1f1f1f`
+- body `#a1a1a1`, faint `#878787`, muted surface `#1f1f1f`
 - border `#262626`, input `#2e2e2e`
 - link `#52a8ff`, focus `#3291ff`, destructive `#ff5757`
 
