@@ -51,13 +51,15 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
   return (
     <div className="h-full overflow-auto">
       <table className="w-full border-separate border-spacing-0 text-sm">
+        <caption className="sr-only">Weekly schedule: {format(weekStart, 'd MMM')} – {format(addDays(weekStart, 6), 'd MMM yyyy')}</caption>
         <thead>
           <tr>
-            <th className="sticky left-0 top-0 z-20 w-40 min-w-40 border-b border-r bg-card p-2 text-left font-medium">
+            <th scope="col" className="sticky left-0 top-0 z-20 w-40 min-w-40 border-b border-r bg-card p-2 text-left font-medium">
               Team
             </th>
             {days.map((day) => (
               <th
+                scope="col"
                 key={day.toISOString()}
                 className={cn(
                   'sticky top-0 z-10 min-w-32 border-b p-2 font-medium',
