@@ -20,10 +20,9 @@ export async function POST(request: NextRequest) {
   const users = db.collection('users')
 
   const existing = await users.findOne({ email: parsed.data.email })
-  if (existing) return apiError('Email already registered', 409)
-
+  // Hash on both paths so the expensive work does not reveal account existence.
   const hashedPassword = await bcrypt.hash(parsed.data.password, 12)
-  const result = await users.insertOne({
+  if (!existing) await users.insertOne({
     name: parsed.data.name,
     email: parsed.data.email,
     password: hashedPassword,
@@ -32,5 +31,5 @@ export async function POST(request: NextRequest) {
     updatedAt: new Date(),
   })
 
-  return apiSuccess({ id: result.insertedId.toString() }, 201)
+  return apiSuccess({ message: 'Registration request processed. You can now try signing in.' }, 201)
 }
