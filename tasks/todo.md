@@ -2,6 +2,9 @@
 
 ## Handovers
 
+- [2026-11-08 · Mover/redimensionar turnos con teclado (falso positivo)](handovers-archive/HANDOVER-2026-11-08-teclado-mover-turnos.md)
+  — el hallazgo -003 no es real: el modal de edición (Start/End, PUT igual que el arrastre)
+  ES la vía de teclado; guard de 25 checks en `components/calendar/keyboard-move.test.ts`.
 - [2026-11-08 · Contraste AA de los tokens de texto secundario](handovers-archive/HANDOVER-2026-11-08-contraste-tokens-wcag.md)
   — `--faint` y `--muted-foreground` a WCAG 1.4.3 AA en ambos temas, incluido el
   texto de los eventos de ausencia; guard numérico de 34 casos en vitest.
