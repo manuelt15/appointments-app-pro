@@ -14,6 +14,10 @@ import { cn } from '@/lib/utils'
  *
  * Reduced motion freezes the grid in its dim state and stops the shimmer; the timer
  * still ticks. Keyframes `pixel-on` and `shimmer-text` live in app/globals.css.
+ *
+ * The timer is decorative: it re-renders every 100ms inside the role="status" live
+ * region, which would drown the loading announcement. It stays aria-hidden so the
+ * status region only ever announces the label (appointments-2026-11-07-008).
  */
 
 const chevron = Array.from({ length: 9 }, (_, i) => {
@@ -89,7 +93,7 @@ export function LoadingState({
       >
         {label}
       </span>
-      <span className="font-mono text-xs text-body tabular-nums">{elapsed}</span>
+      <span aria-hidden className="font-mono text-xs text-body tabular-nums">{elapsed}</span>
     </div>
   )
 }
