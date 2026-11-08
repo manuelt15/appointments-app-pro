@@ -2,6 +2,7 @@
 
 import { addDays, format, isSameDay, isToday, isWeekend, startOfWeek } from 'date-fns'
 import { Cake } from 'lucide-react'
+import { readableForeground } from '@/lib/design/readable-foreground'
 import { isBirthday } from '@/lib/shifts/calendar-date'
 import { clampToDay, hoursInRange, overlapsDay } from '@/lib/shifts/matrix'
 import { cn } from '@/lib/utils'
@@ -151,15 +152,17 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
                             key={item.shift._id}
                             type="button"
                             onClick={() => onSelectShift(item.shift)}
-                            className="w-full rounded-sm px-2 py-1.5 text-left text-xs text-primary-foreground transition-opacity can-hover:hover:opacity-90"
-                            style={{ backgroundColor: employee.color }}
+                            // Text color follows the employee color: AA contrast in both themes
+                            // (a dimmed hover or faded notes would break it on light colors).
+                            className="w-full rounded-sm px-2 py-1.5 text-left text-xs transition-shadow can-hover:hover:ring-2 can-hover:hover:ring-ring/60"
+                            style={{ backgroundColor: employee.color, color: readableForeground(employee.color) }}
                           >
                             <span className="block font-medium">
                               {span.continuesBefore && '… '}
                               {format(span.start, 'HH:mm')} – {format(span.end, 'HH:mm')}
                               {span.continuesAfter && ' …'}
                             </span>
-                            {item.shift.notes && <span className="block truncate opacity-90">{item.shift.notes}</span>}
+                            {item.shift.notes && <span className="block truncate">{item.shift.notes}</span>}
                           </button>
                         )
                       })}

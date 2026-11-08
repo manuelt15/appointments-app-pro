@@ -15,8 +15,9 @@ import WeekMatrix, { type MatrixShift } from './WeekMatrix'
 import WeekPicker from './WeekPicker'
 import { Button } from '@/components/ui/button'
 import { LoadingState } from '@/components/ui/loading-state'
-import { collectPaginatedResults } from '@/lib/shifts/pagination'
+import { readableForeground } from '@/lib/design/readable-foreground'
 import { calendarDateToIso, getCalendarLoadRange, toCalendarDate } from '@/lib/datetime/timezone'
+import { collectPaginatedResults } from '@/lib/shifts/pagination'
 import { cn } from '@/lib/utils'
 import type { Employee, Shift, ShiftType } from '@/types'
 
@@ -354,7 +355,7 @@ export default function ShiftCalendar({ timeZone }: Props) {
                 backgroundColor: event.color,
                 borderRadius: '6px',
                 border: 'none',
-                color: 'var(--primary-foreground)',
+                color: readableForeground(event.color),
                 fontSize: '12px',
               },
             })}

@@ -142,6 +142,9 @@ Escala de 4px: `4, 8, 12, 16, 24, 32, 40, 64, 96, 128`.
 
 - El color distingue recursos o estados, no decora.
 - Mantener contraste de texto AA.
+- El texto sobre el color de un empleado se elige entre `#000000` y `#ffffff`
+  (el de mayor contraste), incluidas las notas del chip; el hover es un ring,
+  nunca una opacidad. Lo vigila `lib/design/employee-chip-contrast.test.ts`.
 - No depender solo de drag & drop: editar fecha/hora debe ser una alternativa completa.
 - En móvil, priorizar día/agenda frente a semana.
 
