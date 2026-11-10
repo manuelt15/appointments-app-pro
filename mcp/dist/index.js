@@ -7,9 +7,10 @@ const server = new McpServer({
     version: '2.0.0',
 });
 const SHIFT_TYPES = ['shift', 'vacation', 'sick_leave', 'time_off'];
+const objectId = z.string().regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId');
 // Tool: list_shifts
 server.tool('list_shifts', 'List scheduled shifts with optional filters', {
-    employee_id: z.string().optional().describe('Filter by employee ID'),
+    employee_id: objectId.optional().describe('Filter by employee ID'),
     type: z.enum(SHIFT_TYPES).optional().describe('Filter by shift type'),
     start: z.string().optional().describe('ISO8601 start of date range'),
     end: z.string().optional().describe('ISO8601 end of date range'),
@@ -44,7 +45,7 @@ server.tool('list_shifts', 'List scheduled shifts with optional filters', {
 });
 // Tool: create_shift
 server.tool('create_shift', 'Schedule a block of time for an employee', {
-    employee_id: z.string().describe('Employee ID the shift belongs to'),
+    employee_id: objectId.describe('Employee ID the shift belongs to'),
     start_time: z.string().describe('ISO8601 start time'),
     end_time: z.string().describe('ISO8601 end time'),
     type: z.enum(SHIFT_TYPES).optional().default('shift').describe('Working shift, vacation, sick leave or time off'),
@@ -66,8 +67,8 @@ server.tool('create_shift', 'Schedule a block of time for an employee', {
 });
 // Tool: update_shift
 server.tool('update_shift', 'Update, move or reassign an existing shift', {
-    id: z.string().describe('Shift ID'),
-    employee_id: z.string().optional().describe('Reassign the shift to this employee'),
+    id: objectId.describe('Shift ID'),
+    employee_id: objectId.optional().describe('Reassign the shift to this employee'),
     start_time: z.string().optional().describe('ISO8601 new start time'),
     end_time: z.string().optional().describe('ISO8601 new end time'),
     type: z.enum(SHIFT_TYPES).optional(),
@@ -89,7 +90,7 @@ server.tool('update_shift', 'Update, move or reassign an existing shift', {
 });
 // Tool: delete_shift
 server.tool('delete_shift', 'Remove a shift from the schedule', {
-    id: z.string().describe('Shift ID'),
+    id: objectId.describe('Shift ID'),
 }, async ({ id }) => {
     await apiCall(`/api/shifts/${id}`, { method: 'DELETE' });
     return {
@@ -98,7 +99,7 @@ server.tool('delete_shift', 'Remove a shift from the schedule', {
 });
 // Tool: check_coverage
 server.tool('check_coverage', 'Check who is scheduled to work during a time interval', {
-    employee_id: z.string().optional().describe('Narrow the check to a single employee'),
+    employee_id: objectId.optional().describe('Narrow the check to a single employee'),
     start_time: z.string().describe('ISO8601 interval start, including Z or an offset'),
     end_time: z.string().describe('ISO8601 interval end, including Z or an offset'),
 }, async (params) => {
