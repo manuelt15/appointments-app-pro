@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- Standalone Node CommonJS test harness. */
 const { test } = require('node:test')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
@@ -10,16 +11,16 @@ function load(file, dependencies) {
   const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText
-  const module = { exports: {} }
+  const loadedModule = { exports: {} }
   vm.runInNewContext(code, {
-    module, exports: module.exports, console: { error() {} }, Date, URL, URLSearchParams,
+    module: loadedModule, exports: loadedModule.exports, console: { error() {} }, Date, URL, URLSearchParams,
     require(name) {
       if (name === 'zod') return { z }
       if (!(name in dependencies)) throw new Error(`Unexpected import: ${name}`)
       return dependencies[name]
     },
   }, { filename: file })
-  return module.exports
+  return loadedModule.exports
 }
 
 for (const file of ['mcp/src/index.ts', 'mcp/dist/index.js']) {
