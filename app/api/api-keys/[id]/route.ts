@@ -7,6 +7,7 @@ import { ApiKey } from '@/lib/mongodb/models/ApiKey'
 export async function DELETE(_req: NextRequest, ctx: RouteContext<'/api/api-keys/[id]'>) {
   const auth = await resolveAuth(_req)
   if (!auth) return apiError('Unauthorized', 401)
+  if (auth.authType !== 'session') return apiError('A signed-in owner session is required', 403)
 
   await connectDB()
   const { id } = await ctx.params
