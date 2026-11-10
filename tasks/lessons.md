@@ -1,5 +1,21 @@
 # Lecciones
 
+## La autoridad de una clave no sustituye la vinculación de la herramienta
+
+Validar como ObjectId todos los selectores MCP antes de interpolarlos en rutas, también
+en dist versionado: `../employees/id` puede transformar la eliminación de un turno en
+la baja de una persona aunque ambas operaciones pertenezcan al mismo negocio.
+La regresión debe alcanzar el handler final con datos ficticios, no limitarse a mirar
+la cadena URL. Reservar la emisión y revocación de credenciales a la sesión del dueño
+evita que una clave delegada cree otra que sobreviva a su propia revocación.
+
+## Una búsqueda ARIA debe distinguir comentarios de marcado
+
+No dar por activa una cadena `role="grid"` encontrada dentro de un comentario JSX que
+explica precisamente por qué se retiró ese rol. Comprobar el marcado o las propiedades
+reales del componente; una coincidencia literal sobre todo el fichero puede invalidar
+erróneamente un arreglo correcto.
+
 ## ESLint rechaza `setState` dentro del cuerpo de un `useEffect`
 
 Este repo tiene activa `react-hooks/set-state-in-effect`, que no viene por defecto en

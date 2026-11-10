@@ -2,6 +2,11 @@
 
 ## Handovers
 
+- [2026-11-10 · Auditoría de seguridad y cierre local](handovers-archive/HANDOVER-2026-11-10-auditoria-seguridad.md)
+  — cuatro arreglos locales, regresiones 7/7 y artefactos validados. Pendientes:
+  toolchain de desarrollo, instalación limpia/suite completa y decisiones RGPD.
+  Revisión secuencial sin independencia; sin push.
+
 - [2026-11-08 · Listbox de horas del DateTimePicker](handovers-archive/HANDOVER-2026-11-08-listbox-horas-picker.md)
   — hallazgo -007: la lista de horas fingía un listbox sin aria-activedescendant ni
   flechas y tapaba el rol de botón; pasa a `role="group"` etiquetado con horas como
