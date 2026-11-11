@@ -3,6 +3,11 @@
 Aplicación de planificación de turnos de plantilla, con autenticación, panel de
 administración y servidor MCP para integrarla con Claude Code.
 
+**En producción: <https://appointments-app-pro.vercel.app>** — el producto se llama
+Shift App, pero el repositorio y el proyecto de Vercel conservan el nombre original
+(ver [Nombre del proyecto](#nombre-del-proyecto)). La URL `shift-app-pro.vercel.app`
+todavía **no existe**: el renombrado está pendiente.
+
 Cada empleado tiene su propia agenda. Un turno es un bloque de tiempo asignado a
 una persona, y puede ser jornada de trabajo, vacaciones, baja o tiempo libre.
 Dos turnos de la misma persona no pueden solaparse; dos personas sí pueden
@@ -151,11 +156,11 @@ entrega nada todavía**: falta elegir proveedor. El único punto a tocar es
 El producto se llama **Shift App**, pero el repositorio y el proyecto de Vercel
 conservan el nombre original de cuando era una app de citas:
 
-| Sitio | Nombre actual | Nombre previsto |
+| Sitio | Nombre actual (en uso) | Nombre previsto (pendiente) |
 |---|---|---|
 | Repositorio GitHub | `manuelt15/appointments-app-pro` | `shift-app-pro` |
 | Proyecto Vercel | `appointments-app-pro` | `shift-app-pro` |
-| URL de producción | `appointments-app-pro.vercel.app` | `shift-app-pro.vercel.app` |
+| URL de producción | `appointments-app-pro.vercel.app` ✅ | `shift-app-pro.vercel.app` ⛔ hoy da 404 |
 | Base de datos Atlas | `appointments-pro-prod` | sin cambios |
 
 Los paquetes npm (`shift-app-pro` y `@shift-app/mcp`) y toda la documentación ya
