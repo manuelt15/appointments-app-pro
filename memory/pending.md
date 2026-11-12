@@ -8,3 +8,5 @@
   - Núcleo compartido a tocar una sola vez: `TYPE_LABELS` (`lib/schedule/week.ts`), las etiquetas de día y `weekRangeLabel`. De ahí beben calendario, matriz semanal, ficha de empleado, historial, los dos PDF y el correo del cuadrante.
   - Alrededor de **13 ficheros de test** comprueban esos textos y hay que actualizarlos con el cambio, no después.
   - Decisiones que habrá que tomar: dónde vive el idioma (preferencia por negocio o por usuario, o cookie), si el PDF se genera en el idioma de quien lo descarga o en el del negocio, y qué pasa con los datos ya guardados en inglés (notas de turno escritas a mano no se traducen).
+
+- **Límite conocido del PDF del cuadrante (anotado 2026-11-12, sin arreglar a propósito).** El cuadrante es **una sola página**: con la fila en su mínimo entran unas **13 personas** y el resto se descarta en silencio —el PDF parece completo y le falta gente—. Hoy las plantillas son más pequeñas, así que Manuel decidió no tocarlo. Si algún día se usa con plantillas grandes, la solución es **paginar** (página nueva repitiendo la cabecera de días), no encoger la letra. El aviso está también en el código, sobre el bucle de `lib/schedule/pdf.ts`.
