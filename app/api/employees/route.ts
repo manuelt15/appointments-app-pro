@@ -5,12 +5,13 @@ import { apiSuccess, apiError } from '@/lib/api/response'
 import { connectDB } from '@/lib/mongodb/client'
 import { Employee } from '@/lib/mongodb/models/Employee'
 import { isCalendarDate } from '@/lib/shifts/calendar-date'
+import { employeeEmail, employeeName } from '@/lib/employees/fields'
 
 const calendarDate = z.string().refine(isCalendarDate, 'Expected a YYYY-MM-DD date')
 
 const CreateSchema = z.object({
-  fullName: z.string().min(1),
-  email: z.string().optional().nullable(),
+  fullName: employeeName,
+  email: employeeEmail.optional().nullable(),
   phone: z.string().optional().nullable(),
   birthday: calendarDate.optional().nullable(),
   startDate: calendarDate.optional().nullable(),
