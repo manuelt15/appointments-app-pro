@@ -10,6 +10,7 @@
 import { Copy } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { AgentIconRow } from '@/components/settings/AgentIconRow'
 import { agentPrompt } from '@/components/settings/agent-prompt'
 
 const WHAT_IT_CAN_DO = [
@@ -40,7 +41,7 @@ export function AgentSetupPrompt({ origin }: { origin: string }) {
   }
 
   return (
-    <div className="space-y-4 border-t pt-5 [&_p]:max-w-prose">
+    <div className="space-y-4 [&_p]:max-w-prose">
       <div className="space-y-2">
         <h3 className="text-sm font-semibold">Let your agent set it up</h3>
         <p className="text-sm text-body">
@@ -48,6 +49,8 @@ export function AgentSetupPrompt({ origin }: { origin: string }) {
           The agent does the setup for you.
         </p>
       </div>
+
+      <AgentIconRow />
 
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-2">

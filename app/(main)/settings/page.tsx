@@ -149,11 +149,9 @@ export default function SettingsPage() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="border-b bg-card">
-        <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6">
-          <h1 className="text-xl font-semibold tracking-[-0.02em]">Settings</h1>
-          <p className="text-sm text-body">API keys and integrations</p>
-        </div>
+      <header className="border-b bg-card px-4 py-4 sm:px-6">
+        <h1 className="text-xl font-semibold tracking-[-0.02em]">Settings</h1>
+        <p className="text-sm text-body">API keys and integrations</p>
       </header>
 
       <div className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6">
