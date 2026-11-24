@@ -52,7 +52,9 @@ export default function PrivacyPage() {
               Purpose: to build and show the work schedule; the birthday is marked on the schedule
               every year. Legal basis: the legitimate interest of the business in organizing its
               staff schedule (GDPR art. 6.1.f). If you manage a business account, informing your
-              employees and having a valid reason to add them is your responsibility.
+              employees and having a valid reason to add them is your responsibility. One of the
+              absence types marks the absence as a sick leave; that data will be processed under
+              the legal basis defined in the pending legal review.
             </li>
           </ul>
         </section>
@@ -128,6 +130,14 @@ export default function PrivacyPage() {
             the placeholders between brackets ([RESPONSABLE LEGAL] and [EMAIL DE CONTACTO]) must be
             replaced with real values and the notice must pass a legal review. Until then, treat
             this page as a draft.
+          </p>
+          <p className="text-sm leading-6 text-body">
+            <strong className="font-medium text-foreground">Health data.</strong> The sick_leave
+            shift type reveals that an employee is on sick leave, which is health data under GDPR
+            art. 9. Before the service opens to the public, the legal basis of GDPR art. 9.2
+            (explicit consent from the employee or applicable labor law) must be decided,
+            restricted access must be documented and it must be confirmed that no clinical detail
+            is stored.
           </p>
         </aside>
 
