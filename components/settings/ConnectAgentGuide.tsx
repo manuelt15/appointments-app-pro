@@ -7,6 +7,8 @@
  * The guide is deliberately written for someone who has never used an API:
  * every step says what to do and why it matters, in plain words.
  */
+import { AgentSetupPrompt } from '@/components/settings/AgentSetupPrompt'
+
 export function ConnectAgentGuide({ origin }: { origin: string }) {
   return (
     <section className="space-y-5 rounded-lg border bg-card p-5 sm:p-6" aria-labelledby="connect-agent-title">
@@ -109,6 +111,8 @@ export function ConnectAgentGuide({ origin }: { origin: string }) {
           </p>
         </li>
       </ol>
+
+      <AgentSetupPrompt origin={origin} />
     </section>
   )
 }
@@ -133,7 +137,7 @@ function mcpJson(origin: string): string {
   return JSON.stringify(
     {
       mcpServers: {
-        shifts: {
+        turnos: {
           command: 'node',
           args: ['./mcp/dist/index.js'],
           env: {
