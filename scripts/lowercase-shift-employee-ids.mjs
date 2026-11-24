@@ -23,7 +23,18 @@ if (!uri) {
 
 const client = new MongoClient(uri)
 await client.connect()
-const db = client.db()
+const db = client.db(process.env.MONGODB_DB || undefined)
+
+// Sin nombre de base en la cadena, el driver cae en "test" y el script diria
+// que no hay nada que migrar mientras la base real sigue igual.
+if (db.databaseName === 'test') {
+  console.error('La cadena no lleva nombre de base y el driver cae en "test".')
+  console.error('Anade la base al final de MONGODB_URI (por ejemplo /appointments-pro-prod)')
+  console.error('o pasa MONGODB_DB=nombre-de-la-base.')
+  await client.close()
+  process.exit(1)
+}
+
 const shifts = db.collection('shifts')
 
 const uppercase = { employeeId: { $regex: /[A-F]/ } }
