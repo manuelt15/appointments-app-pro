@@ -121,10 +121,9 @@ function NavigationContent({
       <div className={cn('flex h-16 shrink-0 items-center gap-3 px-4', expanded && 'pr-14')}>
         <BusinessAvatar />
         {expanded && (
-          <div className="min-w-0">
-            <p className="font-mono text-xs font-medium uppercase text-body">{t('nav.business')}</p>
-            <p className="truncate text-sm font-semibold">{businessName}</p>
-          </div>
+          <p className="min-w-0 truncate text-sm font-semibold" title={businessName}>
+            {businessName}
+          </p>
         )}
       </div>
 

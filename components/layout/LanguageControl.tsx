@@ -31,7 +31,7 @@ export function LanguageControl({ expanded }: { expanded: boolean }) {
         onClick={() => void setLocale(next)}
         aria-label={activeName}
         title={activeName}
-        className="mx-auto flex size-10 items-center justify-center rounded-xl border bg-card text-body outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/30 can-hover:hover:text-foreground"
+        className="mx-auto flex size-10 items-center justify-center rounded-md border bg-card text-body outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/30 can-hover:hover:text-foreground"
       >
         <span aria-hidden="true" className="text-xs font-semibold uppercase">
           {locale}
