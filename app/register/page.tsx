@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
@@ -14,11 +14,22 @@ export default function RegisterPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [consent, setConsent] = useState(false)
+  const [consentError, setConsentError] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const consentRef = useRef<HTMLInputElement>(null)
 
   async function handleRegister(event: React.FormEvent) {
     event.preventDefault()
+
+    // The privacy notice must be accepted before the account is created.
+    if (!consent) {
+      setConsentError(true)
+      consentRef.current?.focus()
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -64,6 +75,35 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
           <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} autoComplete="new-password" placeholder="Minimum 8 characters" />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-start gap-2.5">
+            <input
+              ref={consentRef}
+              id="consent"
+              type="checkbox"
+              checked={consent}
+              onChange={(event) => {
+                setConsent(event.target.checked)
+                setConsentError(false)
+              }}
+              aria-invalid={consentError || undefined}
+              aria-describedby={consentError ? 'consent-error' : undefined}
+              className="mt-0.5 size-4 shrink-0 accent-foreground"
+            />
+            <Label htmlFor="consent" className="block font-normal leading-5 text-body">
+              I have read and accept the{' '}
+              <Link href="/privacy" target="_blank" className="text-link underline-offset-4 can-hover:hover:underline">
+                privacy notice
+              </Link>
+              .
+            </Label>
+          </div>
+          {consentError && (
+            <p id="consent-error" role="alert" className="text-sm text-destructive">
+              Please accept the privacy notice to continue.
+            </p>
+          )}
         </div>
         <Button type="submit" disabled={loading} className="w-full">
           {loading ? 'Creating account…' : 'Create account'}

@@ -11,7 +11,8 @@ export default auth((req) => {
   // All /api/ routes handle their own auth (session or API key)
   if (pathname.startsWith('/api/')) return NextResponse.next()
 
-  const publicPaths = ['/login', '/register']
+  // /privacy is the legal notice linked from /register: it must be readable without an account.
+  const publicPaths = ['/login', '/register', '/privacy']
   const isPublic = publicPaths.some((p) => pathname.startsWith(p))
 
   if (!isAuthenticated && !isPublic) {
