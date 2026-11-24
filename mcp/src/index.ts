@@ -82,7 +82,7 @@ server.tool(
   'update_shift',
   'Update, move or reassign an existing shift',
   {
-    id: z.string().describe('Shift ID'),
+    id: z.string().regex(/^[a-f0-9]{24}$/i, 'Expected a 24 character hex id').describe('Shift ID'),
     employee_id: z.string().optional().describe('Reassign the shift to this employee'),
     start_time: z.string().optional().describe('ISO8601 new start time'),
     end_time: z.string().optional().describe('ISO8601 new end time'),
@@ -111,7 +111,7 @@ server.tool(
   'delete_shift',
   'Remove a shift from the schedule',
   {
-    id: z.string().describe('Shift ID'),
+    id: z.string().regex(/^[a-f0-9]{24}$/i, 'Expected a 24 character hex id').describe('Shift ID'),
   },
   async ({ id }) => {
     await apiCall(`/api/shifts/${id}`, { method: 'DELETE' })
