@@ -44,8 +44,7 @@ export function useTheme() {
     () => 'light'
   )
 
-  function cyclePreference() {
-    const next = NEXT_PREFERENCE[preference]
+  function setPreference(next: ThemePreference) {
     try {
       if (next === 'system') localStorage.removeItem('theme')
       else localStorage.setItem('theme', next)
@@ -55,7 +54,11 @@ export function useTheme() {
     document.documentElement.classList.toggle('dark', dark)
   }
 
-  return { preference, theme, cyclePreference }
+  function cyclePreference() {
+    setPreference(NEXT_PREFERENCE[preference])
+  }
+
+  return { preference, theme, cyclePreference, setPreference }
 }
 
 export function ThemedToaster() {

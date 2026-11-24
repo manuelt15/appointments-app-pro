@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ThemeScript, ThemedToaster } from '@/components/layout/theme'
+import { getLocale } from '@/lib/i18n'
+import { LocaleProvider } from '@/lib/i18n/client'
 import './globals.css'
 
 const geistSans = Geist({
@@ -18,15 +20,18 @@ export const metadata: Metadata = {
   description: 'Employee shift scheduling',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale()
   return (
-    <html lang="en" className={`h-full ${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+    <html lang={locale} className={`h-full ${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>
       <body className="flex min-h-full flex-col antialiased">
-        {children}
-        <ThemedToaster />
+        <LocaleProvider locale={locale}>
+          {children}
+          <ThemedToaster />
+        </LocaleProvider>
       </body>
     </html>
   )
