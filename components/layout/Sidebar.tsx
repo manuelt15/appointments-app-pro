@@ -241,14 +241,14 @@ function UserAvatar({ user }: { user: Props['user'] }) {
   if (user.image) {
     return (
       <span
-        className="size-9 shrink-0 rounded-md bg-muted bg-cover bg-center"
+        className="size-9 shrink-0 rounded-full bg-cover bg-center"
         style={{ backgroundImage: `url(${JSON.stringify(user.image).slice(1, -1)})` }}
         aria-hidden="true"
       />
     )
   }
   return (
-    <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-sm font-medium text-body" aria-hidden="true">
+    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium text-body" aria-hidden="true">
       {user.name?.[0]?.toUpperCase() ?? '?'}
     </span>
   )
