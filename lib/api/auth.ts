@@ -11,6 +11,8 @@ export type AuthContext = {
   authType: 'session' | 'api_key'
 }
 
+const LAST_USED_THROTTLE_MS = 5 * 60 * 1000
+
 export async function resolveAuth(request: NextRequest): Promise<AuthContext | null> {
   await connectDB()
 
@@ -20,7 +22,11 @@ export async function resolveAuth(request: NextRequest): Promise<AuthContext | n
     const keyRow = await ApiKey.findOne({ keyHash })
     if (!keyRow) return null
     if (keyRow.expiresAt && keyRow.expiresAt < new Date()) return null
-    await ApiKey.findByIdAndUpdate(keyRow._id, { lastUsedAt: new Date() })
+    // lastUsedAt is bookkeeping, not security: writing it on every request
+    // turned reads into writes. Refresh it at most once every 5 minutes.
+    if (!keyRow.lastUsedAt || Date.now() - keyRow.lastUsedAt.getTime() > LAST_USED_THROTTLE_MS) {
+      await ApiKey.updateOne({ _id: keyRow._id }, { $set: { lastUsedAt: new Date() } })
+    }
     return { businessId: keyRow.businessId, authType: 'api_key' }
   }
 
