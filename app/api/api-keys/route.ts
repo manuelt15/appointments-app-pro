@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const auth = await resolveAuth(request)
   if (!auth) return apiError('Unauthorized', 401)
+  if (auth.authType !== 'session') return apiError('Session required to create API keys', 403)
 
   const body = await request.json()
   const parsed = CreateSchema.safeParse(body)
