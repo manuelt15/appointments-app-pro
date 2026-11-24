@@ -4,9 +4,10 @@
 
 - **Autenticación beta intencionada (appointments-2026-11-07-014):** por decisión de Manuel, se mantiene NextAuth v5 `5.0.0-beta.32`, fijada sin rango en manifest y lockfile. No se migra a v4. Revisar la actualización cuando se publique la versión estable de v5; la fijación evita cambios accidentales de prerelease, no convierte la beta en estable.
 
-- **Internacionalización EN/ES (mejora pedida el 2026-11-12, sin fecha).** La app está **entera en inglés**: `<html lang="en">`, 80 cadenas visibles en 27 ficheros y `moment` sin locale. Los PDF (cuadrante semanal e historial) y los correos usan las mismas cadenas, así que no se traducen por separado. Manuel quiere **las dos opciones**, con selector de idioma, no cambiar el inglés por el español.
-  - Núcleo compartido a tocar una sola vez: `TYPE_LABELS` (`lib/schedule/week.ts`), las etiquetas de día y `weekRangeLabel`. De ahí beben calendario, matriz semanal, ficha de empleado, historial, los dos PDF y el correo del cuadrante.
-  - Alrededor de **13 ficheros de test** comprueban esos textos y hay que actualizarlos con el cambio, no después.
-  - Decisiones que habrá que tomar: dónde vive el idioma (preferencia por negocio o por usuario, o cookie), si el PDF se genera en el idioma de quien lo descarga o en el del negocio, y qué pasa con los datos ya guardados en inglés (notas de turno escritas a mano no se traducen).
+- **Internacionalización ES/EN (cerrada el 2026-11-24).** La app entera está traducida, español por
+  defecto y selector en la barra. Ver [handover](../tasks/handovers-archive/HANDOVER-2026-11-24-i18n-es-en.md).
+  **Queda fuera, y es el siguiente paso:** el PDF del cuadrante, el PDF del historial y el correo del
+  cuadrante siguen usando `TYPE_LABELS` de `lib/schedule/week.ts`, que está en inglés. Hay que decidir
+  si el PDF sale en el idioma de quien lo descarga o en el del negocio.
 
 - **Límite conocido del PDF del cuadrante (anotado 2026-11-12, sin arreglar a propósito).** El cuadrante es **una sola página**: con la fila en su mínimo entran unas **13 personas** y el resto se descarta en silencio —el PDF parece completo y le falta gente—. Hoy las plantillas son más pequeñas, así que Manuel decidió no tocarlo. Si algún día se usa con plantillas grandes, la solución es **paginar** (página nueva repitiendo la cabecera de días), no encoger la letra. El aviso está también en el código, sobre el bucle de `lib/schedule/pdf.ts`.

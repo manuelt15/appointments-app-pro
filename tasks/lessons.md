@@ -153,3 +153,34 @@ describían la petición, no lo que vive la persona.
 escrita en `DESIGN.md`.
 **Regla:** todo texto visible se escribe para quien usa la app, no para quien la programa:
 nada de "fetch", "API", "data", "loading" ni nombres de colecciones.
+
+## La cabecera no se centra: solo el contenido usa el ancho máximo
+
+**Corrección (2026-11-24):** "las demás páginas quedan a la izquierda y así quiero que sea; lo único
+que no debe dejar espacio es el contenido de la página".
+**Causa:** al ensanchar Ajustes metí el título y el subtítulo dentro del mismo contenedor centrado
+(`mx-auto max-w-7xl`) que el contenido, así que en pantallas grandes la cabecera se iba al medio y
+dejaba de parecerse al resto de la app.
+**Fix:** la cabecera vuelve al patrón de siempre, `border-b bg-card px-4 py-4 sm:px-6` con el `h1` y
+el `p` dentro, sin envoltorio; el `mx-auto max-w-7xl` se queda solo en el bloque de contenido.
+**Regla:** el ancho máximo y el centrado son del contenido. La cabecera va pegada al borde izquierdo
+con su padding, igual en todas las páginas.
+
+## Los radios se copian de la escala, no se inventan
+
+**Corrección (2026-11-24):** "los interruptores del tema y el idioma me parecen muy circulares, no
+siguen los mismos bordes que los demás elementos".
+**Causa:** puse `rounded-xl` (16 px) en la caja y `rounded-lg` (12 px) dentro sin mirar la escala del
+proyecto, donde los elementos dentro de una tarjeta usan 6 px (`rounded-sm`) y las tarjetas 12 px.
+**Fix:** caja a `rounded-md` (8 px) y opción activa a `rounded-sm` (6 px); el botón colapsado, 8 px.
+**Regla:** antes de elegir un radio, mirar `--radius` en `app/globals.css` y qué usan los componentes
+vecinos. Un control nuevo tiene que parecer hermano de los que ya hay, no una pieza pegada.
+
+## No se construye sobre una referencia que puede retirarse
+
+**Corrección (2026-11-24):** "no prestes atención a la imagen del sidebar, me equivoqué".
+**Causa:** lancé una tanda entera a construir un control segmentado a partir de una captura, sin
+confirmar antes si era la referencia buena; cuando se retiró, hubo que revertir 12 minutos de trabajo.
+**Fix:** revertido, y el interruptor de idioma rehecho después con la decisión ya cerrada.
+**Regla:** cuando la referencia visual de un encargo es una captura, se confirma en una línea antes
+de delegar. Y no se lanza una segunda tanda sobre la misma zona hasta cerrar la decisión de la primera.

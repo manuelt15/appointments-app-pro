@@ -2,6 +2,10 @@
 
 ## Handovers
 
+- [2026-11-24 · Español e inglés en toda la app](handovers-archive/HANDOVER-2026-11-24-i18n-es-en.md)
+  — 416 claves por idioma con paridad exacta, cookie y `<html lang>` reales, interruptor en la barra.
+  Traducido de punta a punta; el PDF y los correos se quedan fuera y son el siguiente paso. 478 tests.
+
 - [2026-11-10 · Auditoría de seguridad y cierre local](handovers-archive/HANDOVER-2026-11-10-auditoria-seguridad.md)
   — cuatro arreglos locales, regresiones 7/7 y artefactos validados. Pendientes:
   toolchain de desarrollo, instalación limpia/suite completa y decisiones RGPD.
