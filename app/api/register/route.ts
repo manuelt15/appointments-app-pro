@@ -10,6 +10,10 @@ const RegisterSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
   password: z.string().min(8),
+  // The account cannot be created unless the privacy notice was accepted. The
+  // form checks the box client-side, but the API cannot trust that: without
+  // this literal an anonymous request stored a consent timestamp nobody gave.
+  privacyAccepted: z.literal(true),
 })
 
 export async function POST(request: NextRequest) {
@@ -40,7 +44,8 @@ export async function POST(request: NextRequest) {
         emailVerified: null,
         createdAt: now,
         updatedAt: now,
-        // The register form only posts after the privacy notice is accepted.
+        // RegisterSchema only lets the request through when privacyAccepted is
+        // true, so reaching this insert means the notice was accepted.
         ...privacyConsentFields(now),
       })
     } catch (error) {

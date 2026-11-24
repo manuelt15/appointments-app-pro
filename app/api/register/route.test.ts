@@ -11,10 +11,16 @@ vi.mock('@/lib/mongodb/client', () => ({
   clientPromise: Promise.resolve({ db: () => ({ collection: () => ({ findOne, insertOne }) }) }),
 }))
 
-const request = () =>
+const request = (overrides: Record<string, unknown> = {}) =>
   new NextRequest('http://localhost/api/register', {
     method: 'POST',
-    body: JSON.stringify({ name: 'Ana', email: 'ana@example.com', password: 'contrasena-larga' }),
+    body: JSON.stringify({
+      name: 'Ana',
+      email: 'ana@example.com',
+      password: 'contrasena-larga',
+      privacyAccepted: true,
+      ...overrides,
+    }),
   })
 
 describe('POST /api/register', () => {
@@ -89,5 +95,20 @@ describe('POST /api/register', () => {
 
     expect(response.status).toBe(201)
     expect(await response.json()).toEqual({ success: true, data: { ok: true } })
+  })
+
+  it('no crea la cuenta si falta la aceptacion del aviso o no es true', async () => {
+    findOne.mockResolvedValue(null)
+
+    for (const privacyAccepted of [undefined, false, null]) {
+      const response = await POST(request({ privacyAccepted }))
+
+      expect(response.status, String(privacyAccepted)).toBe(400)
+      expect(await response.json()).toMatchObject({
+        success: false,
+        error: 'Validation error',
+      })
+    }
+    expect(insertOne).not.toHaveBeenCalled()
   })
 })
