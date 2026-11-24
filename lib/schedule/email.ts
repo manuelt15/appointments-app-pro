@@ -1,5 +1,15 @@
 import type { EmployeeWeek } from './week'
 import { weekRangeLabel } from './week'
+import { employeeEmail } from '../employees/fields'
+
+/**
+ * El nombre y el negocio acaban en el asunto y en el cuerpo del mensaje. Un salto
+ * de línea ahí parte la cabecera en dos, así que se colapsa a un espacio: el
+ * formulario ya lo rechaza, esto cubre los datos que ya están en la base.
+ */
+function headerSafe(value: string): string {
+  return value.replace(/[\r\n\u0000]+/g, ' ').trim()
+}
 
 export interface PreparedEmail {
   employeeId: string
@@ -28,12 +38,20 @@ export function prepareWeeklyEmails(
   const skipped: { employeeName: string; reason: string }[] = []
 
   for (const week of weeks) {
-    if (!week.employee.email) {
-      skipped.push({ employeeName: week.employee.fullName, reason: 'No email address' })
+    const safeName = headerSafe(week.employee.fullName)
+    const rawEmail = week.employee.email?.trim()
+    if (!rawEmail) {
+      skipped.push({ employeeName: safeName, reason: 'No email address' })
+      continue
+    }
+    // Empleados antiguos con un email inventado: no se les escribe, se avisa.
+    const parsedEmail = employeeEmail.safeParse(rawEmail)
+    if (!parsedEmail.success) {
+      skipped.push({ employeeName: safeName, reason: 'Invalid email address' })
       continue
     }
     if (!week.hasAnything) {
-      skipped.push({ employeeName: week.employee.fullName, reason: 'Nothing scheduled' })
+      skipped.push({ employeeName: safeName, reason: 'Nothing scheduled' })
       continue
     }
 
@@ -44,13 +62,13 @@ export function prepareWeeklyEmails(
 
     ready.push({
       employeeId: week.employee._id,
-      employeeName: week.employee.fullName,
-      to: week.employee.email,
+      employeeName: safeName,
+      to: parsedEmail.data,
       subject: `Your schedule for ${weekRangeLabel(weekStart, timeZone)}`,
       body: [
-        `Hi ${week.employee.fullName},`,
+        `Hi ${safeName},`,
         '',
-        `Here is your schedule at ${businessName} for ${weekRangeLabel(weekStart, timeZone)}.`,
+        `Here is your schedule at ${headerSafe(businessName)} for ${weekRangeLabel(weekStart, timeZone)}.`,
         '',
         ...lines,
         '',

@@ -151,7 +151,10 @@ export default async function HomePage() {
                       {row.days.map((day) => (
                         <td key={day.date} className={cn('px-2 py-2.5 text-center align-top', day.date === today && 'bg-muted/60')}>
                           {day.entries.length === 0 ? (
-                            <span className="text-faint" aria-label="Nothing">–</span>
+                            <span className="text-faint">
+                              <span aria-hidden="true">–</span>
+                              <span className="sr-only">Nothing</span>
+                            </span>
                           ) : (
                             <span className="flex flex-col items-center gap-1">
                               {day.entries.map((entry, index) => (

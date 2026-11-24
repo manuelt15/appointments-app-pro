@@ -123,10 +123,10 @@ export default function WeekPicker({ date, today, label, onSelect }: Props) {
           </Button>
         </div>
 
-        <div role="grid" aria-label="Weeks">
-          <div role="row" className="grid grid-cols-7 gap-0.5">
+        <div role="group" aria-label="Weeks">
+          <div aria-hidden="true" className="grid grid-cols-7 gap-0.5">
             {weekdays.map((weekday, index) => (
-              <span key={index} role="columnheader" className="grid h-8 place-items-center text-xs text-body">
+              <span key={index} className="grid h-8 place-items-center text-xs text-body">
                 {weekday}
               </span>
             ))}
@@ -136,8 +136,6 @@ export default function WeekPicker({ date, today, label, onSelect }: Props) {
             return (
               <div
                 key={week[0].toISOString()}
-                role="row"
-                aria-selected={selected}
                 className={cn(
                   'grid grid-cols-7 gap-0.5 rounded-sm transition-colors',
                   selected ? 'bg-foreground text-primary-foreground' : 'can-hover:hover:bg-muted'
@@ -147,7 +145,7 @@ export default function WeekPicker({ date, today, label, onSelect }: Props) {
                   <button
                     key={day.toISOString()}
                     type="button"
-                    role="gridcell"
+                    aria-pressed={selected}
                     aria-label={format(day, 'd MMMM yyyy')}
                     onClick={() => pick(day)}
                     className={cn(

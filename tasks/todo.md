@@ -2,6 +2,38 @@
 
 ## Handovers
 
+- [2026-11-10 · Auditoría de seguridad y cierre local](handovers-archive/HANDOVER-2026-11-10-auditoria-seguridad.md)
+  — cuatro arreglos locales, regresiones 7/7 y artefactos validados. Pendientes:
+  toolchain de desarrollo, instalación limpia/suite completa y decisiones RGPD.
+  Revisión secuencial sin independencia; sin push.
+
+- [2026-11-08 · Listbox de horas del DateTimePicker](handovers-archive/HANDOVER-2026-11-08-listbox-horas-picker.md)
+  — hallazgo -007: la lista de horas fingía un listbox sin aria-activedescendant ni
+  flechas y tapaba el rol de botón; pasa a `role="group"` etiquetado con horas como
+  botones nativos y selección con aria-pressed; guard de 7 checks. El guard del -006
+  solo cambia su ancla de región (`role="listbox"` desaparece), no sus checks.
+- [2026-11-08 · Grids ARIA inválidas de los pickers de fecha](handovers-archive/HANDOVER-2026-11-08-grid-aria-pickers.md)
+  — hallazgo -006: el contenedor de días de DatePicker/DateTimePicker declaraba
+  `role="grid"` sin `role="row"` ni flechas y tapaba el rol de botón; pasa a
+  `role="group" aria-label="Days"` con días como botones nativos y selección
+  con `aria-pressed`; guard de 16 checks en vitest. Semántica igual, interacción
+  intacta.
+- [2026-11-08 · zod de la app a 4.6.7 (agotamiento de memoria al validar)](handovers-archive/HANDOVER-2026-11-08-zod-raiz-app.md)
+  — hallazgo -015: la dependencia directa zod ^4.3.6 estaba en el rango vulnerable
+  <4.6.6 de GHSA-mrhx-c7xc-m3w5 / CVE-2023-54404; sube a ^4.6.6 (resuelve 4.6.7, la
+  misma versión que el MCP) y guarda con 4 tests RED/GREEN (declarada/resuelta/instalada
+  + el array acotado termina pronto). Incluye resumen acumulado F2 y pendientes.
+- [2026-11-08 · Texto legible sobre el color del empleado](handovers-archive/HANDOVER-2026-11-08-texto-sobre-color-empleado.md)
+  — hallazgo -004: `readableForeground` compartido por WeekMatrix y
+  ShiftCalendar elige negro o blanco puro según el color del empleado;
+  notas y hover sin opacidad (el hover es un ring); guard numérico de
+  102 casos en vitest.
+- [2026-11-08 · Mover/redimensionar turnos con teclado (falso positivo)](handovers-archive/HANDOVER-2026-11-08-teclado-mover-turnos.md)
+  — el hallazgo -003 no es real: el modal de edición (Start/End, PUT igual que el arrastre)
+  ES la vía de teclado; guard de 25 checks en `components/calendar/keyboard-move.test.ts`.
+- [2026-11-08 · Contraste AA de los tokens de texto secundario](handovers-archive/HANDOVER-2026-11-08-contraste-tokens-wcag.md)
+  — `--faint` y `--muted-foreground` a WCAG 1.4.3 AA en ambos temas, incluido el
+  texto de los eventos de ausencia; guard numérico de 34 casos en vitest.
 - [2026-11-07 · Scroll de la lista de horas y recarga del calendario](handovers-archive/HANDOVER-2026-11-07-scroll-lista-de-horas.md)
   - `Popover modal` para el scroll de horas; la rejilla ya no se vacía al guardar ni recarga entre semanas del mismo mes.
 - [2026-10-03 · Home, historial, navegación y zona horaria del PDF](handovers-archive/HANDOVER-2026-10-03-home-historial-navegacion.md)

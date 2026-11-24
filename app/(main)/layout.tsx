@@ -21,11 +21,14 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="flex h-screen overflow-hidden bg-background supports-[height:100dvh]:h-dvh">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-card focus:px-4 focus:py-2 focus:text-foreground focus:outline-2 focus:outline-ring">
+        Skip to main content
+      </a>
       <Sidebar
         business={{ _id: business._id.toString(), name: business.name }}
         user={{ name: session.user.name, email: session.user.email, image: session.user.image, provider: session.user.provider }}
       />
-      <main className="min-w-0 flex-1 overflow-y-auto overscroll-contain pt-14 md:pt-0">
+      <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 overflow-y-auto overscroll-contain pt-14 md:pt-0">
         {children}
       </main>
     </div>

@@ -65,6 +65,12 @@ export async function buildSchedulePdf(
     Math.min(70, (cursor - MARGIN) / Math.max(weeks.length, 1))
   )
 
+  // LÍMITE CONOCIDO: el cuadrante cabe en UNA sola página. Con `rowHeight` en su mínimo
+  // de 34 pt entran unas 13 filas; a partir de ahí el `break` de abajo descarta a los
+  // empleados que sobran **sin avisar**: el PDF sale completo a la vista y le falta gente.
+  // Hoy las plantillas son de menos de 13 personas, así que no se toca (decisión de
+  // Manuel, 12/11/2026). Si algún día se usa con plantillas grandes, la solución es paginar
+  // (crear página nueva y repetir cabecera de días), no reducir la letra.
   for (const week of weeks) {
     const rowTop = cursor
     if (rowTop - rowHeight < MARGIN) break

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
+import bcrypt from 'bcryptjs'
 import { PRIVACY_NOTICE_VERSION } from '@/lib/legal/privacy'
 import { POST } from './route'
 
@@ -48,8 +49,36 @@ describe('POST /api/register', () => {
 
     expect(existing.status).toBe(201)
     expect(existing.status).toBe(fresh.status)
+    expect([...existing.headers]).toEqual([...fresh.headers])
     expect(await existing.json()).toEqual(await fresh.json())
     expect(insertOne).toHaveBeenCalledTimes(1)
+  })
+
+  it('guarda el password hasheado sin exponer el id (caso de main)', async () => {
+    findOne.mockResolvedValue(null)
+
+    const response = await POST(request())
+
+    expect(response.status).toBe(201)
+    expect(findOne).toHaveBeenCalledWith({ email: 'ana@example.com' })
+    const saved = insertOne.mock.calls[0][0]
+    expect(saved).toMatchObject({ name: 'Ana', email: 'ana@example.com', emailVerified: null })
+    expect(saved.createdAt).toBeInstanceOf(Date)
+    expect(await bcrypt.compare('contrasena-larga', saved.password)).toBe(true)
+    expect(await response.text()).not.toContain('u-new')
+  })
+
+  it('hashea tambien cuando el correo ya existe', async () => {
+    findOne.mockResolvedValue({ _id: 'u-existing', email: 'ana@example.com' })
+    const hash = vi.spyOn(bcrypt, 'hash')
+    try {
+      const response = await POST(request())
+      expect(response.status).toBe(201)
+      expect(hash).toHaveBeenCalledWith('contrasena-larga', 12)
+      expect(insertOne).not.toHaveBeenCalled()
+    } finally {
+      hash.mockRestore()
+    }
   })
 
   it('responde igual si dos registros chocan en el indice unico', async () => {

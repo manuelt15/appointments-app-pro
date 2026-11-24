@@ -14,6 +14,10 @@ import { cn } from '@/lib/utils'
  *
  * Reduced motion freezes the grid in its dim state and stops the shimmer; the timer
  * still ticks. Keyframes `pixel-on` and `shimmer-text` live in app/globals.css.
+ *
+ * The timer is decorative: it re-renders every 100ms inside the role="status" live
+ * region, which would drown the loading announcement. It stays aria-hidden so the
+ * status region only ever announces the label (appointments-2026-11-07-008).
  */
 
 const chevron = Array.from({ length: 9 }, (_, i) => {
@@ -77,10 +81,9 @@ export function LoadingState({
   const elapsed = useElapsed()
 
   return (
-    <div className={cn('flex w-fit items-center gap-2.5', className)}>
+    <div role="status" className={cn('flex w-fit items-center gap-2.5', className)}>
       <LoaderGrid variant={variant} />
       <span
-        role="status"
         className="loader-shimmer bg-clip-text text-[13px] font-medium text-transparent"
         style={{
           backgroundImage: 'linear-gradient(90deg, var(--body) 35%, var(--foreground) 50%, var(--body) 65%)',
@@ -90,8 +93,7 @@ export function LoadingState({
       >
         {label}
       </span>
-      {/* El cronometro cambia 10 veces por segundo: fuera del live region para no tapar el anuncio. */}
-      <span aria-hidden="true" className="font-mono text-xs text-body tabular-nums">{elapsed}</span>
+      <span aria-hidden className="font-mono text-xs text-body tabular-nums">{elapsed}</span>
     </div>
   )
 }

@@ -44,7 +44,8 @@ export async function DELETE(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const auth = await resolveAuth(request)
   if (!auth) return apiError('Unauthorized', 401)
-  if (auth.authType !== 'session') return apiError('Session required to create API keys', 403)
+  // Delegated keys must not mint credentials that survive their own revocation or expiry.
+  if (auth.authType !== 'session') return apiError('A signed-in owner session is required', 403)
 
   const body = await request.json()
   const parsed = CreateSchema.safeParse(body)

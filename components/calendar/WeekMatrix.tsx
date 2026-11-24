@@ -2,6 +2,7 @@
 
 import { addDays, format, isSameDay, isToday, isWeekend, startOfWeek } from 'date-fns'
 import { Cake } from 'lucide-react'
+import { readableForeground } from '@/lib/design/readable-foreground'
 import { isBirthday } from '@/lib/shifts/calendar-date'
 import { clampToDay, hoursInRange, overlapsDay } from '@/lib/shifts/matrix'
 import { cn } from '@/lib/utils'
@@ -50,13 +51,15 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
   return (
     <div className="h-full overflow-auto">
       <table className="w-full border-separate border-spacing-0 text-sm">
+        <caption className="sr-only">Weekly schedule: {format(weekStart, 'd MMM')} – {format(addDays(weekStart, 6), 'd MMM yyyy')}</caption>
         <thead>
           <tr>
-            <th className="sticky left-0 top-0 z-20 w-40 min-w-40 border-b border-r bg-card p-2 text-left font-medium">
+            <th scope="col" className="sticky left-0 top-0 z-20 w-40 min-w-40 border-b border-r bg-card p-2 text-left font-medium">
               Team
             </th>
             {days.map((day) => (
               <th
+                scope="col"
                 key={day.toISOString()}
                 className={cn(
                   'sticky top-0 z-10 min-w-32 border-b p-2 font-medium',
@@ -151,15 +154,18 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
                             key={item.shift._id}
                             type="button"
                             onClick={() => onSelectShift(item.shift)}
-                            className="w-full rounded-sm px-2 py-1.5 text-left text-xs text-primary-foreground transition-opacity can-hover:hover:opacity-90"
-                            style={{ backgroundColor: employee.color }}
+                            // Text color follows the employee color: AA contrast in both themes
+                            // (a dimmed hover or faded notes would break it on light colors).
+                            className="w-full rounded-sm px-2 py-1.5 text-left text-xs transition-shadow can-hover:hover:ring-2 can-hover:hover:ring-ring/60"
+                            style={{ backgroundColor: employee.color, color: readableForeground(employee.color) }}
                           >
+                            <span className="sr-only">{employee.fullName} on {format(day, 'd MMMM')}: </span>
                             <span className="block font-medium">
                               {span.continuesBefore && '… '}
                               {format(span.start, 'HH:mm')} – {format(span.end, 'HH:mm')}
                               {span.continuesAfter && ' …'}
                             </span>
-                            {item.shift.notes && <span className="block truncate opacity-90">{item.shift.notes}</span>}
+                            {item.shift.notes && <span className="block truncate">{item.shift.notes}</span>}
                           </button>
                         )
                       })}

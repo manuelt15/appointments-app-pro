@@ -7,12 +7,13 @@ import { connectDB } from '@/lib/mongodb/client'
 import { Employee, buildEmployeeAnonymization } from '@/lib/mongodb/models/Employee'
 import { Shift } from '@/lib/mongodb/models/Shift'
 import { isCalendarDate } from '@/lib/shifts/calendar-date'
+import { employeeEmail, employeeName } from '@/lib/employees/fields'
 
 const calendarDate = z.string().refine(isCalendarDate, 'Expected a YYYY-MM-DD date')
 
 const UpdateSchema = z.object({
-  fullName: z.string().min(1).optional(),
-  email: z.string().optional().nullable(),
+  fullName: employeeName.optional(),
+  email: employeeEmail.optional().nullable(),
   phone: z.string().optional().nullable(),
   birthday: calendarDate.optional().nullable(),
   startDate: calendarDate.optional().nullable(),

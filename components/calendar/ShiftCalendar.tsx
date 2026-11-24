@@ -15,8 +15,9 @@ import WeekMatrix, { type MatrixShift } from './WeekMatrix'
 import WeekPicker from './WeekPicker'
 import { Button } from '@/components/ui/button'
 import { LoadingState } from '@/components/ui/loading-state'
-import { collectPaginatedResults } from '@/lib/shifts/pagination'
+import { readableForeground } from '@/lib/design/readable-foreground'
 import { calendarDateToIso, getCalendarLoadRange, toCalendarDate } from '@/lib/datetime/timezone'
+import { collectPaginatedResults } from '@/lib/shifts/pagination'
 import { cn } from '@/lib/utils'
 import type { Employee, Shift, ShiftType } from '@/types'
 
@@ -261,10 +262,10 @@ export default function ShiftCalendar({ timeZone }: Props) {
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="icon" aria-label="Previous" onClick={() => shiftDate(-1)}>
+          <Button type="button" variant="outline" size="icon" aria-label={view === Views.MONTH ? 'Previous month' : 'Previous week'} onClick={() => shiftDate(-1)}>
             <ChevronLeft />
           </Button>
-          <Button type="button" variant="outline" size="icon" aria-label="Next" onClick={() => shiftDate(1)}>
+          <Button type="button" variant="outline" size="icon" aria-label={view === Views.MONTH ? 'Next month' : 'Next week'} onClick={() => shiftDate(1)}>
             <ChevronRight />
           </Button>
           <Button type="button" variant="outline" onClick={() => setDate(toCalendarDate(new Date(), timeZone))}>
@@ -354,7 +355,7 @@ export default function ShiftCalendar({ timeZone }: Props) {
                 backgroundColor: event.color,
                 borderRadius: '6px',
                 border: 'none',
-                color: 'var(--primary-foreground)',
+                color: readableForeground(event.color),
                 fontSize: '12px',
               },
             })}
