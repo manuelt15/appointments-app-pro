@@ -20,14 +20,45 @@ export function AuthCard({ title, subtitle, footer, children }: { title: string;
   )
 }
 
-export function OAuthButtons({ callbackUrl }: { callbackUrl: string }) {
+export function OAuthButtons({
+  callbackUrl,
+  disabled = false,
+  descriptionId,
+  beforeSignIn,
+}: {
+  callbackUrl: string
+  disabled?: boolean
+  descriptionId?: string
+  beforeSignIn?: () => Promise<boolean>
+}) {
+  async function start(provider: 'google' | 'github') {
+    if (disabled) return
+    // Last chance to persist the consent before leaving for the provider.
+    if (beforeSignIn && !(await beforeSignIn())) return
+    await signIn(provider, { callbackUrl })
+  }
+
   return (
     <div className="space-y-3">
-      <Button type="button" variant="outline" className="w-full" onClick={() => signIn('google', { callbackUrl })}>
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        disabled={disabled}
+        aria-describedby={disabled ? descriptionId : undefined}
+        onClick={() => start('google')}
+      >
         <GoogleIcon />
         Continue with Google
       </Button>
-      <Button type="button" variant="outline" className="w-full" onClick={() => signIn('github', { callbackUrl })}>
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        disabled={disabled}
+        aria-describedby={disabled ? descriptionId : undefined}
+        onClick={() => start('github')}
+      >
         <GitHubIcon />
         Continue with GitHub
       </Button>

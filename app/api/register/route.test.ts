@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
+import { PRIVACY_NOTICE_VERSION } from '@/lib/legal/privacy'
 import { POST } from './route'
 
 const findOne = vi.fn()
@@ -29,6 +30,12 @@ describe('POST /api/register', () => {
 
     expect(response.status).toBe(201)
     expect(insertOne).toHaveBeenCalledTimes(1)
+    expect(insertOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        privacyAcceptedAt: expect.any(Date),
+        privacyVersion: PRIVACY_NOTICE_VERSION,
+      }),
+    )
   })
 
   it('responde igual si el correo ya existe, sin crear nada', async () => {

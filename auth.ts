@@ -6,11 +6,17 @@ import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import { clientPromise, connectDB } from '@/lib/mongodb/client'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { createUserEvent } from '@/lib/legal/oauth-consent'
 import { authConfig } from './auth.config'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: MongoDBAdapter(clientPromise),
+  events: {
+    // OAuth creates the account outside the register form; record the consent
+    // the browser carried through the short-lived cookie.
+    createUser: createUserEvent,
+  },
   providers: [
     Google,
     GitHub,

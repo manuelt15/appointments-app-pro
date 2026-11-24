@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { toast } from 'sonner'
 import { AuthCard, AuthSeparator, OAuthButtons } from '@/components/auth/AuthCard'
+import { PrivacyConsent } from '@/components/auth/PrivacyConsent'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,6 +20,25 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const consentRef = useRef<HTMLInputElement>(null)
+
+  function handleConsentChange(checked: boolean) {
+    setConsent(checked)
+    setConsentError(false)
+    // The OAuth callback runs as its own server request and cannot see this
+    // checkbox, so the acceptance travels in a short-lived cookie.
+    void fetch('/api/privacy-consent', { method: checked ? 'POST' : 'DELETE' }).catch(() => {})
+  }
+
+  async function ensureConsentCookie() {
+    try {
+      const response = await fetch('/api/privacy-consent', { method: 'POST' })
+      if (!response.ok) throw new Error('Consent not saved')
+      return true
+    } catch {
+      toast.error('Could not record your consent. Try again.')
+      return false
+    }
+  }
 
   async function handleRegister(event: React.FormEvent) {
     event.preventDefault()
@@ -61,7 +81,17 @@ export default function RegisterPage() {
       subtitle="Set up your team's shift schedule: add employees, plan their hours and track time off."
       footer={<>Already have an account? <Link href="/login" className="text-link underline-offset-4 can-hover:hover:underline">Sign in</Link></>}
     >
-      <OAuthButtons callbackUrl="/business/new" />
+      <OAuthButtons
+        callbackUrl="/business/new"
+        disabled={!consent}
+        descriptionId="oauth-consent-hint"
+        beforeSignIn={ensureConsentCookie}
+      />
+      <p id="oauth-consent-hint" className="text-sm text-body">
+        {consent
+          ? 'Google and GitHub will create your account with the privacy notice accepted.'
+          : 'Accept the privacy notice below to continue with Google or GitHub.'}
+      </p>
       <AuthSeparator />
       <form onSubmit={handleRegister} className="space-y-4" aria-busy={loading}>
         <div className="space-y-2">
@@ -76,35 +106,7 @@ export default function RegisterPage() {
           <Label htmlFor="password">Password</Label>
           <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} autoComplete="new-password" placeholder="Minimum 8 characters" />
         </div>
-        <div className="space-y-2">
-          <div className="flex items-start gap-2.5">
-            <input
-              ref={consentRef}
-              id="consent"
-              type="checkbox"
-              checked={consent}
-              onChange={(event) => {
-                setConsent(event.target.checked)
-                setConsentError(false)
-              }}
-              aria-invalid={consentError || undefined}
-              aria-describedby={consentError ? 'consent-error' : undefined}
-              className="mt-0.5 size-4 shrink-0 accent-foreground"
-            />
-            <Label htmlFor="consent" className="block font-normal leading-5 text-body">
-              I have read and accept the{' '}
-              <Link href="/privacy" target="_blank" className="text-link underline-offset-4 can-hover:hover:underline">
-                privacy notice
-              </Link>
-              .
-            </Label>
-          </div>
-          {consentError && (
-            <p id="consent-error" role="alert" className="text-sm text-destructive">
-              Please accept the privacy notice to continue.
-            </p>
-          )}
-        </div>
+        <PrivacyConsent checked={consent} error={consentError} onChange={handleConsentChange} inputRef={consentRef} />
         <Button type="submit" disabled={loading} className="w-full">
           {loading ? 'Creating account…' : 'Create account'}
         </Button>

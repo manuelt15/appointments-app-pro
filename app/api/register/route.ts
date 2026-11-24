@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { apiSuccess, apiError } from '@/lib/api/response'
 import { clientPromise } from '@/lib/mongodb/client'
 import { isDuplicateKeyError } from '@/lib/mongodb/indexes'
+import { privacyConsentFields } from '@/lib/legal/privacy'
 
 const RegisterSchema = z.object({
   name: z.string().min(1),
@@ -31,13 +32,16 @@ export async function POST(request: NextRequest) {
   // already exists; they find out when signing in.
   if (!existing) {
     try {
+      const now = new Date()
       await users.insertOne({
         name: parsed.data.name,
         email: parsed.data.email,
         password: hashedPassword,
         emailVerified: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: now,
+        updatedAt: now,
+        // The register form only posts after the privacy notice is accepted.
+        ...privacyConsentFields(now),
       })
     } catch (error) {
       // The unique index on users.email settles this race: two concurrent POSTs

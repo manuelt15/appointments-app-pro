@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { toast } from 'sonner'
 import { AuthCard, AuthSeparator, OAuthButtons } from '@/components/auth/AuthCard'
+import { PrivacyConsent } from '@/components/auth/PrivacyConsent'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,8 +14,27 @@ import { Label } from '@/components/ui/label'
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [consent, setConsent] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+
+  function handleConsentChange(checked: boolean) {
+    setConsent(checked)
+    // Signing in with OAuth starts on this page but the account is resolved in
+    // the callback, so the acceptance has to travel in the short-lived cookie.
+    void fetch('/api/privacy-consent', { method: checked ? 'POST' : 'DELETE' }).catch(() => {})
+  }
+
+  async function ensureConsentCookie() {
+    try {
+      const response = await fetch('/api/privacy-consent', { method: 'POST' })
+      if (!response.ok) throw new Error('Consent not saved')
+      return true
+    } catch {
+      toast.error('Could not record your consent. Try again.')
+      return false
+    }
+  }
 
   async function handleCredentials(event: React.FormEvent) {
     event.preventDefault()
@@ -41,7 +61,18 @@ export default function LoginPage() {
       subtitle="Plan who works and when, and keep your team's schedule in one place."
       footer={<>Don&apos;t have an account? <Link href="/register" className="text-link underline-offset-4 can-hover:hover:underline">Create one</Link></>}
     >
-      <OAuthButtons callbackUrl="/home" />
+      <PrivacyConsent checked={consent} onChange={handleConsentChange} />
+      <OAuthButtons
+        callbackUrl="/home"
+        disabled={!consent}
+        descriptionId="oauth-consent-hint"
+        beforeSignIn={ensureConsentCookie}
+      />
+      <p id="oauth-consent-hint" className="text-sm text-body">
+        {consent
+          ? 'Google and GitHub will sign you in.'
+          : 'Accept the privacy notice above to continue with Google or GitHub.'}
+      </p>
       <AuthSeparator />
       <form onSubmit={handleCredentials} className="space-y-4" aria-busy={loading}>
         <div className="space-y-2">
