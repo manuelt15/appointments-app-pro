@@ -3,19 +3,15 @@
 import { addDays, format, isSameDay, isToday, isWeekend, startOfWeek } from 'date-fns'
 import { Cake } from 'lucide-react'
 import { readableForeground } from '@/lib/design/readable-foreground'
+import { useLocale } from '@/lib/i18n/client'
+import { dateFnsLocale } from '@/lib/i18n/dates'
 import { isBirthday } from '@/lib/shifts/calendar-date'
+import { shiftTypeKey } from '@/lib/shifts/labels'
 import { clampToDay, hoursInRange, overlapsDay } from '@/lib/shifts/matrix'
 import { cn } from '@/lib/utils'
-import type { Employee, Shift, ShiftType } from '@/types'
+import type { Employee, Shift } from '@/types'
 
 const WEEK_OPTIONS = { weekStartsOn: 1 } as const
-
-const TYPE_LABELS: Record<ShiftType, string> = {
-  shift: 'Shift',
-  vacation: 'Vacation',
-  sick_leave: 'Sick leave',
-  time_off: 'Time off',
-}
 
 /** Diagonal hatching reads as "not available" without competing with shift colors. */
 const ABSENCE_BACKGROUND =
@@ -36,6 +32,8 @@ interface Props {
 }
 
 export default function WeekMatrix({ date, employees, shifts, onSelectShift, onSelectCell }: Props) {
+  const { locale, t } = useLocale()
+  const names = dateFnsLocale(locale)
   const weekStart = startOfWeek(date, WEEK_OPTIONS)
   const weekEnd = addDays(weekStart, 7)
   const days = Array.from({ length: 7 }, (_, index) => addDays(weekStart, index))
@@ -43,7 +41,7 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
   if (employees.length === 0) {
     return (
       <div className="grid h-full place-items-center p-6 text-center text-sm text-body">
-        <p>No employees yet. Add your team to start planning shifts.</p>
+        <p>{t('calendar.noEmployees')}</p>
       </div>
     )
   }
@@ -51,11 +49,16 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
   return (
     <div className="h-full overflow-auto">
       <table className="w-full border-separate border-spacing-0 text-sm">
-        <caption className="sr-only">Weekly schedule: {format(weekStart, 'd MMM')} – {format(addDays(weekStart, 6), 'd MMM yyyy')}</caption>
+        <caption className="sr-only">
+          {t('calendar.weekCaption', {
+            start: format(weekStart, 'd MMM', { locale: names }),
+            end: format(addDays(weekStart, 6), 'd MMM yyyy', { locale: names }),
+          })}
+        </caption>
         <thead>
           <tr>
             <th scope="col" className="sticky left-0 top-0 z-20 w-40 min-w-40 border-b border-r bg-card p-2 text-left font-medium">
-              Team
+              {t('calendar.team')}
             </th>
             {days.map((day) => (
               <th
@@ -67,7 +70,7 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
                   isToday(day) && 'text-foreground'
                 )}
               >
-                <span className="block text-xs text-body">{format(day, 'EEE')}</span>
+                <span className="block text-xs text-body">{format(day, 'EEE', { locale: names })}</span>
                 <span className={cn(
                   'mt-0.5 inline-grid size-7 place-items-center rounded-full',
                   isToday(day) && 'bg-foreground text-primary-foreground'
@@ -96,7 +99,7 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
                   </span>
                   <span
                     className="shrink-0 rounded-sm bg-muted px-1.5 py-0.5 font-mono text-xs text-body"
-                    title={`${weeklyHours} scheduled hours this week`}
+                    title={t('calendar.hoursThisWeek', { hours: weeklyHours })}
                   >
                     {weeklyHours}h
                   </span>
@@ -112,6 +115,7 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
                 // Label once, on the first visible day, so a range reads as one bar.
                 const labelAbsence = absence
                   && (isSameDay(absence.start, day) || isSameDay(day, weekStart))
+                const absenceLabel = absence ? t(shiftTypeKey(absence.shift.type)) : ''
 
                 return (
                   <td
@@ -127,23 +131,27 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
                       {birthday && (
                         <span
                           className="flex items-center gap-1 rounded-sm bg-birthday/20 px-2 py-1 text-xs font-medium text-birthday-foreground"
-                          title={`${employee.fullName} turns a year older today`}
+                          title={t('calendar.birthdayTitle', { name: employee.fullName })}
                         >
                           <Cake className="size-3 shrink-0" aria-hidden="true" />
-                          Birthday
+                          {t('calendar.birthday')}
                         </span>
                       )}
                       {absence && (
                         <button
                           type="button"
                           onClick={() => onSelectShift(absence.shift)}
-                          aria-label={`${TYPE_LABELS[absence.shift.type]} for ${employee.fullName} on ${format(day, 'd MMMM')}`}
+                          aria-label={t('calendar.absenceAria', {
+                            type: absenceLabel,
+                            employee: employee.fullName,
+                            day: format(day, 'd MMMM', { locale: names }),
+                          })}
                           className={cn(
                             'w-full rounded-sm px-2 py-1.5 text-left text-xs transition-colors can-hover:hover:bg-muted',
                             labelAbsence ? 'font-medium text-body' : 'min-h-8'
                           )}
                         >
-                          {labelAbsence ? TYPE_LABELS[absence.shift.type] : ''}
+                          {labelAbsence ? absenceLabel : ''}
                         </button>
                       )}
 
@@ -159,7 +167,9 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
                             className="w-full rounded-sm px-2 py-1.5 text-left text-xs transition-shadow can-hover:hover:ring-2 can-hover:hover:ring-ring/60"
                             style={{ backgroundColor: employee.color, color: readableForeground(employee.color) }}
                           >
-                            <span className="sr-only">{employee.fullName} on {format(day, 'd MMMM')}: </span>
+                            <span className="sr-only">
+                              {t('calendar.shiftAria', { employee: employee.fullName, day: format(day, 'd MMMM', { locale: names }) })}{' '}
+                            </span>
                             <span className="block font-medium">
                               {span.continuesBefore && '… '}
                               {format(span.start, 'HH:mm')} – {format(span.end, 'HH:mm')}
@@ -173,7 +183,10 @@ export default function WeekMatrix({ date, employees, shifts, onSelectShift, onS
                       {!absence && (
                         <button
                           type="button"
-                          aria-label={`Add a shift for ${employee.fullName} on ${format(day, 'd MMMM')}`}
+                          aria-label={t('calendar.addShiftAria', {
+                            employee: employee.fullName,
+                            day: format(day, 'd MMMM', { locale: names }),
+                          })}
                           onClick={() => onSelectCell(employee._id, day)}
                           className="flex-1 rounded-sm border border-dashed border-transparent text-xs text-body transition-colors can-hover:hover:border-border can-hover:hover:bg-muted"
                         >

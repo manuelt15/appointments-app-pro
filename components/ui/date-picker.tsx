@@ -27,11 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useLocale } from '@/lib/i18n/client'
+import { dateFnsLocale } from '@/lib/i18n/dates'
 import { CALENDAR_DATE_FORMAT, parseCalendarDate } from '@/lib/shifts/calendar-date'
 import { cn } from '@/lib/utils'
 
 const WEEK_OPTIONS = { weekStartsOn: 1 } as const
-const MONTHS = Array.from({ length: 12 }, (_, index) => format(setMonth(new Date(), index), 'MMMM'))
 
 interface Props {
   id?: string
@@ -50,13 +51,16 @@ export function DatePicker({
   onChange,
   yearsBack = 80,
   yearsForward = 1,
-  placeholder = 'Pick a date',
+  placeholder,
   disabled,
 }: Props) {
+  const { locale, t } = useLocale()
+  const names = dateFnsLocale(locale)
   const selected = parseCalendarDate(value)
   const [open, setOpen] = useState(false)
   const [month, setMonthState] = useState(() => startOfMonth(selected ?? new Date()))
 
+  const months = Array.from({ length: 12 }, (_, index) => format(setMonth(new Date(), index), 'MMMM', { locale: names }))
   const thisYear = getYear(new Date())
   const years = Array.from(
     { length: yearsBack + yearsForward + 1 },
@@ -69,7 +73,7 @@ export function DatePicker({
   })
 
   const weekdays = Array.from({ length: 7 }, (_, index) =>
-    format(addDays(startOfWeek(new Date(), WEEK_OPTIONS), index), 'EEEEE')
+    format(addDays(startOfWeek(new Date(), WEEK_OPTIONS), index), 'EEEEE', { locale: names })
   )
 
   function handleOpenChange(next: boolean) {
@@ -93,7 +97,7 @@ export function DatePicker({
           className="h-11 w-full justify-between px-3 font-normal sm:h-10"
         >
           <span className={cn(!selected && 'text-body')}>
-            {selected ? format(selected, 'd MMMM yyyy') : placeholder}
+            {selected ? format(selected, 'd MMMM yyyy', { locale: names }) : placeholder ?? t('common.pickDate')}
           </span>
           <CalendarIcon className="size-4 shrink-0 opacity-60" />
         </Button>
@@ -104,7 +108,7 @@ export function DatePicker({
             type="button"
             variant="ghost"
             size="icon"
-            aria-label="Previous month"
+            aria-label={t('common.previousMonth')}
             onClick={() => setMonthState((current) => subMonths(current, 1))}
           >
             <ChevronLeft />
@@ -114,11 +118,11 @@ export function DatePicker({
             value={String(month.getMonth())}
             onValueChange={(next) => setMonthState((current) => setMonth(current, Number(next)))}
           >
-            <SelectTrigger aria-label="Month" className="h-8 flex-1">
+            <SelectTrigger aria-label={t('common.month')} className="h-8 flex-1">
               <SelectValue />
             </SelectTrigger>
             <SelectContent position="popper">
-              {MONTHS.map((name, index) => (
+              {months.map((name, index) => (
                 <SelectItem key={name} value={String(index)}>{name}</SelectItem>
               ))}
             </SelectContent>
@@ -128,7 +132,7 @@ export function DatePicker({
             value={String(getYear(month))}
             onValueChange={(next) => setMonthState((current) => setYear(current, Number(next)))}
           >
-            <SelectTrigger aria-label="Year" className="h-8 w-24">
+            <SelectTrigger aria-label={t('common.year')} className="h-8 w-24">
               <SelectValue />
             </SelectTrigger>
             <SelectContent position="popper">
@@ -142,7 +146,7 @@ export function DatePicker({
             type="button"
             variant="ghost"
             size="icon"
-            aria-label="Next month"
+            aria-label={t('common.nextMonth')}
             onClick={() => setMonthState((current) => addMonths(current, 1))}
           >
             <ChevronRight />
@@ -151,7 +155,7 @@ export function DatePicker({
 
         {/* Days are plain buttons in a labeled group: a role="grid" would demand
             rows and arrow-key focus that this picker doesn't implement. */}
-        <div className="grid grid-cols-7 gap-0.5" role="group" aria-label="Days">
+        <div className="grid grid-cols-7 gap-0.5" role="group" aria-label={t('common.days')}>
           {weekdays.map((weekday, index) => (
             <span key={index} className="grid h-8 place-items-center text-xs text-body">
               {weekday}
@@ -164,7 +168,7 @@ export function DatePicker({
                 key={day.toISOString()}
                 type="button"
                 aria-pressed={isSelected}
-                aria-label={format(day, 'd MMMM yyyy')}
+                aria-label={format(day, 'd MMMM yyyy', { locale: names })}
                 onClick={() => pick(day)}
                 className={cn(
                   'grid h-8 w-9 place-items-center rounded-sm text-sm transition-colors can-hover:hover:bg-muted',
@@ -180,7 +184,7 @@ export function DatePicker({
 
         {value && (
           <Button type="button" variant="ghost" size="sm" className="mt-2 w-full" onClick={() => { onChange(''); setOpen(false) }}>
-            Clear
+            {t('common.clear')}
           </Button>
         )}
       </PopoverContent>

@@ -149,9 +149,9 @@ function NavigationContent({
       <Divider />
 
       <div className="space-y-2 p-3">
+        <NavigationLink item={SETTINGS} pathname={pathname} expanded={expanded} onNavigate={onNavigate} />
         <ThemeControl expanded={expanded} />
         <LanguageControl expanded={expanded} />
-        <NavigationLink item={SETTINGS} pathname={pathname} expanded={expanded} onNavigate={onNavigate} />
         <UserMenu user={user} expanded={expanded} inDrawer={inDrawer} />
       </div>
     </div>

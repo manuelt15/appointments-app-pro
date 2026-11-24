@@ -2,6 +2,8 @@ import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { resolveAuth } from '@/lib/api/auth'
 import { apiSuccess, apiError } from '@/lib/api/response'
+import { requestLocale } from '@/lib/i18n/request'
+import { t } from '@/lib/i18n/translate'
 import { connectDB } from '@/lib/mongodb/client'
 import { Employee } from '@/lib/mongodb/models/Employee'
 import { isCalendarDate } from '@/lib/shifts/calendar-date'
@@ -28,12 +30,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const locale = requestLocale(request)
   const auth = await resolveAuth(request)
   if (!auth) return apiError('Unauthorized', 401)
 
   const body = await request.json()
   const parsed = CreateSchema.safeParse(body)
-  if (!parsed.success) return apiError('Validation error', 400, parsed.error.flatten())
+  if (!parsed.success) return apiError(t(locale, 'shifts.error.validation'), 400, parsed.error.flatten())
 
   await connectDB()
   const employee = await Employee.create({ ...parsed.data, businessId: auth.businessId })

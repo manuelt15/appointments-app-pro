@@ -7,9 +7,12 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { LoadingState } from '@/components/ui/loading-state'
+import { useLocale } from '@/lib/i18n/client'
+import { t as translate } from '@/lib/i18n/translate'
 import type { Employee } from '@/types'
 
 export default function EmployeeList() {
+  const { locale, t } = useLocale()
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -23,13 +26,13 @@ export default function EmployeeList() {
     async function loadEmployees() {
       try {
         const response = await fetch('/api/employees', { signal: controller.signal })
-        if (!response.ok) throw new Error('Employees could not be loaded.')
+        if (!response.ok) throw new Error(translate(locale, 'employees.loadError'))
         const data = await response.json()
         setEmployees(data.data ?? [])
         setError('')
       } catch (loadError) {
         if (loadError instanceof DOMException && loadError.name === 'AbortError') return
-        setError(loadError instanceof Error ? loadError.message : 'Employees could not be loaded.')
+        setError(loadError instanceof Error ? loadError.message : translate(locale, 'employees.loadError'))
       } finally {
         if (!controller.signal.aborted) setLoading(false)
       }
@@ -37,7 +40,7 @@ export default function EmployeeList() {
 
     loadEmployees()
     return () => controller.abort()
-  }, [refreshKey])
+  }, [refreshKey, locale])
 
   async function handleDelete() {
     if (!deleteTarget) return
@@ -45,24 +48,24 @@ export default function EmployeeList() {
 
     try {
       const response = await fetch(`/api/employees/${deleteTarget._id}`, { method: 'DELETE' })
-      if (!response.ok) throw new Error('Failed to remove employee')
+      if (!response.ok) throw new Error(t('employees.removeError'))
       setEmployees((current) => current.filter((employee) => employee._id !== deleteTarget._id))
       setDeleteTarget(null)
-      toast.success('Employee removed')
+      toast.success(t('employees.removed'))
     } catch (deleteError) {
-      toast.error(deleteError instanceof Error ? deleteError.message : 'Failed to remove employee')
+      toast.error(deleteError instanceof Error ? deleteError.message : t('employees.removeError'))
     } finally {
       setDeleting(false)
     }
   }
 
-  if (loading) return <LoadingState label="Gathering your team" />
+  if (loading) return <LoadingState label={t('employees.loading')} />
 
   if (error) {
     return (
       <div className="rounded-lg border bg-card p-6 text-center" role="alert">
         <p className="text-sm text-body">{error}</p>
-        <Button variant="outline" className="mt-4" onClick={() => { setLoading(true); setRefreshKey((key) => key + 1) }}>Try again</Button>
+        <Button variant="outline" className="mt-4" onClick={() => { setLoading(true); setRefreshKey((key) => key + 1) }}>{t('common.tryAgain')}</Button>
       </div>
     )
   }
@@ -71,7 +74,7 @@ export default function EmployeeList() {
     return (
       <div className="rounded-lg border bg-card py-12 text-center">
         <User className="mx-auto mb-3 size-8 text-body" aria-hidden="true" />
-        <p className="text-sm text-body">No employees yet. Add your first team member.</p>
+        <p className="text-sm text-body">{t('employees.empty')}</p>
       </div>
     )
   }
@@ -89,11 +92,11 @@ export default function EmployeeList() {
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{employee.fullName}</p>
                 <p className="truncate text-xs text-body">
-                  {[employee.email, employee.phone].filter(Boolean).join(' · ') || 'View history'}
+                  {[employee.email, employee.phone].filter(Boolean).join(' · ') || t('employees.viewHistory')}
                 </p>
               </div>
             </Link>
-            <Button type="button" variant="ghost" size="icon" aria-label={`Remove ${employee.fullName}`} onClick={() => setDeleteTarget(employee)}>
+            <Button type="button" variant="ghost" size="icon" aria-label={t('employees.removeAria', { name: employee.fullName })} onClick={() => setDeleteTarget(employee)}>
               <Trash2 />
             </Button>
           </li>
@@ -102,9 +105,9 @@ export default function EmployeeList() {
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Remove employee?"
-        description={`${deleteTarget?.fullName ?? 'This employee'} will be deactivated and their upcoming shifts removed.`}
-        confirmLabel="Remove employee"
+        title={t('employees.removeTitle')}
+        description={t('employees.removeBody', { name: deleteTarget?.fullName ?? t('employees.removeFallbackName') })}
+        confirmLabel={t('employees.removeConfirm')}
         loading={deleting}
         onConfirm={handleDelete}
       />

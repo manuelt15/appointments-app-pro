@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server'
 import { resolveAuth } from '@/lib/api/auth'
 import { apiSuccess, apiError } from '@/lib/api/response'
+import { requestLocale } from '@/lib/i18n/request'
+import { t } from '@/lib/i18n/translate'
 import { buildConflictFilter } from '@/lib/shifts/conflicts'
 import { ShiftListQuerySchema, buildShiftListFilter } from '@/lib/shifts/list-query'
 import { SchedulingBusyError, withSchedulingLock } from '@/lib/shifts/scheduling-lock'
@@ -10,12 +12,13 @@ import { Employee } from '@/lib/mongodb/models/Employee'
 import { Shift } from '@/lib/mongodb/models/Shift'
 
 export async function GET(request: NextRequest) {
+  const locale = requestLocale(request)
   const auth = await resolveAuth(request)
   if (!auth) return apiError('Unauthorized', 401)
 
   const { searchParams } = new URL(request.url)
   const parsed = ShiftListQuerySchema.safeParse(Object.fromEntries(searchParams.entries()))
-  if (!parsed.success) return apiError('Validation error', 400, parsed.error.flatten())
+  if (!parsed.success) return apiError(t(locale, 'shifts.error.validation'), 400, parsed.error.flatten())
 
   await connectDB()
   const { page, limit } = parsed.data
@@ -31,12 +34,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const locale = requestLocale(request)
   const auth = await resolveAuth(request)
   if (!auth) return apiError('Unauthorized', 401)
 
   const body = await request.json()
   const parsed = CreateShiftSchema.safeParse(body)
-  if (!parsed.success) return apiError('Validation error', 400, parsed.error.flatten())
+  if (!parsed.success) return apiError(t(locale, 'shifts.error.validation'), 400, parsed.error.flatten())
 
   await connectDB()
 
@@ -74,13 +78,13 @@ export async function POST(request: NextRequest) {
       return { kind: 'created' as const, shift }
     })
 
-    if (result.kind === 'employeeNotFound') return apiError('Employee not found', 404)
+    if (result.kind === 'employeeNotFound') return apiError(t(locale, 'shifts.error.employeeNotFound'), 404)
     if (result.kind === 'conflict') {
-      return apiError('This employee already has a shift in that range', 409, { conflictId: result.conflictId })
+      return apiError(t(locale, 'shifts.error.conflict'), 409, { conflictId: result.conflictId })
     }
     return apiSuccess(result.shift, 201)
   } catch (error) {
-    if (error instanceof SchedulingBusyError) return apiError(error.message, 503)
+    if (error instanceof SchedulingBusyError) return apiError(t(locale, 'shifts.error.busy'), 503)
     throw error
   }
 }

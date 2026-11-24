@@ -19,6 +19,8 @@ import {
 import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { useLocale } from '@/lib/i18n/client'
+import { dateFnsLocale } from '@/lib/i18n/dates'
 import { cn } from '@/lib/utils'
 
 /** Same wire format as the native datetime-local input it replaces. */
@@ -48,6 +50,8 @@ const TIME_SLOTS = Array.from({ length: (24 * 60) / SLOT_MINUTES }, (_, index) =
 })
 
 export function DateTimePicker({ id, value, onChange, disabled }: Props) {
+  const { locale, t } = useLocale()
+  const names = dateFnsLocale(locale)
   const selected = parseValue(value)
   const [open, setOpen] = useState(false)
   const [month, setMonth] = useState(() => startOfMonth(selected ?? new Date()))
@@ -66,8 +70,8 @@ export function DateTimePicker({ id, value, onChange, disabled }: Props) {
 
   const weekdays = useMemo(() => {
     const first = startOfWeek(new Date(), WEEK_OPTIONS)
-    return Array.from({ length: 7 }, (_, index) => format(addDays(first, index), 'EEEEE'))
-  }, [])
+    return Array.from({ length: 7 }, (_, index) => format(addDays(first, index), 'EEEEE', { locale: names }))
+  }, [names])
 
   // Opening is an event, not an effect: land on the month the value points at.
   function handleOpenChange(next: boolean) {
@@ -106,7 +110,7 @@ export function DateTimePicker({ id, value, onChange, disabled }: Props) {
           className="h-11 w-full justify-between px-3 font-normal sm:h-10"
         >
           <span className={cn(!selected && 'text-body')}>
-            {selected ? format(selected, 'd MMM yyyy, HH:mm') : 'Pick a date and time'}
+            {selected ? format(selected, 'd MMM yyyy, HH:mm', { locale: names }) : t('common.pickDateTime')}
           </span>
           <CalendarIcon className="size-4 shrink-0 opacity-60" />
         </Button>
@@ -118,17 +122,17 @@ export function DateTimePicker({ id, value, onChange, disabled }: Props) {
               type="button"
               variant="ghost"
               size="icon"
-              aria-label="Previous month"
+              aria-label={t('common.previousMonth')}
               onClick={() => setMonth((current) => subMonths(current, 1))}
             >
               <ChevronLeft />
             </Button>
-            <span aria-live="polite" className="text-sm font-medium">{format(month, 'MMMM yyyy')}</span>
+            <span aria-live="polite" className="text-sm font-medium">{format(month, 'MMMM yyyy', { locale: names })}</span>
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              aria-label="Next month"
+              aria-label={t('common.nextMonth')}
               onClick={() => setMonth((current) => addMonths(current, 1))}
             >
               <ChevronRight />
@@ -137,7 +141,7 @@ export function DateTimePicker({ id, value, onChange, disabled }: Props) {
 
           {/* Days are plain buttons in a labeled group: a role="grid" would demand
               rows and arrow-key focus that this picker doesn't implement. */}
-          <div className="grid grid-cols-7 gap-0.5" role="group" aria-label="Days">
+          <div className="grid grid-cols-7 gap-0.5" role="group" aria-label={t('common.days')}>
             {weekdays.map((weekday, index) => (
               <span key={index} className="grid h-8 place-items-center text-xs text-body">
                 {weekday}
@@ -151,7 +155,7 @@ export function DateTimePicker({ id, value, onChange, disabled }: Props) {
                   key={day.toISOString()}
                   type="button"
                   aria-pressed={isSelected}
-                  aria-label={format(day, 'd MMMM yyyy')}
+                  aria-label={format(day, 'd MMMM yyyy', { locale: names })}
                   onClick={() => pickDay(day)}
                   className={cn(
                     'grid h-8 w-9 place-items-center rounded-sm text-sm transition-colors can-hover:hover:bg-muted',
@@ -175,7 +179,7 @@ export function DateTimePicker({ id, value, onChange, disabled }: Props) {
           ref={timeListRef}
           className="max-h-64 w-full overflow-y-auto p-2 sm:w-32"
           role="group"
-          aria-label="Time"
+          aria-label={t('common.time')}
         >
           {TIME_SLOTS.map((slot) => {
             const isSelected = Boolean(

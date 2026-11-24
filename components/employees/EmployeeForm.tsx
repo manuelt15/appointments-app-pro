@@ -8,6 +8,7 @@ import { ColorPicker } from '@/components/ui/color-picker'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useLocale } from '@/lib/i18n/client'
 import type { Employee } from '@/types'
 
 export const EMPLOYEE_COLORS = ['#6366f1', '#0070f3', '#10b981', '#f5a623', '#ee0000', '#7928ca', '#ff0080', '#14b8a6']
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function EmployeeForm({ employee, onSaved }: Props) {
+  const { t } = useLocale()
   const [fullName, setFullName] = useState(employee?.fullName ?? '')
   const [email, setEmail] = useState(employee?.email ?? '')
   const [phone, setPhone] = useState(employee?.phone ?? '')
@@ -50,15 +52,15 @@ export default function EmployeeForm({ employee, onSaved }: Props) {
       )
       if (!response.ok) {
         const data = await response.json().catch(() => null)
-        throw new Error(data?.error ?? 'Failed to save employee')
+        throw new Error(data?.error ?? t('employees.form.saveError'))
       }
 
-      toast.success(employee ? 'Employee updated' : 'Employee added')
+      toast.success(t(employee ? 'employees.form.updated' : 'employees.form.added'))
       onSaved?.()
       router.push(employee ? `/employees/${employee._id}` : '/employees')
       router.refresh()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to save employee')
+      toast.error(error instanceof Error ? error.message : t('employees.form.saveError'))
     } finally {
       setLoading(false)
     }
@@ -67,41 +69,41 @@ export default function EmployeeForm({ employee, onSaved }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5 rounded-lg border bg-card p-5 sm:p-6" aria-busy={loading}>
       <div className="space-y-2">
-        <Label htmlFor="full-name">Full name</Label>
-        <Input id="full-name" value={fullName} onChange={(event) => setFullName(event.target.value)} required autoComplete="name" placeholder="Jane Smith" />
+        <Label htmlFor="full-name">{t('employees.form.fullName')}</Label>
+        <Input id="full-name" value={fullName} onChange={(event) => setFullName(event.target.value)} required autoComplete="name" placeholder={t('employees.form.fullNamePlaceholder')} />
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="email">Email <span className="font-normal text-body">(optional)</span></Label>
-          <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="jane@example.com" />
+          <Label htmlFor="email">{t('employees.form.email')} <span className="font-normal text-body">{t('employees.form.optional')}</span></Label>
+          <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder={t('employees.form.emailPlaceholder')} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone <span className="font-normal text-body">(optional)</span></Label>
+          <Label htmlFor="phone">{t('employees.form.phone')} <span className="font-normal text-body">{t('employees.form.optional')}</span></Label>
           <Input id="phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" placeholder="+34 600 00 00 00" />
         </div>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="birthday">Birthday <span className="font-normal text-body">(optional)</span></Label>
-          <DatePicker id="birthday" value={birthday} onChange={setBirthday} placeholder="Pick a birthday" yearsBack={80} yearsForward={0} />
-          <p className="text-xs text-body">Marked on the schedule every year.</p>
+          <Label htmlFor="birthday">{t('employees.form.birthday')} <span className="font-normal text-body">{t('employees.form.optional')}</span></Label>
+          <DatePicker id="birthday" value={birthday} onChange={setBirthday} placeholder={t('employees.form.birthdayPlaceholder')} yearsBack={80} yearsForward={0} />
+          <p className="text-xs text-body">{t('employees.form.birthdayHint')}</p>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="start-date">Start date <span className="font-normal text-body">(optional)</span></Label>
-          <DatePicker id="start-date" value={startDate} onChange={setStartDate} placeholder="Pick a start date" yearsBack={40} yearsForward={1} />
-          <p className="text-xs text-body">Used to show how long they have been on the team.</p>
+          <Label htmlFor="start-date">{t('employees.form.startDate')} <span className="font-normal text-body">{t('employees.form.optional')}</span></Label>
+          <DatePicker id="start-date" value={startDate} onChange={setStartDate} placeholder={t('employees.form.startDatePlaceholder')} yearsBack={40} yearsForward={1} />
+          <p className="text-xs text-body">{t('employees.form.startDateHint')}</p>
         </div>
       </div>
 
       <fieldset className="space-y-3">
-        <legend className="text-sm font-medium">Calendar color</legend>
-        <ColorPicker colors={EMPLOYEE_COLORS} value={color} onChange={setColor} label="Employee color" />
+        <legend className="text-sm font-medium">{t('employees.form.color')}</legend>
+        <ColorPicker colors={EMPLOYEE_COLORS} value={color} onChange={setColor} label={t('employees.form.colorLabel')} />
       </fieldset>
 
       <Button type="submit" disabled={loading} className="w-full sm:w-auto">
-        {loading ? 'Saving…' : employee ? 'Save changes' : 'Add employee'}
+        {loading ? t('employees.form.saving') : t(employee ? 'employees.form.save' : 'employees.add')}
       </Button>
     </form>
   )

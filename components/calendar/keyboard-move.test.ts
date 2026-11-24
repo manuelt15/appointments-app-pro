@@ -124,13 +124,13 @@ const CHECKS: Check[] = [
   {
     file: 'components/calendar/ShiftModal.tsx',
     reason: 'el modal expone un campo «Start» editable',
-    pattern: /label="Start"/g,
+    pattern: /label=\{t\('shifts\.modal\.start'\)\}/g,
     times: 1,
   },
   {
     file: 'components/calendar/ShiftModal.tsx',
     reason: 'el modal expone un campo «End» editable',
-    pattern: /label="End"/g,
+    pattern: /label=\{t\('shifts\.modal\.end'\)\}/g,
     times: 1,
   },
   {

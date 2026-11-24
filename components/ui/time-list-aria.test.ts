@@ -84,7 +84,7 @@ const CHECKS: Check[] = [
   {
     file: FILE,
     reason: 'la lista de horas es un grupo etiquetado',
-    pattern: /role="group"\s+aria-label="Time"/g,
+    pattern: /role="group"\s+aria-label=\{t\('common\.time'\)\}/g,
     times: 1,
   },
   {

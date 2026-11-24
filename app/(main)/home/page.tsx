@@ -1,15 +1,19 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { parse } from 'date-fns'
 import moment from 'moment-timezone'
 import { AlertTriangle, CalendarDays, Plus, UserPlus } from 'lucide-react'
 import { auth } from '@/auth'
 import { Button } from '@/components/ui/button'
+import { getLocale, t } from '@/lib/i18n'
+import { formatDate, formatInZone } from '@/lib/i18n/dates'
 import { connectDB } from '@/lib/mongodb/client'
 import { Business } from '@/lib/mongodb/models/Business'
 import { Employee } from '@/lib/mongodb/models/Employee'
 import { Shift } from '@/lib/mongodb/models/Shift'
 import { buildHomeWeek, businessWeekRange } from '@/lib/schedule/home-week'
 import { toPlainEmployee, toPlainShift } from '@/lib/schedule/serialize'
+import { shiftTypeKey } from '@/lib/shifts/labels'
 import { cn } from '@/lib/utils'
 
 interface HomeBusiness {
@@ -19,6 +23,7 @@ interface HomeBusiness {
 }
 
 export default async function HomePage() {
+  const locale = await getLocale()
   const session = await auth()
   await connectDB()
   const business = await Business.findOne({ ownerId: session!.user!.id })
@@ -36,7 +41,8 @@ export default async function HomePage() {
   const week = buildHomeWeek(employees.map(toPlainEmployee), shifts.map(toPlainShift), now, timeZone)
 
   const today = moment(now).tz(timeZone).format('YYYY-MM-DD')
-  const weekLabel = `${moment(range.start).tz(timeZone).format('D MMM')} – ${moment(range.end).tz(timeZone).subtract(1, 'day').format('D MMM YYYY')}`
+  const weekEnd = moment(range.end).tz(timeZone).subtract(1, 'day').toDate()
+  const weekLabel = `${formatInZone(range.start, timeZone, 'd MMM', locale)} – ${formatInZone(weekEnd, timeZone, 'd MMM yyyy', locale)}`
   const firstName = session?.user?.name?.split(' ')[0]
   const working = week.scheduled.filter((row) => row.hours > 0)
   const totalHours = Math.round(week.scheduled.reduce((total, row) => total + row.hours, 0) * 10) / 10
@@ -54,13 +60,14 @@ export default async function HomePage() {
             className="shrink-0 rounded-full"
           />
           <div className="min-w-0">
-            <p className="text-sm text-body">Welcome back{firstName ? `, ${firstName}` : ''}</p>
+            <p className="text-sm text-body">
+              {firstName ? t(locale, 'home.welcomeBack', { name: firstName }) : t(locale, 'home.welcomeBackAnonymous')}
+            </p>
             <h1 className="truncate text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">{business?.name}</h1>
           </div>
         </div>
         <p className="mt-4 max-w-xl text-sm text-body">
-          Here is how your team looks this week. Check who is working, spot anyone still without a schedule,
-          and jump into the planner when something needs a change.
+          {t(locale, 'home.intro')}
         </p>
       </header>
 
@@ -68,32 +75,34 @@ export default async function HomePage() {
         <section aria-labelledby="week-heading" className="space-y-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 id="week-heading" className="text-lg font-semibold tracking-[-0.01em]">This week</h2>
+              <h2 id="week-heading" className="text-lg font-semibold tracking-[-0.01em]">{t(locale, 'home.thisWeek')}</h2>
               <p className="text-sm text-body tabular-nums">{weekLabel}</p>
             </div>
             <Button asChild variant="outline" className="w-full sm:w-auto">
-              <Link href="/dashboard"><CalendarDays />Open schedule</Link>
+              <Link href="/dashboard"><CalendarDays />{t(locale, 'home.openSchedule')}</Link>
             </Button>
           </div>
 
           {employees.length === 0 ? (
             <Notice
-              title="You have no employees yet"
-              action={<Link href="/employees/new"><UserPlus />Add employee</Link>}
+              title={t(locale, 'home.noEmployeesTitle')}
+              action={<Link href="/employees/new"><UserPlus />{t(locale, 'home.addEmployee')}</Link>}
             >
-              Add your team first, then plan their shifts.
+              {t(locale, 'home.noEmployeesBody')}
             </Notice>
           ) : week.scheduled.length === 0 ? (
             <Notice
-              title="There is no schedule for this week"
-              action={<Link href="/dashboard?new=shift"><Plus />New shift</Link>}
+              title={t(locale, 'home.noScheduleTitle')}
+              action={<Link href="/dashboard?new=shift"><Plus />{t(locale, 'home.newShift')}</Link>}
             >
-              Nobody has a shift or an absence between {weekLabel}.
+              {t(locale, 'home.noScheduleBody', { range: weekLabel })}
             </Notice>
           ) : week.unassigned.length > 0 ? (
             <Notice
-              title={`${week.unassigned.length} ${week.unassigned.length === 1 ? 'employee has' : 'employees have'} no schedule this week`}
-              action={<Link href="/dashboard"><CalendarDays />Assign shifts</Link>}
+              title={t(locale, week.unassigned.length === 1 ? 'home.unassignedOne' : 'home.unassignedMany', {
+                count: week.unassigned.length,
+              })}
+              action={<Link href="/dashboard"><CalendarDays />{t(locale, 'home.assignShifts')}</Link>}
             >
               <span className="flex flex-wrap gap-x-3 gap-y-1">
                 {week.unassigned.map((employee) => (
@@ -109,9 +118,9 @@ export default async function HomePage() {
           {employees.length > 0 && (
             <dl className="grid grid-cols-3 gap-2">
               {[
-                { label: 'Working', value: working.length },
-                { label: 'Hours planned', value: `${totalHours} h` },
-                { label: 'Without schedule', value: week.unassigned.length },
+                { label: t(locale, 'home.tileWorking'), value: working.length },
+                { label: t(locale, 'home.tileHoursPlanned'), value: t(locale, 'home.hoursValue', { hours: totalHours }) },
+                { label: t(locale, 'home.tileWithoutSchedule'), value: week.unassigned.length },
               ].map((tile) => (
                 <div key={tile.label} className="rounded-md border bg-card p-3 sm:p-4">
                   <dt className="text-xs text-body">{tile.label}</dt>
@@ -126,17 +135,17 @@ export default async function HomePage() {
               <table className="w-full min-w-[720px] text-sm">
                 <thead className="border-b text-xs text-body">
                   <tr>
-                    <th scope="col" className="px-4 py-2.5 text-left font-medium">Employee</th>
+                    <th scope="col" className="px-4 py-2.5 text-left font-medium">{t(locale, 'home.colEmployee')}</th>
                     {week.days.map((day) => (
                       <th
                         key={day.date}
                         scope="col"
                         className={cn('px-2 py-2.5 text-center font-medium', day.date === today && 'bg-muted text-foreground')}
                       >
-                        {day.label}
+                        {formatDate(parse(day.date, 'yyyy-MM-dd', new Date()), 'EEE d', locale)}
                       </th>
                     ))}
-                    <th scope="col" className="px-4 py-2.5 text-right font-medium">Hours</th>
+                    <th scope="col" className="px-4 py-2.5 text-right font-medium">{t(locale, 'home.colHours')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -153,7 +162,7 @@ export default async function HomePage() {
                           {day.entries.length === 0 ? (
                             <span className="text-faint">
                               <span aria-hidden="true">–</span>
-                              <span className="sr-only">Nothing</span>
+                              <span className="sr-only">{t(locale, 'home.emptyCell')}</span>
                             </span>
                           ) : (
                             <span className="flex flex-col items-center gap-1">
@@ -165,14 +174,14 @@ export default async function HomePage() {
                                     entry.type === 'shift' ? 'bg-muted text-foreground' : 'bg-warning/15 text-foreground'
                                   )}
                                 >
-                                  {entry.text}
+                                  {entry.type === 'shift' ? entry.text : t(locale, shiftTypeKey(entry.type))}
                                 </span>
                               ))}
                             </span>
                           )}
                         </td>
                       ))}
-                      <td className="px-4 py-2.5 text-right tabular-nums">{row.hours} h</td>
+                      <td className="px-4 py-2.5 text-right tabular-nums">{t(locale, 'home.hoursValue', { hours: row.hours })}</td>
                     </tr>
                   ))}
                 </tbody>

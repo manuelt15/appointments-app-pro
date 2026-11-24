@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { useLocale } from '@/lib/i18n/client'
 
 export function ConfirmDialog({
   open,
@@ -27,6 +28,7 @@ export function ConfirmDialog({
   loading?: boolean
   onConfirm: () => void | Promise<void>
 }) {
+  const { t } = useLocale()
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !loading && onOpenChange(nextOpen)}>
       <DialogContent className="sm:max-w-md">
@@ -35,9 +37,9 @@ export function ConfirmDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>Keep</Button>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>{t('common.keep')}</Button>
           <Button type="button" variant="destructive" onClick={onConfirm} disabled={loading}>
-            {loading ? 'Working…' : confirmLabel}
+            {loading ? t('common.working') : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

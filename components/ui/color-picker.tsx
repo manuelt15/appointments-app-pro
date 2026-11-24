@@ -1,16 +1,19 @@
 'use client'
 
 import { Check } from 'lucide-react'
+import { useLocale } from '@/lib/i18n/client'
+import type { TranslationKey } from '@/lib/i18n/translate'
 
-const COLOR_NAMES: Record<string, string> = {
-  '#6366f1': 'Indigo',
-  '#0070f3': 'Blue',
-  '#10b981': 'Emerald',
-  '#f5a623': 'Amber',
-  '#ee0000': 'Red',
-  '#7928ca': 'Purple',
-  '#ff0080': 'Pink',
-  '#14b8a6': 'Teal',
+/** Colour names live in the dictionary: they are read out by screen readers. */
+const COLOR_KEYS: Record<string, TranslationKey> = {
+  '#6366f1': 'common.color.indigo',
+  '#0070f3': 'common.color.blue',
+  '#10b981': 'common.color.emerald',
+  '#f5a623': 'common.color.amber',
+  '#ee0000': 'common.color.red',
+  '#7928ca': 'common.color.purple',
+  '#ff0080': 'common.color.pink',
+  '#14b8a6': 'common.color.teal',
 }
 
 export function ColorPicker({
@@ -24,6 +27,7 @@ export function ColorPicker({
   onChange: (color: string) => void
   label: string
 }) {
+  const { t } = useLocale()
   return (
     <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={label}>
       {colors.map((color, index) => {
@@ -35,7 +39,7 @@ export function ColorPicker({
             role="radio"
             aria-checked={selected}
             tabIndex={selected || (!colors.includes(value) && index === 0) ? 0 : -1}
-            aria-label={`${label}: ${COLOR_NAMES[color.toLowerCase()] ?? 'Custom color'}`}
+            aria-label={`${label}: ${t(COLOR_KEYS[color.toLowerCase()] ?? 'common.color.custom')}`}
             onClick={() => onChange(color)}
             onKeyDown={(event) => {
               let nextIndex: number

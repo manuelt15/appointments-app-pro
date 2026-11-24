@@ -40,14 +40,14 @@ interface Check {
 }
 
 const DAYS_REGION_START = 'grid grid-cols-7'
-const DAYS_REGION_END = 'aria-label="Time"'
+const DAYS_REGION_END = "aria-label={t('common.time')}"
 
 const cache = new Map<string, string>()
 
 /** Zona de la rejilla de días: desde el contenedor grid-cols-7 hasta el
  *  contenedor de horas (si existe). Lo que haya después (hallazgo -007,
  *  que tiene su propio guard en time-list-aria.test.ts) no se vigila
- *  aquí. El límite ancla en aria-label="Time", que sobrevive al arreglo
+ *  aquí. El límite ancla en la etiqueta de la lista de horas, que sobrevive al arreglo
  *  del -007 (el ancla anterior, role="listbox", desapareció con él). */
 function daysRegion(file: string): string {
   let content = cache.get(file)
@@ -116,13 +116,13 @@ const CHECKS: Check[] = [
   {
     file: 'components/ui/date-picker.tsx',
     reason: 'la rejilla de días es un grupo etiquetado',
-    pattern: /role="group" aria-label="Days"/g,
+    pattern: /role="group" aria-label=\{t\('common\.days'\)\}/g,
     times: 1,
   },
   {
     file: 'components/ui/date-picker.tsx',
     reason: 'cada día sigue siendo un <button type="button"> nativo con la fecha completa como nombre accesible',
-    pattern: /<button\b[\s\S]{0,120}?type="button"[\s\S]{0,200}?aria-label=\{format\(day, 'd MMMM yyyy'\)\}/g,
+    pattern: /<button\b[\s\S]{0,120}?type="button"[\s\S]{0,200}?aria-label=\{format\(day, 'd MMMM yyyy', \{ locale: names \}\)\}/g,
     times: 1,
   },
   {
@@ -140,13 +140,13 @@ const CHECKS: Check[] = [
   {
     file: 'components/ui/date-time-picker.tsx',
     reason: 'la rejilla de días es un grupo etiquetado',
-    pattern: /role="group" aria-label="Days"/g,
+    pattern: /role="group" aria-label=\{t\('common\.days'\)\}/g,
     times: 1,
   },
   {
     file: 'components/ui/date-time-picker.tsx',
     reason: 'cada día sigue siendo un <button type="button"> nativo con la fecha completa como nombre accesible',
-    pattern: /<button\b[\s\S]{0,120}?type="button"[\s\S]{0,200}?aria-label=\{format\(day, 'd MMMM yyyy'\)\}/g,
+    pattern: /<button\b[\s\S]{0,120}?type="button"[\s\S]{0,200}?aria-label=\{format\(day, 'd MMMM yyyy', \{ locale: names \}\)\}/g,
     times: 1,
   },
   {

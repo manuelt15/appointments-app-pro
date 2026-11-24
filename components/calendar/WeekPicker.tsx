@@ -22,10 +22,11 @@ import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useLocale } from '@/lib/i18n/client'
+import { dateFnsLocale } from '@/lib/i18n/dates'
 import { cn } from '@/lib/utils'
 
 const WEEK_OPTIONS = { weekStartsOn: 1 } as const
-const MONTHS = Array.from({ length: 12 }, (_, index) => format(setMonth(new Date(), index), 'MMMM'))
 const YEARS_BACK = 10
 const YEARS_FORWARD = 2
 
@@ -38,9 +39,12 @@ interface Props {
 
 /** The toolbar's range label, opening a month grid to jump straight to any week. */
 export default function WeekPicker({ date, today, label, onSelect }: Props) {
+  const { locale, t } = useLocale()
+  const names = dateFnsLocale(locale)
   const [open, setOpen] = useState(false)
   const [month, setMonthState] = useState(() => startOfMonth(date))
 
+  const months = Array.from({ length: 12 }, (_, index) => format(setMonth(new Date(), index), 'MMMM', { locale: names }))
   const thisYear = getYear(today)
   const years = Array.from({ length: YEARS_BACK + YEARS_FORWARD + 1 }, (_, index) => thisYear + YEARS_FORWARD - index)
 
@@ -51,7 +55,7 @@ export default function WeekPicker({ date, today, label, onSelect }: Props) {
   const weeks = Array.from({ length: days.length / 7 }, (_, index) => days.slice(index * 7, index * 7 + 7))
 
   const weekdays = Array.from({ length: 7 }, (_, index) =>
-    format(addDays(startOfWeek(today, WEEK_OPTIONS), index), 'EEEEE')
+    format(addDays(startOfWeek(today, WEEK_OPTIONS), index), 'EEEEE', { locale: names })
   )
 
   function handleOpenChange(next: boolean) {
@@ -67,7 +71,7 @@ export default function WeekPicker({ date, today, label, onSelect }: Props) {
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="ghost" className="ml-1 gap-1.5 px-2 font-medium" aria-label={`Pick a week, showing ${label}`}>
+        <Button type="button" variant="ghost" className="ml-1 gap-1.5 px-2 font-medium" aria-label={t('calendar.pickWeek', { label })}>
           <span aria-live="polite">{label}</span>
           <ChevronDown className="size-3.5 opacity-60" />
         </Button>
@@ -78,7 +82,7 @@ export default function WeekPicker({ date, today, label, onSelect }: Props) {
             type="button"
             variant="ghost"
             size="icon"
-            aria-label="Previous month"
+            aria-label={t('common.previousMonth')}
             onClick={() => setMonthState((current) => subMonths(current, 1))}
           >
             <ChevronLeft />
@@ -88,11 +92,11 @@ export default function WeekPicker({ date, today, label, onSelect }: Props) {
             value={String(month.getMonth())}
             onValueChange={(next) => setMonthState((current) => setMonth(current, Number(next)))}
           >
-            <SelectTrigger aria-label="Month" className="h-8 flex-1">
+            <SelectTrigger aria-label={t('common.month')} className="h-8 flex-1">
               <SelectValue />
             </SelectTrigger>
             <SelectContent position="popper">
-              {MONTHS.map((name, index) => (
+              {months.map((name, index) => (
                 <SelectItem key={name} value={String(index)}>{name}</SelectItem>
               ))}
             </SelectContent>
@@ -102,7 +106,7 @@ export default function WeekPicker({ date, today, label, onSelect }: Props) {
             value={String(getYear(month))}
             onValueChange={(next) => setMonthState((current) => setYear(current, Number(next)))}
           >
-            <SelectTrigger aria-label="Year" className="h-8 w-24">
+            <SelectTrigger aria-label={t('common.year')} className="h-8 w-24">
               <SelectValue />
             </SelectTrigger>
             <SelectContent position="popper">
@@ -116,14 +120,14 @@ export default function WeekPicker({ date, today, label, onSelect }: Props) {
             type="button"
             variant="ghost"
             size="icon"
-            aria-label="Next month"
+            aria-label={t('common.nextMonth')}
             onClick={() => setMonthState((current) => addMonths(current, 1))}
           >
             <ChevronRight />
           </Button>
         </div>
 
-        <div role="group" aria-label="Weeks">
+        <div role="group" aria-label={t('calendar.weeks')}>
           <div aria-hidden="true" className="grid grid-cols-7 gap-0.5">
             {weekdays.map((weekday, index) => (
               <span key={index} className="grid h-8 place-items-center text-xs text-body">
@@ -146,7 +150,7 @@ export default function WeekPicker({ date, today, label, onSelect }: Props) {
                     key={day.toISOString()}
                     type="button"
                     aria-pressed={selected}
-                    aria-label={format(day, 'd MMMM yyyy')}
+                    aria-label={format(day, 'd MMMM yyyy', { locale: names })}
                     onClick={() => pick(day)}
                     className={cn(
                       'grid h-8 w-9 place-items-center rounded-sm text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/30',

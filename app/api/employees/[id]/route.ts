@@ -2,6 +2,8 @@ import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { resolveAuth } from '@/lib/api/auth'
 import { apiSuccess, apiError } from '@/lib/api/response'
+import { requestLocale } from '@/lib/i18n/request'
+import { t } from '@/lib/i18n/translate'
 import { SchedulingBusyError, withSchedulingLock } from '@/lib/shifts/scheduling-lock'
 import { canonicalEmployeeId, employeeIdParam } from '@/lib/shifts/validation'
 import { connectDB } from '@/lib/mongodb/client'
@@ -32,28 +34,30 @@ async function parseEmployeeId(ctx: RouteContext<'/api/employees/[id]'>) {
 }
 
 export async function GET(request: NextRequest, ctx: RouteContext<'/api/employees/[id]'>) {
+  const locale = requestLocale(request)
   const auth = await resolveAuth(request)
   if (!auth) return apiError('Unauthorized', 401)
 
   const employeeId = await parseEmployeeId(ctx)
-  if (!employeeId) return apiError('Not found', 404)
+  if (!employeeId) return apiError(t(locale, 'shifts.error.notFound'), 404)
 
   await connectDB()
   const employee = await Employee.findOne({ _id: employeeId, businessId: auth.businessId }).lean()
-  if (!employee) return apiError('Not found', 404)
+  if (!employee) return apiError(t(locale, 'shifts.error.notFound'), 404)
   return apiSuccess(employee)
 }
 
 export async function PUT(request: NextRequest, ctx: RouteContext<'/api/employees/[id]'>) {
+  const locale = requestLocale(request)
   const auth = await resolveAuth(request)
   if (!auth) return apiError('Unauthorized', 401)
 
   const body = await request.json()
   const parsed = UpdateSchema.safeParse(body)
-  if (!parsed.success) return apiError('Validation error', 400, parsed.error.flatten())
+  if (!parsed.success) return apiError(t(locale, 'shifts.error.validation'), 400, parsed.error.flatten())
 
   const employeeId = await parseEmployeeId(ctx)
-  if (!employeeId) return apiError('Not found', 404)
+  if (!employeeId) return apiError(t(locale, 'shifts.error.notFound'), 404)
 
   await connectDB()
   const employee = await Employee.findOneAndUpdate(
@@ -61,20 +65,21 @@ export async function PUT(request: NextRequest, ctx: RouteContext<'/api/employee
     parsed.data,
     { new: true }
   )
-  if (!employee) return apiError('Not found', 404)
+  if (!employee) return apiError(t(locale, 'shifts.error.notFound'), 404)
   return apiSuccess(employee)
 }
 
 export async function DELETE(_req: NextRequest, ctx: RouteContext<'/api/employees/[id]'>) {
+  const locale = requestLocale(_req)
   const auth = await resolveAuth(_req)
   if (!auth) return apiError('Unauthorized', 401)
 
   const employeeId = await parseEmployeeId(ctx)
-  if (!employeeId) return apiError('Not found', 404)
+  if (!employeeId) return apiError(t(locale, 'shifts.error.notFound'), 404)
 
   await connectDB()
   const employee = await Employee.findOne({ _id: employeeId, businessId: auth.businessId })
-  if (!employee) return apiError('Not found', 404)
+  if (!employee) return apiError(t(locale, 'shifts.error.notFound'), 404)
 
   // Mongo casts the _id argument and matches it case-insensitively, but
   // Shift.employeeId and the scheduling lock key are plain strings: the key has
@@ -107,7 +112,7 @@ export async function DELETE(_req: NextRequest, ctx: RouteContext<'/api/employee
     )
     return apiSuccess({ deleted: true })
   } catch (error) {
-    if (error instanceof SchedulingBusyError) return apiError(error.message, 503)
+    if (error instanceof SchedulingBusyError) return apiError(t(locale, 'shifts.error.busy'), 503)
     throw error
   }
 }

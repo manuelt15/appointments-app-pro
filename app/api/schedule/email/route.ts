@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server'
 import { resolveAuth } from '@/lib/api/auth'
 import { apiSuccess, apiError } from '@/lib/api/response'
+import { requestLocale } from '@/lib/i18n/request'
+import { t } from '@/lib/i18n/translate'
 import { connectDB } from '@/lib/mongodb/client'
 import { Business } from '@/lib/mongodb/models/Business'
 import { Employee } from '@/lib/mongodb/models/Employee'
@@ -15,6 +17,7 @@ import { toPlainEmployee, toPlainShift } from '@/lib/schedule/serialize'
 import { buildEmployeeWeeks, resolveWeekStart, weekEnd } from '@/lib/schedule/week'
 
 export async function POST(request: NextRequest) {
+  const locale = requestLocale(request)
   const auth = await resolveAuth(request)
   if (!auth) return apiError('Unauthorized', 401)
 
@@ -63,11 +66,11 @@ export async function POST(request: NextRequest) {
       sent += 1
     } catch (error) {
       if (error instanceof EmailProviderNotConfigured) {
-        return apiError('No email provider is configured yet.', 503)
+        return apiError(t(locale, 'shifts.error.emailProvider'), 503)
       }
       failed.push({
         employeeName: message.employeeName,
-        reason: error instanceof Error ? error.message : 'Delivery failed',
+        reason: error instanceof Error ? error.message : t(locale, 'shifts.error.delivery'),
       })
     }
   }

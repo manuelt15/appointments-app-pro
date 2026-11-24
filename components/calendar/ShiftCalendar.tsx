@@ -17,21 +17,18 @@ import { Button } from '@/components/ui/button'
 import { LoadingState } from '@/components/ui/loading-state'
 import { readableForeground } from '@/lib/design/readable-foreground'
 import { calendarDateToIso, getCalendarLoadRange, toCalendarDate } from '@/lib/datetime/timezone'
+import { useLocale } from '@/lib/i18n/client'
+import { dateFnsLocale } from '@/lib/i18n/dates'
+import { t as translate } from '@/lib/i18n/translate'
+import { shiftTypeKey } from '@/lib/shifts/labels'
 import { collectPaginatedResults } from '@/lib/shifts/pagination'
 import { cn } from '@/lib/utils'
-import type { Employee, Shift, ShiftType } from '@/types'
+import type { Employee, Shift } from '@/types'
 
 const localizer = momentLocalizer(moment)
 const WEEK_OPTIONS = { weekStartsOn: 1 } as const
 const DEFAULT_SHIFT_HOURS = 8
 const DEFAULT_SHIFT_START = 9
-
-const TYPE_LABELS: Record<ShiftType, string> = {
-  shift: 'Shift',
-  vacation: 'Vacation',
-  sick_leave: 'Sick leave',
-  time_off: 'Time off',
-}
 
 /** 24-hour clock everywhere: these schedules are not US-facing. */
 const CALENDAR_FORMATS = {
@@ -62,6 +59,7 @@ function newShiftSlot(timeZone: string) {
 }
 
 export default function ShiftCalendar({ timeZone }: Props) {
+  const { locale, t } = useLocale()
   const [view, setView] = useState<View>(Views.WEEK)
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [employees, setEmployees] = useState<Employee[]>([])
@@ -129,8 +127,8 @@ export default function ShiftCalendar({ timeZone }: Props) {
         setEvents(shifts.map((shift) => ({
           id: shift._id,
           title: shift.type === 'shift'
-            ? (shift.notes || TYPE_LABELS.shift)
-            : TYPE_LABELS[shift.type],
+            ? (shift.notes || translate(locale, 'shifts.type.shift'))
+            : translate(locale, shiftTypeKey(shift.type)),
           start: toCalendarDate(shift.startTime, timeZone),
           end: toCalendarDate(shift.endTime, timeZone),
           resource: shift,
@@ -142,7 +140,7 @@ export default function ShiftCalendar({ timeZone }: Props) {
         setLoadedRange(requestedRange)
       } catch (loadError) {
         if (loadError instanceof DOMException && loadError.name === 'AbortError') return
-        setError('The schedule could not be loaded.')
+        setError(translate(locale, 'calendar.loadError'))
       } finally {
         if (!controller.signal.aborted) setLoading(false)
       }
@@ -150,7 +148,7 @@ export default function ShiftCalendar({ timeZone }: Props) {
 
     loadSchedule()
     return () => controller.abort()
-  }, [rangeStart, rangeEnd, refreshKey, timeZone])
+  }, [rangeStart, rangeEnd, refreshKey, timeZone, locale])
 
   async function handleEventDrop({ event, start, end }: EventInteractionArgs<CalendarEvent>) {
     try {
@@ -164,13 +162,13 @@ export default function ShiftCalendar({ timeZone }: Props) {
       })
       if (!response.ok) {
         const data = await response.json().catch(() => null)
-        throw new Error(data?.error ?? 'Could not move shift')
+        throw new Error(data?.error ?? t('calendar.moveError'))
       }
 
-      toast.success('Shift moved')
+      toast.success(t('calendar.shiftMoved'))
       setRefreshKey((key) => key + 1)
     } catch (moveError) {
-      toast.error(moveError instanceof Error ? moveError.message : 'Could not move shift')
+      toast.error(moveError instanceof Error ? moveError.message : t('calendar.moveError'))
     }
   }
 
@@ -193,26 +191,26 @@ export default function ShiftCalendar({ timeZone }: Props) {
         body: JSON.stringify({ week: visibleWeekStart() }),
       })
       const data = await response.json().catch(() => null)
-      if (!response.ok) throw new Error(data?.error ?? 'Could not send the schedule')
+      if (!response.ok) throw new Error(data?.error ?? t('calendar.sendError'))
 
       const { sent, prepared, skipped, configured } = data.data
       if (!configured) {
         toast.message(
           prepared === 0
-            ? 'Nothing to send for this week'
-            : `${prepared} ${prepared === 1 ? 'email is' : 'emails are'} ready`,
+            ? t('calendar.nothingToSend')
+            : t(prepared === 1 ? 'calendar.emailsReadyOne' : 'calendar.emailsReadyMany', { count: prepared }),
           {
             description: prepared === 0
               ? skipped.map((item: { employeeName: string; reason: string }) => `${item.employeeName}: ${item.reason}`).join(', ')
-              : 'No email provider is configured yet, so nothing was delivered.',
+              : t('calendar.noProviderBody'),
           }
         )
         return
       }
 
-      toast.success(`${sent} ${sent === 1 ? 'email' : 'emails'} sent`)
+      toast.success(t(sent === 1 ? 'calendar.emailsSentOne' : 'calendar.emailsSentMany', { count: sent }))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not send the schedule')
+      toast.error(error instanceof Error ? error.message : t('calendar.sendError'))
     } finally {
       setSending(false)
     }
@@ -222,7 +220,7 @@ export default function ShiftCalendar({ timeZone }: Props) {
     setDownloading(true)
     try {
       const response = await fetch(`/api/schedule/pdf?week=${encodeURIComponent(visibleWeekStart())}`)
-      if (!response.ok) throw new Error('Could not build the PDF')
+      if (!response.ok) throw new Error(t('calendar.pdfError'))
 
       const blob = await response.blob()
       const url = URL.createObjectURL(blob)
@@ -232,7 +230,7 @@ export default function ShiftCalendar({ timeZone }: Props) {
       link.click()
       URL.revokeObjectURL(url)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not build the PDF')
+      toast.error(error instanceof Error ? error.message : t('calendar.pdfError'))
     } finally {
       setDownloading(false)
     }
@@ -248,9 +246,10 @@ export default function ShiftCalendar({ timeZone }: Props) {
     })
   }
 
+  const localeNames = dateFnsLocale(locale)
   const rangeLabel = view === Views.MONTH
-    ? format(date, 'MMMM yyyy')
-    : `${format(startOfWeek(date, WEEK_OPTIONS), 'd MMM')} – ${format(addDays(startOfWeek(date, WEEK_OPTIONS), 6), 'd MMM yyyy')}`
+    ? format(date, 'MMMM yyyy', { locale: localeNames })
+    : `${format(startOfWeek(date, WEEK_OPTIONS), 'd MMM', { locale: localeNames })} – ${format(addDays(startOfWeek(date, WEEK_OPTIONS), 6), 'd MMM yyyy', { locale: localeNames })}`
 
   const matrixShifts: MatrixShift[] = events.map((event) => ({
     shift: event.resource,
@@ -262,20 +261,20 @@ export default function ShiftCalendar({ timeZone }: Props) {
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="icon" aria-label={view === Views.MONTH ? 'Previous month' : 'Previous week'} onClick={() => shiftDate(-1)}>
+          <Button type="button" variant="outline" size="icon" aria-label={view === Views.MONTH ? t('calendar.previousMonth') : t('calendar.previousWeek')} onClick={() => shiftDate(-1)}>
             <ChevronLeft />
           </Button>
-          <Button type="button" variant="outline" size="icon" aria-label={view === Views.MONTH ? 'Next month' : 'Next week'} onClick={() => shiftDate(1)}>
+          <Button type="button" variant="outline" size="icon" aria-label={view === Views.MONTH ? t('calendar.nextMonth') : t('calendar.nextWeek')} onClick={() => shiftDate(1)}>
             <ChevronRight />
           </Button>
           <Button type="button" variant="outline" onClick={() => setDate(toCalendarDate(new Date(), timeZone))}>
-            Today
+            {t('calendar.today')}
           </Button>
           <WeekPicker date={date} today={toCalendarDate(new Date(), timeZone)} label={rangeLabel} onSelect={setDate} />
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex rounded-sm border p-0.5" role="group" aria-label="Calendar view">
+          <div className="flex rounded-sm border p-0.5" role="group" aria-label={t('calendar.viewGroup')}>
             {([Views.MONTH, Views.WEEK] as const).map((option) => (
               <button
                 key={option}
@@ -283,11 +282,11 @@ export default function ShiftCalendar({ timeZone }: Props) {
                 aria-pressed={view === option}
                 onClick={() => setView(option)}
                 className={cn(
-                  'rounded-[3px] px-3 py-1.5 text-sm capitalize transition-colors',
+                  'rounded-[3px] px-3 py-1.5 text-sm transition-colors',
                   view === option ? 'bg-foreground text-primary-foreground' : 'text-body can-hover:hover:bg-muted'
                 )}
               >
-                {option}
+                {t(option === Views.MONTH ? 'calendar.viewMonth' : 'calendar.viewWeek')}
               </button>
             ))}
           </div>
@@ -297,8 +296,8 @@ export default function ShiftCalendar({ timeZone }: Props) {
             size="icon"
             onClick={emailSchedule}
             disabled={sending}
-            aria-label="Email this week's schedule to each employee"
-            title="Email this week's schedule to each employee"
+            aria-label={t('calendar.emailSchedule')}
+            title={t('calendar.emailSchedule')}
           >
             <Mail />
           </Button>
@@ -308,8 +307,8 @@ export default function ShiftCalendar({ timeZone }: Props) {
             size="icon"
             onClick={downloadPdf}
             disabled={downloading}
-            aria-label="Download this week as PDF"
-            title="Download this week as PDF"
+            aria-label={t('calendar.downloadPdf')}
+            title={t('calendar.downloadPdf')}
           >
             <FileDown />
           </Button>
@@ -318,11 +317,11 @@ export default function ShiftCalendar({ timeZone }: Props) {
 
       <div className="min-h-0 flex-1 overflow-hidden rounded-lg border bg-card p-2 shadow-[0_1px_1px_rgb(0_0_0/0.04)]">
         {loading && loadedRange !== rangeKey ? (
-          <div className="grid h-full place-items-center"><LoadingState label="Putting your week together" /></div>
+          <div className="grid h-full place-items-center"><LoadingState label={t('calendar.loading')} /></div>
         ) : error ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-sm text-body" role="alert">
             <p>{error}</p>
-            <Button variant="outline" onClick={() => setRefreshKey((key) => key + 1)}>Try again</Button>
+            <Button variant="outline" onClick={() => setRefreshKey((key) => key + 1)}>{t('calendar.tryAgain')}</Button>
           </div>
         ) : view === Views.WEEK ? (
           <WeekMatrix

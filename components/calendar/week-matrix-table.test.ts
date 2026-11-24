@@ -1,5 +1,4 @@
 import { createElement } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
 import { expect, it, vi } from 'vitest'
 import type { Employee, Shift } from '../../types'
 
@@ -7,10 +6,14 @@ vi.mock('@/lib/design/readable-foreground', async () => import('../../lib/design
 vi.mock('@/lib/shifts/calendar-date', async () => import('../../lib/shifts/calendar-date'))
 vi.mock('@/lib/shifts/matrix', async () => import('../../lib/shifts/matrix'))
 vi.mock('@/lib/utils', async () => import('../../lib/utils'))
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }))
+import { renderInLocale } from '@/lib/i18n/test-locale'
 import WeekMatrix from './WeekMatrix'
 
+// The matrix reads its copy from the dictionary, so it is rendered inside the locale
+// provider with English pinned: Spanish is the app default and would change the words.
 it('renders a week caption and scoped column and row headers (021)', () => {
-  const html = renderToStaticMarkup(createElement(WeekMatrix, {
+  const html = renderInLocale('en', createElement(WeekMatrix, {
     date: new Date(2026, 10, 2),
     employees: [{ _id: 'employee-1', fullName: 'Test Employee', color: '#0070f3' } as Employee],
     shifts: [], onSelectShift: () => {}, onSelectCell: () => {},
@@ -27,7 +30,7 @@ it('distinguishes identical shift times by employee while keeping time and notes
   const employees = ['Alice Test', 'Bob Test'].map((fullName, i) => ({
     _id: String(i), fullName, color: '#0070f3',
   } as Employee))
-  const html = renderToStaticMarkup(createElement(WeekMatrix, {
+  const html = renderInLocale('en', createElement(WeekMatrix, {
     date: new Date(2026, 10, 2), employees,
     shifts: employees.map((employee) => ({
       shift: { _id: employee._id, employeeId: employee._id, type: 'shift', notes: 'Front desk' } as Shift,

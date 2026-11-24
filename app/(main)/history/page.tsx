@@ -1,6 +1,7 @@
 import moment from 'moment-timezone'
 import { auth } from '@/auth'
 import ScheduleHistory, { type HistoryEmployee } from '@/components/history/ScheduleHistory'
+import { getLocale, t } from '@/lib/i18n'
 import { connectDB } from '@/lib/mongodb/client'
 import { Business } from '@/lib/mongodb/models/Business'
 import { Employee } from '@/lib/mongodb/models/Employee'
@@ -19,6 +20,7 @@ interface EmployeeRecord {
 }
 
 export default async function HistoryPage() {
+  const locale = await getLocale()
   const session = await auth()
   await connectDB()
   const business = await Business.findOne({ ownerId: session!.user!.id })
@@ -43,12 +45,12 @@ export default async function HistoryPage() {
   return (
     <div className="flex min-h-full flex-col">
       <header className="border-b bg-card px-4 py-4 sm:px-6">
-        <h1 className="text-xl font-semibold tracking-[-0.02em]">History</h1>
-        <p className="text-sm text-body">Every month of the schedule: who worked, for how long, and who was away.</p>
+        <h1 className="text-xl font-semibold tracking-[-0.02em]">{t(locale, 'history.title')}</h1>
+        <p className="text-sm text-body">{t(locale, 'history.subtitle')}</p>
       </header>
       <div className="flex-1 p-4 sm:p-6">
         <ScheduleHistory
-          businessName={business?.name ?? 'Schedule'}
+          businessName={business?.name ?? t(locale, 'history.defaultBusiness')}
           timeZone={timeZone}
           employees={employees}
           currentYear={now.year()}

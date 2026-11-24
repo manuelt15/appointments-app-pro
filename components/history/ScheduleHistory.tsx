@@ -9,7 +9,9 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { LoadingState } from '@/components/ui/loading-state'
-import { TYPE_LABELS } from '@/lib/schedule/week'
+import { useLocale } from '@/lib/i18n/client'
+import { formatDate, formatInZone } from '@/lib/i18n/dates'
+import { t as translate } from '@/lib/i18n/translate'
 import {
   businessMonthRange,
   businessYearRange,
@@ -19,6 +21,7 @@ import {
   summariseYear,
   type EmployeeMonthRow,
 } from '@/lib/shifts/business-history'
+import { shiftTypeKey, SHIFT_TYPE_KEYS } from '@/lib/shifts/labels'
 import { collectPaginatedResults } from '@/lib/shifts/pagination'
 import { cn } from '@/lib/utils'
 import type { Shift, ShiftType } from '@/types'
@@ -39,15 +42,11 @@ interface Props {
 }
 
 const ALL = 'all'
-const SHIFT_TYPES = Object.keys(TYPE_LABELS) as ShiftType[]
-const MONTH_NAMES = moment.months()
+const SHIFT_TYPES = Object.keys(SHIFT_TYPE_KEYS) as ShiftType[]
 const YEARS_BACK = 10
 
-function formatHours(hours: number) {
-  return `${hours.toLocaleString('en', { maximumFractionDigits: 1 })} h`
-}
-
 export default function ScheduleHistory({ businessName, timeZone, employees, currentYear, currentMonth }: Props) {
+  const { locale, t } = useLocale()
   const [year, setYear] = useState(currentYear)
   const [month, setMonth] = useState(currentMonth)
   const [shifts, setShifts] = useState<Shift[]>([])
@@ -73,14 +72,14 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
             page: String(page),
           })
           const response = await fetch(`/api/shifts?${params}`, { signal: controller.signal })
-          if (!response.ok) throw new Error('The history could not be loaded.')
+          if (!response.ok) throw new Error(translate(locale, 'history.loadError'))
           return response.json()
         })
         setShifts(results)
         setError('')
       } catch (loadError) {
         if (loadError instanceof DOMException && loadError.name === 'AbortError') return
-        setError(loadError instanceof Error ? loadError.message : 'The history could not be loaded.')
+        setError(loadError instanceof Error ? loadError.message : translate(locale, 'history.loadError'))
       } finally {
         if (!controller.signal.aborted) setLoading(false)
       }
@@ -88,7 +87,7 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
 
     loadYear()
     return () => controller.abort()
-  }, [year, timeZone])
+  }, [year, timeZone, locale])
 
   const employeesById = new Map(employees.map((employee) => [employee._id, employee]))
   const months = summariseYear(shifts, year, timeZone)
@@ -121,19 +120,30 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
   const details = shiftsInRange(filtered, monthRange)
     .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
 
+  const MONTH_NAMES = Array.from({ length: 12 }, (_, index) =>
+    formatDate(new Date(year, index, 1), 'MMMM', locale)
+  )
   const monthLabel = `${MONTH_NAMES[month]} ${year}`
   const years = Array.from({ length: YEARS_BACK + 1 }, (_, index) => currentYear - index)
+
+  function formatHours(hours: number) {
+    return t('history.hoursValue', { hours: hours.toLocaleString(locale, { maximumFractionDigits: 1 }) })
+  }
+
   const summaryTiles = [
-    { label: 'Hours worked', value: formatHours(Math.round(summary.hours * 10) / 10) },
-    { label: 'Shifts', value: String(summary.workedShifts) },
-    { label: 'Employees who worked', value: String(summary.employees) },
-    { label: 'Absences', value: String(summary.absences) },
+    { label: t('history.hoursWorked'), value: formatHours(Math.round(summary.hours * 10) / 10) },
+    { label: t('history.shifts'), value: String(summary.workedShifts) },
+    { label: t('history.employeesWhoWorked'), value: String(summary.employees) },
+    { label: t('history.absences'), value: String(summary.absences) },
   ]
 
   function formatEntryTime(shift: Shift) {
     const start = moment(shift.startTime).tz(timeZone)
     const end = moment(shift.endTime).tz(timeZone)
-    return `${start.format('HH:mm')} – ${start.isSame(end, 'day') ? end.format('HH:mm') : end.format('D MMM HH:mm')}`
+    const endLabel = start.isSame(end, 'day')
+      ? end.format('HH:mm')
+      : `${formatInZone(end.toDate(), timeZone, 'd MMM', locale)} ${end.format('HH:mm')}`
+    return `${start.format('HH:mm')} – ${endLabel}`
   }
 
   async function downloadPdf() {
@@ -141,14 +151,14 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
     try {
       // Loaded on demand: pdf-lib is heavy and only needed here.
       const { buildHistoryPdf } = await import('@/lib/schedule/history-pdf')
-      const employeeName = (id: string) => employeesById.get(id)?.fullName ?? 'Removed employee'
+      const employeeName = (id: string) => employeesById.get(id)?.fullName ?? t('history.removedEmployee')
       const bytes = await buildHistoryPdf({
         businessName,
         monthLabel,
         filters: [
-          employeeFilter === ALL ? 'All employees' : employeeName(employeeFilter),
-          typeFilter === ALL ? 'All types' : TYPE_LABELS[typeFilter],
-          onlyWorked ? 'Only employees who worked' : 'Including employees who did not work',
+          employeeFilter === ALL ? t('history.allEmployees') : employeeName(employeeFilter),
+          typeFilter === ALL ? t('history.allTypes') : t(shiftTypeKey(typeFilter)),
+          onlyWorked ? t('history.onlyWorked') : t('history.includingIdle'),
         ],
         summary: summaryTiles,
         employees: rows.map((row) => ({
@@ -160,11 +170,11 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
           absences: row.absences,
         })),
         entries: details.map((shift) => ({
-          date: moment(shift.startTime).tz(timeZone).format('ddd D MMM'),
+          date: formatInZone(new Date(shift.startTime), timeZone, 'EEE d MMM', locale),
           employee: employeeName(shift.employeeId),
           time: formatEntryTime(shift),
           hours: shift.type === 'shift' ? formatHours(shiftHoursInRange(shift, monthRange)) : '—',
-          type: TYPE_LABELS[shift.type],
+          type: t(shiftTypeKey(shift.type)),
           notes: shift.notes ?? '',
         })),
       })
@@ -175,7 +185,7 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
       link.click()
       URL.revokeObjectURL(url)
     } catch (pdfError) {
-      toast.error(pdfError instanceof Error ? pdfError.message : 'Could not build the PDF')
+      toast.error(pdfError instanceof Error ? pdfError.message : t('history.pdfError'))
     } finally {
       setDownloading(false)
     }
@@ -185,13 +195,13 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
     <div className="space-y-6">
       <section aria-labelledby="months-heading" className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <h2 id="months-heading" className="text-sm font-semibold">Month by month</h2>
+          <h2 id="months-heading" className="text-sm font-semibold">{t('history.monthByMonth')}</h2>
           <div className="flex items-center gap-1">
-            <Button type="button" variant="outline" size="icon" aria-label="Previous year" onClick={() => setYear((value) => value - 1)}>
+            <Button type="button" variant="outline" size="icon" aria-label={t('history.previousYear')} onClick={() => setYear((value) => value - 1)}>
               <ChevronLeft />
             </Button>
             <Select value={String(year)} onValueChange={(value) => setYear(Number(value))}>
-              <SelectTrigger aria-label="Year" className="w-24 justify-center gap-1.5 font-medium tabular-nums">
+              <SelectTrigger aria-label={t('common.year')} className="w-24 justify-center gap-1.5 font-medium tabular-nums">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper">
@@ -204,7 +214,7 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
               type="button"
               variant="outline"
               size="icon"
-              aria-label="Next year"
+              aria-label={t('history.nextYear')}
               disabled={year >= currentYear}
               onClick={() => setYear((value) => value + 1)}
             >
@@ -232,10 +242,13 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
                 {loading ? (
                   <span className={cn('mt-1 block text-xs', selected ? 'opacity-70' : 'text-faint')}>…</span>
                 ) : empty ? (
-                  <span className={cn('mt-1 block text-xs', selected ? 'opacity-70' : 'text-faint')}>No shifts</span>
+                  <span className={cn('mt-1 block text-xs', selected ? 'opacity-70' : 'text-faint')}>{t('history.noShifts')}</span>
                 ) : (
                   <span className={cn('mt-1 block text-xs tabular-nums', selected ? 'opacity-80' : 'text-body')}>
-                    {formatHours(overview.hours)} · {overview.employees} {overview.employees === 1 ? 'person' : 'people'}
+                    {t(overview.employees === 1 ? 'history.monthPeopleOne' : 'history.monthPeopleMany', {
+                      hours: formatHours(overview.hours),
+                      people: overview.employees,
+                    })}
                   </span>
                 )}
               </button>
@@ -253,36 +266,36 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
               <div className="flex items-center gap-3">
                 <h2 id="month-heading" className="text-lg font-semibold tracking-[-0.01em]">{monthLabel}</h2>
                 <Button type="button" variant="outline" size="sm" onClick={downloadPdf} disabled={loading || downloading}>
-                  <FileDown />{downloading ? 'Preparing…' : 'Download PDF'}
+                  <FileDown />{t(downloading ? 'history.preparing' : 'history.downloadPdf')}
                 </Button>
               </div>
               <div className="flex flex-wrap items-end gap-3">
                 <div className="space-y-1">
-                  <Label htmlFor="history-employee" className="text-xs text-body">Employee</Label>
+                  <Label htmlFor="history-employee" className="text-xs text-body">{t('history.employee')}</Label>
                   <Select value={employeeFilter} onValueChange={setEmployeeFilter}>
                     <SelectTrigger id="history-employee" className="w-48">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent position="popper">
-                      <SelectItem value={ALL}>All employees</SelectItem>
+                      <SelectItem value={ALL}>{t('history.allEmployees')}</SelectItem>
                       {employees.map((employee) => (
                         <SelectItem key={employee._id} value={employee._id}>
-                          {employee.fullName}{employee.isActive ? '' : ' (inactive)'}
+                          {employee.fullName}{employee.isActive ? '' : ` (${t('employees.inactiveLower')})`}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="history-type" className="text-xs text-body">Type</Label>
+                  <Label htmlFor="history-type" className="text-xs text-body">{t('history.type')}</Label>
                   <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as ShiftType | typeof ALL)}>
                     <SelectTrigger id="history-type" className="w-36">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent position="popper">
-                      <SelectItem value={ALL}>All types</SelectItem>
+                      <SelectItem value={ALL}>{t('history.allTypes')}</SelectItem>
                       {SHIFT_TYPES.map((type) => (
-                        <SelectItem key={type} value={type}>{TYPE_LABELS[type]}</SelectItem>
+                        <SelectItem key={type} value={type}>{t(shiftTypeKey(type))}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -294,7 +307,7 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
                     onChange={(event) => setOnlyWorked(event.target.checked)}
                     className="size-4 accent-foreground"
                   />
-                  Only employees who worked
+                  {t('history.onlyWorked')}
                 </label>
               </div>
             </div>
@@ -310,23 +323,23 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
           </section>
 
           <section aria-labelledby="employees-heading" className="space-y-3">
-            <h2 id="employees-heading" className="text-sm font-semibold">By employee</h2>
+            <h2 id="employees-heading" className="text-sm font-semibold">{t('history.byEmployee')}</h2>
             <div className="overflow-x-auto rounded-md border bg-card">
               <table className="w-full text-sm">
                 <thead className="border-b text-left text-xs text-body">
                   <tr>
-                    <th scope="col" className="px-4 py-2.5 font-medium">Employee</th>
-                    <th scope="col" className="px-4 py-2.5 text-right font-medium">Shifts</th>
-                    <th scope="col" className="px-4 py-2.5 text-right font-medium">Hours</th>
-                    <th scope="col" className="px-4 py-2.5 text-right font-medium">Days worked</th>
-                    <th scope="col" className="px-4 py-2.5 text-right font-medium">Absences</th>
+                    <th scope="col" className="px-4 py-2.5 font-medium">{t('history.colEmployee')}</th>
+                    <th scope="col" className="px-4 py-2.5 text-right font-medium">{t('history.colShifts')}</th>
+                    <th scope="col" className="px-4 py-2.5 text-right font-medium">{t('history.colHours')}</th>
+                    <th scope="col" className="px-4 py-2.5 text-right font-medium">{t('history.colDaysWorked')}</th>
+                    <th scope="col" className="px-4 py-2.5 text-right font-medium">{t('history.colAbsences')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={5} className="px-4 py-6"><LoadingState label="Looking back at past weeks" className="mx-auto" /></td></tr>
+                    <tr><td colSpan={5} className="px-4 py-6"><LoadingState label={t('history.loading')} className="mx-auto" /></td></tr>
                   ) : rows.length === 0 ? (
-                    <tr><td colSpan={5} className="px-4 py-6 text-center text-body">Nobody worked in {monthLabel}.</td></tr>
+                    <tr><td colSpan={5} className="px-4 py-6 text-center text-body">{t('history.nobodyWorked', { month: monthLabel })}</td></tr>
                   ) : rows.map((row) => {
                     const employee = employeesById.get(row.employeeId)
                     return (
@@ -348,30 +361,28 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
 
           <section aria-labelledby="details-heading" className="space-y-3">
             <h2 id="details-heading" className="text-sm font-semibold">
-              All entries <span className="font-normal text-body">({loading ? '…' : details.length})</span>
+              {t('history.allEntries')} <span className="font-normal text-body">({loading ? '…' : details.length})</span>
             </h2>
             <div className="overflow-x-auto rounded-md border bg-card">
               <table className="w-full text-sm">
                 <thead className="border-b text-left text-xs text-body">
                   <tr>
-                    <th scope="col" className="px-4 py-2.5 font-medium">Date</th>
-                    <th scope="col" className="px-4 py-2.5 font-medium">Employee</th>
-                    <th scope="col" className="px-4 py-2.5 font-medium">Time</th>
-                    <th scope="col" className="px-4 py-2.5 text-right font-medium">Hours</th>
-                    <th scope="col" className="px-4 py-2.5 font-medium">Type</th>
-                    <th scope="col" className="px-4 py-2.5 font-medium">Notes</th>
+                    <th scope="col" className="px-4 py-2.5 font-medium">{t('history.colDate')}</th>
+                    <th scope="col" className="px-4 py-2.5 font-medium">{t('history.colEmployee')}</th>
+                    <th scope="col" className="px-4 py-2.5 font-medium">{t('history.colTime')}</th>
+                    <th scope="col" className="px-4 py-2.5 text-right font-medium">{t('history.colHours')}</th>
+                    <th scope="col" className="px-4 py-2.5 font-medium">{t('history.colType')}</th>
+                    <th scope="col" className="px-4 py-2.5 font-medium">{t('history.colNotes')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={6} className="px-4 py-6"><LoadingState label="Looking back at past weeks" className="mx-auto" /></td></tr>
+                    <tr><td colSpan={6} className="px-4 py-6"><LoadingState label={t('history.loading')} className="mx-auto" /></td></tr>
                   ) : details.length === 0 ? (
-                    <tr><td colSpan={6} className="px-4 py-6 text-center text-body">No entries in {monthLabel}.</td></tr>
-                  ) : details.map((shift) => {
-                    const start = moment(shift.startTime).tz(timeZone)
-                    return (
+                    <tr><td colSpan={6} className="px-4 py-6 text-center text-body">{t('history.noEntries', { month: monthLabel })}</td></tr>
+                  ) : details.map((shift) => (
                       <tr key={shift._id} className="border-b last:border-b-0">
-                        <td className="px-4 py-2.5 whitespace-nowrap tabular-nums">{start.format('ddd D MMM')}</td>
+                        <td className="px-4 py-2.5 whitespace-nowrap tabular-nums">{formatInZone(new Date(shift.startTime), timeZone, 'EEE d MMM', locale)}</td>
                         <td className="px-4 py-2.5"><EmployeeName employee={employeesById.get(shift.employeeId)} /></td>
                         <td className="px-4 py-2.5 whitespace-nowrap tabular-nums text-body">
                           {formatEntryTime(shift)}
@@ -384,13 +395,12 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
                             'rounded-sm px-1.5 py-0.5 text-xs font-medium',
                             shift.type === 'shift' ? 'bg-muted text-foreground' : 'bg-warning/15 text-foreground'
                           )}>
-                            {TYPE_LABELS[shift.type]}
+                            {t(shiftTypeKey(shift.type))}
                           </span>
                         </td>
                         <td className="max-w-64 truncate px-4 py-2.5 text-body">{shift.notes}</td>
                       </tr>
-                    )
-                  })}
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -402,13 +412,14 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
 }
 
 function EmployeeName({ employee, link }: { employee?: HistoryEmployee; link?: boolean }) {
-  if (!employee) return <span className="text-body">Removed employee</span>
+  const { t } = useLocale()
+  if (!employee) return <span className="text-body">{t('history.removedEmployee')}</span>
 
   const content = (
     <span className="inline-flex items-center gap-2">
       <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: employee.color }} aria-hidden="true" />
       <span className="truncate">{employee.fullName}</span>
-      {!employee.isActive && <span className="text-xs text-faint">inactive</span>}
+      {!employee.isActive && <span className="text-xs text-faint">{t('employees.inactiveLower')}</span>}
     </span>
   )
 
