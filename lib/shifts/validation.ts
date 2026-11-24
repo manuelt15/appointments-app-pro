@@ -24,7 +24,15 @@ export function canonicalEmployeeId(employeeId: string) {
   return employeeId.toLowerCase()
 }
 
-const employeeIdField = objectId.transform(canonicalEmployeeId)
+/**
+ * The id also arrives from the URL (`/api/employees/[id]`). It gets the same
+ * treatment as the body: checked before touching Mongo, so a malformed value
+ * never reaches a query, and normalised so the lock key and the shift rows use
+ * the canonical spelling instead of whatever the client sent.
+ */
+export const employeeIdParam = objectId.transform(canonicalEmployeeId)
+
+const employeeIdField = employeeIdParam
 
 const shiftFields = {
   employeeId: employeeIdField,
