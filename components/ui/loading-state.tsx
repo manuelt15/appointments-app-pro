@@ -77,9 +77,10 @@ export function LoadingState({
   const elapsed = useElapsed()
 
   return (
-    <div role="status" className={cn('flex w-fit items-center gap-2.5', className)}>
+    <div className={cn('flex w-fit items-center gap-2.5', className)}>
       <LoaderGrid variant={variant} />
       <span
+        role="status"
         className="loader-shimmer bg-clip-text text-[13px] font-medium text-transparent"
         style={{
           backgroundImage: 'linear-gradient(90deg, var(--body) 35%, var(--foreground) 50%, var(--body) 65%)',
@@ -89,7 +90,8 @@ export function LoadingState({
       >
         {label}
       </span>
-      <span className="font-mono text-xs text-body tabular-nums">{elapsed}</span>
+      {/* El cronometro cambia 10 veces por segundo: fuera del live region para no tapar el anuncio. */}
+      <span aria-hidden="true" className="font-mono text-xs text-body tabular-nums">{elapsed}</span>
     </div>
   )
 }
