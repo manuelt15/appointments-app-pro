@@ -4,7 +4,7 @@ import { resolveAuth } from '@/lib/api/auth'
 import { apiSuccess, apiError } from '@/lib/api/response'
 import { SchedulingBusyError, withSchedulingLock } from '@/lib/shifts/scheduling-lock'
 import { connectDB } from '@/lib/mongodb/client'
-import { Employee } from '@/lib/mongodb/models/Employee'
+import { Employee, buildEmployeeAnonymization } from '@/lib/mongodb/models/Employee'
 import { Shift } from '@/lib/mongodb/models/Shift'
 import { isCalendarDate } from '@/lib/shifts/calendar-date'
 
@@ -72,9 +72,14 @@ export async function DELETE(_req: NextRequest, ctx: RouteContext<'/api/employee
       )
     })
 
+    // Logical delete. The row stays because past shifts reference it, but the
+    // personal data goes: email, phone and birthday are cleared and the moment is
+    // recorded in anonymizedAt (see buildEmployeeAnonymization).
     await Employee.updateOne(
       { _id: id, businessId: auth.businessId },
-      { $set: { isActive: false } }
+      buildEmployeeAnonymization(),
+      // Mongoose needs to be told an array is a pipeline, not a list of updates.
+      { updatePipeline: true }
     )
     return apiSuccess({ deleted: true })
   } catch (error) {
