@@ -47,16 +47,40 @@ horaria del negocio (`Business.timezone`), no la del servidor ni la del navegado
 ### Interfaz
 
 - **Sidebar** estrecho de iconos con tooltips, que se despliega con la flecha.
-  Arriba, la imagen del negocio y el botón **New shift**, que abre el formulario
-  de turno desde cualquier página (`/dashboard?new=shift`). Abajo, el tema, los
-  ajustes y la tarjeta del usuario, con el menú de **Sign out** y el proveedor
-  con el que entró.
+  Arriba, la imagen del negocio y su nombre, y el botón **New shift**, que abre el
+  formulario de turno desde cualquier página (`/dashboard?new=shift`). Abajo, en
+  este orden: **Ajustes**, el tema, el idioma y la tarjeta del usuario, con el menú
+  de **Sign out** y el proveedor con el que entró.
 - **Modo oscuro** con tres estados: sistema (por defecto), claro y oscuro. Se
   aplica antes de pintar la página, sin parpadeo, y se guarda en el navegador.
+- **Idioma** español o inglés, con el interruptor del pie de la barra. Español por
+  defecto. La elección vive en una cookie de un año y el `<html lang>` cambia con
+  ella, así que la primera pintura ya sale en el idioma correcto y el lector de
+  pantalla pronuncia bien.
 - **Móvil**: cabecera con la imagen del negocio y un menú que entra desde la
   izquierda. La estructura mide lo que la pantalla y solo hace scroll el
   contenido, para que Safari y Chrome no descoloquen nada al mostrar u ocultar
   sus barras.
+
+### Idioma
+
+La interfaz está traducida entera: menú, ajustes, alta, aviso de privacidad,
+inicio, calendario, empleados, historial y los textos de turno. Los diccionarios
+viven en `lib/i18n/dictionaries/{es,en}.ts`, con el inglés tipado contra el
+español: **si falta una clave, no compila**. Las fechas se formatean con
+`date-fns` en el idioma activo, nunca con nombres de mes escritos a mano.
+
+Dos cosas que **no** se traducen a propósito:
+
+- **Los valores guardados.** El tipo de turno sigue siendo `shift`, `vacation`,
+  `sick_leave` o `time_off` en la base de datos y en la API. Solo cambian las
+  etiquetas que se ven.
+- **El prompt del agente** del bloque de claves API: es un prompt para agentes y
+  va en inglés. Un test comprueba que es idéntico en los dos idiomas.
+
+El **PDF del cuadrante, el del historial y el correo del horario siguen en
+inglés**: comparten `TYPE_LABELS` de `lib/schedule/week.ts` y quedaron fuera de
+esta tanda.
 
 ## Desarrollo local
 
