@@ -23,10 +23,12 @@ function load(file, dependencies) {
   return loadedModule.exports
 }
 
-for (const file of ['mcp/src/index.ts', 'mcp/dist/index.js']) {
+// mcp/dist no se versiona: solo se revisa el fuente (y el compilado si alguien lo tiene).
+for (const file of ['mcp/src/index.ts', 'mcp/dist/index.js'].filter(candidate => fs.existsSync(candidate))) {
   test(`${file}: delete_shift cannot become employee deletion`, async () => {
     const effects = []
     const employeeId = '000000000000000000000001'
+    const employeeFields = load('lib/employees/fields.ts', { zod: { z } })
     const employeeRoute = load('app/api/employees/[id]/route.ts', {
       'next/server': {},
       '@/lib/api/auth': { resolveAuth: async () => ({ businessId: 'business-a', authType: 'api_key' }) },
@@ -37,10 +39,17 @@ for (const file of ['mcp/src/index.ts', 'mcp/dist/index.js']) {
         SchedulingBusyError: class extends Error {},
         withSchedulingLock: async (_business, _employee, operation) => operation({ assertOwned: async () => {} }, null),
       },
-      '@/lib/mongodb/models/Employee': { Employee: {
-        findOne: async () => ({ _id: employeeId }),
-        updateOne: async (_filter, update) => effects.push(update),
-      } },
+      '@/lib/employees/fields': employeeFields,
+      '@/lib/mongodb/models/Employee': {
+        Employee: {
+          findOne: async () => ({ _id: employeeId }),
+          updateOne: async (_filter, update) => effects.push(update),
+        },
+        // Mismo pipeline que el modelo real: el borrado anonimiza los datos personales.
+        buildEmployeeAnonymization: (now = new Date()) => [{
+          $set: { isActive: false, email: null, phone: null, birthday: null, anonymizedAt: { $ifNull: ['$anonymizedAt', now] } },
+        }],
+      },
       '@/lib/mongodb/models/Shift': { Shift: { deleteMany: async () => effects.push('future shifts deleted') } },
     })
     const tools = {}
