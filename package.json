@@ -23,8 +23,8 @@
     "moment": "^2.30.1",
     "moment-timezone": "^0.6.0",
     "mongodb": "^6.21.0",
-    "mongoose": "^9.10.0",
-    "next": "^16.3.5",
+    "mongoose": "^9.13.0",
+    "next": "^16.4.6",
     "next-auth": "^5.0.0-beta.32",
     "pdf-lib": "^1.17.1",
     "radix-ui": "^1.6.7",
@@ -34,7 +34,7 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "tw-animate-css": "^1.4.0",
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -44,7 +44,7 @@
     "@types/react-big-calendar": "^1.16.3",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "^16.3.5",
+    "eslint-config-next": "^16.4.6",
     "shadcn": "^4.21.0",
     "tailwindcss": "^4",
     "typescript": "^5",
