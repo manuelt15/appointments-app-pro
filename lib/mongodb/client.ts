@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import { MongoClient } from 'mongodb'
+import { ensureUserEmailIndex } from './indexes'
 
 const MONGODB_URI = process.env.MONGODB_URI!
 
@@ -38,7 +39,16 @@ globalThis.__mongoClient = mongoClientCache
 
 if (!mongoClientCache.promise) {
   mongoClientCache.client = new MongoClient(MONGODB_URI)
-  mongoClientCache.promise = mongoClientCache.client.connect()
+  // The unique index on users.email is what stops two concurrent sign-ups from
+  // creating the same account twice. It is built once per process, right after
+  // the first connection, and it never takes the app down: ensureUserEmailIndex
+  // does not throw, so a database that already holds duplicates still boots and
+  // the warning below is the only trace.
+  mongoClientCache.promise = mongoClientCache.client.connect().then(async (client) => {
+    const result = await ensureUserEmailIndex(client.db())
+    if (!result.ok) console.warn(`[mongodb] ${result.message}`)
+    return client
+  })
 }
 
 export const clientPromise: Promise<MongoClient> = mongoClientCache.promise
