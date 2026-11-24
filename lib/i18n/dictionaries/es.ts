@@ -5,7 +5,6 @@ export const es = {
   'nav.history': 'Historial',
   'nav.settings': 'Ajustes',
   'nav.newShift': 'Nuevo turno',
-  'nav.business': 'Negocio',
   'nav.collapse': 'Contraer barra lateral',
   'nav.expand': 'Expandir barra lateral',
   'nav.openNavigation': 'Abrir navegación',
@@ -25,4 +24,217 @@ export const es = {
   'nav.email': 'correo electrónico',
   'nav.signOut': 'Cerrar sesión',
   'common.cancel': 'Cancelar',
+
+  // Ajustes: cabecera y tarjeta de claves
+  'settings.title': 'Ajustes',
+  'settings.subtitle': 'Claves de API e integraciones',
+  'settings.apiKeys.announceGenerated': 'Clave de API generada.',
+  'settings.apiKeys.newKeyTitle': 'Nueva clave de API',
+  'settings.apiKeys.newKeyBody': 'Cópiala ahora. No se volverá a mostrar.',
+  'settings.apiKeys.copyNewAria': 'Copiar la clave de API nueva',
+  'settings.apiKeys.dismiss': 'Descartar',
+  'settings.apiKeys.title': 'Claves de API',
+  'settings.apiKeys.intro':
+    'Una clave de API es una contraseña para un programa, no para una persona. Un programa que la tenga puede leer y cambiar este calendario sin iniciar sesión como tú. Así se conecta un agente como Claude Code, para que le puedas preguntar quién trabaja el viernes o pedirle que organice los turnos de la semana que viene.',
+  'settings.apiKeys.warningTitle': 'Trata esta clave como una contraseña',
+  'settings.apiKeys.warningBody':
+    'Una clave de API da el mismo acceso que tu cuenta: quien la tenga puede leer y cambiar el calendario. Solo se muestra una vez, al crearla, y caduca por su cuenta. No la pegues nunca en un chat, en un commit ni en una captura de pantalla.',
+  'settings.apiKeys.nameLabel': 'Nombre de la clave',
+  'settings.apiKeys.namePlaceholder': 'Claude Code en mi portátil',
+  'settings.apiKeys.nameHint': 'Una clave por agente. El nombre te dice después cuál tienes que revocar.',
+  'settings.apiKeys.expiryLabel': 'Caduca después de',
+  'settings.apiKeys.expiry30Label': '30 días',
+  'settings.apiKeys.expiry30Hint': 'La más corta. Va bien para una prueba o para un agente de un solo uso.',
+  'settings.apiKeys.expiry90Label': '90 días',
+  'settings.apiKeys.expiry90Hint':
+    'La recomendada. Suficiente para el día a día y lo bastante corta para limitar el daño si la clave se filtra.',
+  'settings.apiKeys.expiry365Label': '365 días',
+  'settings.apiKeys.expiry365Hint': 'La más larga. Úsala solo para un agente que funciona todos los días.',
+  'settings.apiKeys.creating': 'Creando…',
+  'settings.apiKeys.create': 'Crear clave',
+  'settings.apiKeys.listTitle': 'Tus claves',
+  'settings.apiKeys.refresh': 'Actualizar',
+  'settings.apiKeys.listLoading': 'Comprobando tus claves',
+  'settings.apiKeys.retry': 'Reintentar',
+  'settings.apiKeys.empty': 'Todavía no hay claves de API. Crea una arriba para conectar un agente.',
+  'settings.apiKeys.created': 'Creada el {date}',
+  'settings.apiKeys.expiredNote': 'Caducada. Esta clave ya no funciona.',
+  'settings.apiKeys.revokeAria': 'Revocar {name}',
+  'settings.apiKeys.revokeAll': 'Revocar todas las claves',
+  'settings.apiKeys.revokeAllBody':
+    'Úsalo solo cuando no sepas qué clave se ha filtrado. Corta a todos los agentes a la vez, así que cada uno necesita una clave nueva después.',
+  'settings.apiKeys.revokeTitle': '¿Revocar la clave de API?',
+  'settings.apiKeys.revokeDescription': '{name} dejará de funcionar inmediatamente.',
+  'settings.apiKeys.thisKey': 'Esta clave',
+  'settings.apiKeys.revokeConfirm': 'Revocar clave',
+  'settings.apiKeys.revokeAllTitle': '¿Revocar todas las claves de API?',
+  'settings.apiKeys.revokeAllDescription':
+    'Todas las claves dejarán de funcionar inmediatamente. Todos los agentes que las usan pierden el acceso a la vez y cada uno necesita una clave nueva.',
+  'settings.apiKeys.revokeAllConfirm': 'Revocar todas las claves',
+  'settings.apiKeys.loadError': 'No se han podido cargar las claves de API.',
+  'settings.apiKeys.createError': 'No se ha podido crear la clave',
+  'settings.apiKeys.revokeError': 'No se ha podido revocar la clave',
+  'settings.apiKeys.revokeAllError': 'No se han podido revocar todas las claves',
+  'settings.apiKeys.revoked': 'Clave revocada',
+  'settings.apiKeys.revokedAll': 'Todas las claves de API revocadas',
+  'settings.apiKeys.copied': 'Copiada',
+  'settings.apiKeys.copyError': 'No se ha podido copiar la clave',
+
+  // Ajustes: estados de la clave
+  'settings.keys.noExpiry': 'Sin fecha de caducidad',
+  'settings.keys.expired': 'Caducada',
+  'settings.keys.expiresInOne': 'Caduca en 1 día',
+  'settings.keys.expiresIn': 'Caduca en {days} días',
+  'settings.keys.neverUsed': 'Nunca usada',
+  'settings.keys.lastUsedToday': 'Usada hoy por última vez',
+  'settings.keys.lastUsedOne': 'Usada hace 1 día por última vez',
+  'settings.keys.lastUsed': 'Usada hace {days} días por última vez',
+
+  // Ajustes: guía de conexión
+  'settings.guide.title': 'Conecta un agente',
+  'settings.guide.intro':
+    'Un agente es un programa como Claude Code que lee y cambia tu calendario por ti. Necesita una clave de API para saber cuál es tu calendario. Deja que tu agente lo configure o sigue los pasos tú mismo.',
+  'settings.guide.manualTitle': 'Conéctalo a tu agente',
+  'settings.guide.manualIntro': '¿Prefieres configurarlo tú? Sigue estos pasos en orden, a mano.',
+  'settings.guide.stepLabel': 'Paso {step}: {title}',
+  'settings.guide.step1Title': 'Crea la clave',
+  'settings.guide.step1Body':
+    'Sube hasta **Crear clave**, ponle un nombre que diga dónde va a vivir la clave (por ejemplo `Claude Code en mi portátil`) y elige cuánto tiene que durar.',
+  'settings.guide.step1Why':
+    'Por qué: una clave por agente. Si dos programas comparten clave, revocarla detiene a los dos y no puedes saber cuál era el problema.',
+  'settings.guide.step2Title': 'Copia la clave en el momento',
+  'settings.guide.step2Body':
+    'La clave nueva aparece en un recuadro arriba de esta página, con un botón para copiarla. Cópiala ahora.',
+  'settings.guide.step2Why':
+    'Por qué: la app muestra la clave una sola vez, en el momento en que la creas. Nadie, ni siquiera el soporte, puede volver a mostrártela después. Si la pierdes, creas una nueva.',
+  'settings.guide.step3Title': 'Guárdala donde el agente la lea',
+  'settings.guide.step3Body':
+    'En el proyecto donde corre el agente, crea un fichero llamado `.mcp.json` con este contenido y pega dentro la clave que acabas de copiar:',
+  'settings.guide.step3Why':
+    'Por qué: el agente lee su configuración de ese fichero cuando arranca. Es un fichero local de tu máquina, y este proyecto ya lo ignora en git, así que nunca llega al repositorio.',
+  'settings.guide.step3Url':
+    '`MCP_API_URL` es la dirección de esta app. Los endpoints viven bajo `https://<your-domain>/api` y el servidor añade esa parte por su cuenta, así que la dirección de arriba va sin `/api`.',
+  'settings.guide.step3Other':
+    'Si el agente corre en otro ordenador, cambia la dirección por tu propio dominio, por ejemplo `https://your-domain.example`.',
+  'settings.guide.step3Secret':
+    'No pongas nunca la clave en el código, en un commit, en un chat ni en una captura de pantalla. Una clave en un chat es una clave en un sitio donde mucha gente puede leerla.',
+  'settings.guide.step4Title': 'Compila y arranca el servidor',
+  'settings.guide.step4Body': 'Desde la raíz de este repositorio, ejecuta:',
+  'settings.guide.step4Why':
+    'Por qué: el agente necesita este servidor para traducir lo que le pides en llamadas a tu calendario. No se publica con el repositorio a propósito, así que lo compilas tú y siempre ejecuta código que has visto.',
+  'settings.guide.step5Title': 'Pruébalo y comprueba que ha funcionado',
+  'settings.guide.step5Body':
+    'Pregúntale al agente algo sobre el calendario, por ejemplo ~«¿quién trabaja el viernes?»~, y luego vuelve a esta página y pulsa **Actualizar** en la lista de claves.',
+  'settings.guide.step5Why':
+    'Por qué: la clave apunta cuándo se usó por última vez. Si en la lista ves **Usada hace…** en vez de **Nunca usada**, el agente está conectado correctamente.',
+  'settings.guide.step6Title': 'Si la clave se filtra',
+  'settings.guide.step6Body':
+    'Revoca esa clave con el icono de la papelera que tiene al lado y crea una nueva. Si no sabes qué clave se ha filtrado, usa **Revocar todas las claves**: todos los agentes se paran a la vez y le das una clave nueva a cada uno.',
+  'settings.guide.step6Why':
+    'Por qué: una clave filtrada funciona como una contraseña que tiene otra persona. Revocarla quita el acceso inmediatamente, y además la clave caduca sola pasado un tiempo, como segunda red de seguridad.',
+
+  // Ajustes: el prompt que se pega en el agente (el prompt en sí no se traduce)
+  'settings.prompt.title': 'Deja que tu agente lo configure',
+  'settings.prompt.intro':
+    '¿No quieres seguir los pasos tú? Copia el texto de abajo y pégalo en tu agente. El agente hace la configuración por ti.',
+  'settings.prompt.label': 'Texto para pegar en tu agente',
+  'settings.prompt.copyAria': 'Copiar el texto de configuración',
+  'settings.prompt.copied': 'Copiado',
+  'settings.prompt.copyError': 'No se ha podido copiar el texto. Selecciónalo y cópialo a mano.',
+  'settings.prompt.canDoTitle': 'Lo que puedes hacer cuando funcione',
+  'settings.prompt.canDo1': 'Ver los turnos de un día, de una semana o de un empleado',
+  'settings.prompt.canDo2': 'Crear un turno',
+  'settings.prompt.canDo3': 'Mover un turno a otra hora o a otra persona',
+  'settings.prompt.canDo4': 'Borrar un turno',
+  'settings.prompt.canDo5': 'Comprobar quién cubre un rango de horas',
+  'settings.prompt.canDo6': 'Listar los empleados',
+  'settings.prompt.tryTitle': 'Cómo probarlo',
+  'settings.prompt.try1': 'Pregúntale quién trabaja el viernes',
+  'settings.prompt.try2': 'Pídele que cree un turno de prueba y luego que borre ese mismo turno',
+  'settings.prompt.try3': 'Vuelve a esta página, pulsa Actualizar y comprueba que la clave dice que se ha usado',
+  'settings.prompt.footnote':
+    'El agente tiene el mismo acceso al calendario que tu cuenta. Por eso la clave caduca sola y por eso puedes revocarla desde esta página.',
+
+  // Ajustes: fila de logos
+  'settings.icons.worksWith': 'Funciona con',
+
+  // Acceso
+  'auth.signIn': 'Entrar',
+  'auth.signingIn': 'Entrando…',
+  'auth.email': 'Correo electrónico',
+  'auth.password': 'Contraseña',
+  'auth.name': 'Nombre',
+  'auth.namePlaceholder': 'Tu nombre',
+  'auth.passwordPlaceholder': 'Mínimo 8 caracteres',
+  'auth.or': 'o',
+  'auth.continueWithGoogle': 'Continuar con Google',
+  'auth.continueWithGitHub': 'Continuar con GitHub',
+  'auth.consentPrefix': 'He leído y acepto el ',
+  'auth.consentLink': 'aviso de privacidad',
+  'auth.consentSuffix': '.',
+  'auth.consentRequired': 'Acepta el aviso de privacidad para continuar.',
+  'auth.consentError': 'No se ha podido registrar tu consentimiento. Inténtalo de nuevo.',
+  'auth.login.title': 'Entrar',
+  'auth.login.subtitle': 'Organiza quién trabaja y cuándo, y ten el calendario de tu equipo en un solo sitio.',
+  'auth.login.footerQuestion': '¿No tienes cuenta? ',
+  'auth.login.footerLink': 'Crea una',
+  'auth.login.oauthReady': 'Google y GitHub te dejarán entrar.',
+  'auth.login.oauthNeedsConsent': 'Acepta el aviso de privacidad de arriba para continuar con Google o GitHub.',
+  'auth.invalidCredentials': 'Correo o contraseña incorrectos',
+  'auth.signInFailed': 'No se ha podido entrar. Inténtalo de nuevo.',
+  'auth.register.title': 'Crear cuenta',
+  'auth.register.subtitle':
+    'Configura el calendario de turnos de tu equipo: añade empleados, planifica sus horas y controla los días libres.',
+  'auth.register.footerQuestion': '¿Ya tienes cuenta? ',
+  'auth.register.footerLink': 'Entra',
+  'auth.register.oauthReady': 'Google y GitHub crearán tu cuenta con el aviso de privacidad aceptado.',
+  'auth.register.oauthNeedsConsent': 'Acepta el aviso de privacidad de abajo para continuar con Google o GitHub.',
+  'auth.register.creating': 'Creando la cuenta…',
+  'auth.register.submit': 'Crear cuenta',
+  'auth.registrationFailed': 'No se ha podido crear la cuenta',
+  'auth.signInAfterRegistrationFailed': 'No se ha podido entrar después de crear la cuenta',
+  'auth.acceptPrivacy.title': 'Acepta el aviso de privacidad',
+  'auth.acceptPrivacy.subtitle':
+    'Tu cuenta todavía no está creada. Lee el aviso de privacidad, acéptalo y continúa con el mismo proveedor con el que has entrado.',
+  'auth.acceptPrivacy.footerPrefix': 'Puedes leer el ',
+  'auth.acceptPrivacy.footerLink': 'aviso de privacidad completo',
+  'auth.acceptPrivacy.footerSuffix': ' antes de aceptarlo.',
+  'auth.acceptPrivacy.oauthReady': 'Continúa con el proveedor con el que has entrado.',
+  'auth.acceptPrivacy.oauthNeedsConsent': 'Acepta el aviso de privacidad para crear tu cuenta.',
+
+  // Aviso de privacidad
+  'privacy.title': 'Aviso de privacidad',
+  'privacy.intro':
+    'Este aviso explica, en lenguaje claro, qué datos personales trata esta aplicación, con qué finalidad, durante cuánto tiempo y a quién llegan. Cubre las cuentas de negocio del servicio y los empleados cuyos datos gestionan esas cuentas.',
+  'privacy.controllerTitle': 'Quién es el responsable del tratamiento',
+  'privacy.controllerBody':
+    'El responsable del tratamiento es **[RESPONSABLE LEGAL]**. El nombre legal, el NIF y los datos de contacto se publicarán en esta sección antes de que el servicio se abra al público.',
+  'privacy.dataTitle': 'Qué datos tratamos y para qué',
+  'privacy.dataIntro': 'Solo tratamos los datos que el servicio necesita para funcionar.',
+  'privacy.dataAccount':
+    '**Tu cuenta de negocio.** Cuando creas una cuenta tratamos tu nombre, tu correo electrónico y la contraseña que eliges, que se guarda solo como un hash irreversible, además del nombre y la zona horaria de tu negocio. Finalidad: crear la cuenta, darte acceso y vincular el calendario a tu negocio. Base jurídica: el contrato contigo (art. 6.1.b del RGPD).',
+  'privacy.dataEmployees':
+    '**Los datos de tus empleados.** Cuando añades un empleado al calendario tratamos su nombre completo y, de forma opcional, su correo electrónico, su teléfono, su fecha de nacimiento y su fecha de alta, junto con los turnos y las ausencias que tenga asignados: fechas, horas, tipo de ausencia y las notas que añadas. Finalidad: construir y mostrar el calendario de trabajo; el cumpleaños se marca en el calendario cada año. Base jurídica: el interés legítimo del negocio en organizar la planificación de su personal (art. 6.1.f del RGPD). Si gestionas una cuenta de negocio, informar a tus empleados y tener un motivo válido para añadirlos es responsabilidad tuya. Uno de los tipos de ausencia marca la ausencia como baja por enfermedad; esos datos se tratarán con la base jurídica que se defina en la revisión legal pendiente.',
+  'privacy.retentionTitle': 'Cuánto tiempo lo guardamos',
+  'privacy.retentionBody':
+    'Los datos de la cuenta se guardan mientras la cuenta está activa. Cuando se borra un empleado, su ficha se anonimiza inmediatamente: se borran el correo electrónico, el teléfono y la fecha de nacimiento. Los turnos históricos se conservan y siguen vinculados a esa ficha anonimizada, para que el historial del calendario y las exportaciones en PDF sigan siendo legibles. Solo el nombre permanece asociado a esos turnos pasados.',
+  'privacy.recipientsTitle': 'Quién recibe tus datos',
+  'privacy.recipientsBody':
+    'Los datos se guardan con los proveedores necesarios para prestar este servicio: el proveedor de alojamiento de la aplicación y el proveedor de la base de datos. Si entras con Google o GitHub, ese proveedor participa en identificarte. No vendemos datos personales, no los compartimos con fines publicitarios y no usamos analítica ni rastreadores de marketing.',
+  'privacy.rightsTitle': 'Tus derechos',
+  'privacy.rightsBody':
+    'Tienes derecho a acceder a tus datos, rectificarlos, suprimirlos, limitar su tratamiento, oponerte a él y solicitar su portabilidad. Para ejercer cualquiera de estos derechos, escribe a **[EMAIL DE CONTACTO]**. Todavía no hay autoservicio para estas solicitudes: se tramitan a mano y se responden por correo electrónico, normalmente en el plazo de un mes. Los empleados que aparecen en un calendario pueden usar la misma dirección.',
+  'privacy.complaintTitle': 'Reclamación ante la AEPD',
+  'privacy.complaintPrefix':
+    'Si crees que tus datos no se han tratado correctamente, puedes presentar una reclamación ante la Agencia Española de Protección de Datos (AEPD) en ',
+  'privacy.complaintSuffix': '.',
+  'privacy.draftTitle': 'Aviso en borrador, pendiente de revisión legal',
+  'privacy.draftBody':
+    'Este texto no lo ha revisado ningún abogado. Antes de que el servicio se abra al público, los marcadores entre corchetes ([RESPONSABLE LEGAL] y [EMAIL DE CONTACTO]) se tienen que sustituir por valores reales y el aviso tiene que pasar una revisión legal. Mientras tanto, trata esta página como un borrador.',
+  'privacy.healthBody':
+    '**Datos de salud.** El tipo de turno sick_leave revela que un empleado está de baja por enfermedad, lo que son datos de salud según el art. 9 del RGPD. Antes de que el servicio se abra al público, se tiene que decidir la base jurídica del art. 9.2 del RGPD (consentimiento explícito del empleado o normativa laboral aplicable), documentar el acceso restringido y confirmar que no se guarda ningún detalle clínico.',
+  'privacy.lastUpdated': 'Última actualización: 24 de noviembre de 2026.',
+  'privacy.backPrefix': 'Volver a ',
+  'privacy.backLink': 'entrar',
+  'privacy.backSuffix': '.',
 }

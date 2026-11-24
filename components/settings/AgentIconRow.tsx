@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Small row with the agents a person is most likely to use, next to the
  * prompt that lets the agent do the setup for them.
@@ -12,12 +14,17 @@
  */
 
 import { AGENT_LOGOS } from '@/components/settings/AgentLogos'
+import { useLocale } from '@/lib/i18n/client'
 
 export function AgentIconRow() {
+  const { t } = useLocale()
+
   return (
     <div className="space-y-2">
       {/* Small label above the marks, the way skills.sh labels its row. */}
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Works with</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {t('settings.icons.worksWith')}
+      </p>
       <ul className="flex flex-wrap items-center gap-3">
         {AGENT_LOGOS.map((agent) => {
           const { Glyph } = agent

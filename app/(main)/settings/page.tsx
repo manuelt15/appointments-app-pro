@@ -11,12 +11,26 @@ import { LoadingState } from '@/components/ui/loading-state'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ConnectAgentGuide } from '@/components/settings/ConnectAgentGuide'
 import { expiryLabel, lastUsedLabel } from '@/components/settings/api-key-status'
+import { t as translate } from '@/lib/i18n/translate'
+import { useLocale } from '@/lib/i18n/client'
 import type { ApiKey } from '@/types'
 
 const EXPIRY_OPTIONS = [
-  { value: '30', label: '30 days', hint: 'Shortest. Good for a test or a one-off agent.' },
-  { value: '90', label: '90 days', hint: 'Recommended. Long enough for daily use, short enough to limit the damage if the key leaks.' },
-  { value: '365', label: '365 days', hint: 'Longest. Use it only for an agent that runs every day.' },
+  {
+    value: '30',
+    labelKey: 'settings.apiKeys.expiry30Label',
+    hintKey: 'settings.apiKeys.expiry30Hint',
+  },
+  {
+    value: '90',
+    labelKey: 'settings.apiKeys.expiry90Label',
+    hintKey: 'settings.apiKeys.expiry90Hint',
+  },
+  {
+    value: '365',
+    labelKey: 'settings.apiKeys.expiry365Label',
+    hintKey: 'settings.apiKeys.expiry365Hint',
+  },
 ] as const
 
 const DEFAULT_EXPIRY_DAYS = '90'
@@ -26,6 +40,7 @@ const DEFAULT_EXPIRY_DAYS = '90'
 const SAFETY_MARGIN_MS = 5 * 60 * 1000
 
 export default function SettingsPage() {
+  const { locale, t } = useLocale()
   const [keys, setKeys] = useState<ApiKey[]>([])
   const [newKeyName, setNewKeyName] = useState('')
   const [newKey, setNewKey] = useState<string | null>(null)
@@ -46,17 +61,20 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const controller = new AbortController()
+    // `t` changes identity on every render of the provider, so the effect
+    // depends on the locale string instead: a stable value for the request.
+    const errorLabel = translate(locale, 'settings.apiKeys.loadError')
 
     async function loadKeys() {
       try {
         const response = await fetch('/api/api-keys', { signal: controller.signal })
-        if (!response.ok) throw new Error('API keys could not be loaded.')
+        if (!response.ok) throw new Error(errorLabel)
         const data = await response.json()
         setKeys(data.data ?? [])
         setListError('')
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return
-        setListError(error instanceof Error ? error.message : 'API keys could not be loaded.')
+        setListError(error instanceof Error ? error.message : errorLabel)
       } finally {
         if (!controller.signal.aborted) setListLoading(false)
       }
@@ -64,7 +82,7 @@ export default function SettingsPage() {
 
     loadKeys()
     return () => controller.abort()
-  }, [refreshKey])
+  }, [refreshKey, locale])
 
   async function createKey(event: React.FormEvent) {
     event.preventDefault()
@@ -80,7 +98,7 @@ export default function SettingsPage() {
         body: JSON.stringify({ name: newKeyName, expiresAt }),
       })
       const data = await response.json().catch(() => null)
-      if (!response.ok) throw new Error(data?.error ?? 'Failed to create key')
+      if (!response.ok) throw new Error(data?.error ?? t('settings.apiKeys.createError'))
 
       // The create response also carries the stored hash; it never goes to the list.
       const created = { ...data.data }
@@ -90,7 +108,7 @@ export default function SettingsPage() {
       setKeys((current) => [...current, created])
       setNewKeyName('')
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to create key')
+      toast.error(error instanceof Error ? error.message : t('settings.apiKeys.createError'))
     } finally {
       setLoading(false)
     }
@@ -102,12 +120,12 @@ export default function SettingsPage() {
 
     try {
       const response = await fetch(`/api/api-keys/${deleteTarget._id}`, { method: 'DELETE' })
-      if (!response.ok) throw new Error('Failed to revoke key')
+      if (!response.ok) throw new Error(t('settings.apiKeys.revokeError'))
       setKeys((current) => current.filter((key) => key._id !== deleteTarget._id))
       setDeleteTarget(null)
-      toast.success('Key revoked')
+      toast.success(t('settings.apiKeys.revoked'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to revoke key')
+      toast.error(error instanceof Error ? error.message : t('settings.apiKeys.revokeError'))
     } finally {
       setDeleting(false)
     }
@@ -118,13 +136,13 @@ export default function SettingsPage() {
 
     try {
       const response = await fetch('/api/api-keys?all=1', { method: 'DELETE' })
-      if (!response.ok) throw new Error('Failed to revoke all keys')
+      if (!response.ok) throw new Error(t('settings.apiKeys.revokeAllError'))
       setKeys([])
       setRevokeAllOpen(false)
       setNewKey(null)
-      toast.success('All API keys revoked')
+      toast.success(t('settings.apiKeys.revokedAll'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to revoke all keys')
+      toast.error(error instanceof Error ? error.message : t('settings.apiKeys.revokeAllError'))
     } finally {
       setRevokingAll(false)
     }
@@ -134,9 +152,9 @@ export default function SettingsPage() {
     if (!newKey) return
     try {
       await navigator.clipboard.writeText(newKey)
-      toast.success('Copied')
+      toast.success(t('settings.apiKeys.copied'))
     } catch {
-      toast.error('Could not copy the key')
+      toast.error(t('settings.apiKeys.copyError'))
     }
   }
 
@@ -145,31 +163,33 @@ export default function SettingsPage() {
     setRefreshKey((key) => key + 1)
   }
 
-  const expiryHint = EXPIRY_OPTIONS.find((option) => option.value === expiryDays)?.hint ?? ''
+  const expiryHint = t(
+    EXPIRY_OPTIONS.find((option) => option.value === expiryDays)?.hintKey ?? 'settings.apiKeys.expiry90Hint',
+  )
 
   return (
     <div className="flex min-h-full flex-col">
       <header className="border-b bg-card px-4 py-4 sm:px-6">
-        <h1 className="text-xl font-semibold tracking-[-0.02em]">Settings</h1>
-        <p className="text-sm text-body">API keys and integrations</p>
+        <h1 className="text-xl font-semibold tracking-[-0.02em]">{t('settings.title')}</h1>
+        <p className="text-sm text-body">{t('settings.subtitle')}</p>
       </header>
 
       <div className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6">
-        <p role="status" className="sr-only">{newKey ? 'API key generated.' : ''}</p>
+        <p role="status" className="sr-only">{newKey ? t('settings.apiKeys.announceGenerated') : ''}</p>
 
         {newKey && (
           <section className="mb-6 space-y-3 rounded-lg border bg-muted p-4">
             <div>
-              <h2 className="text-sm font-medium">New API key</h2>
-              <p className="text-sm text-body">Copy it now. It won&apos;t be shown again.</p>
+              <h2 className="text-sm font-medium">{t('settings.apiKeys.newKeyTitle')}</h2>
+              <p className="text-sm text-body">{t('settings.apiKeys.newKeyBody')}</p>
             </div>
             <div className="flex min-w-0 items-center gap-2">
               <code className="min-w-0 flex-1 truncate rounded-sm border bg-card px-3 py-2 font-mono text-xs">{newKey}</code>
-              <Button type="button" variant="outline" size="icon" aria-label="Copy new API key" onClick={copyKey}>
+              <Button type="button" variant="outline" size="icon" aria-label={t('settings.apiKeys.copyNewAria')} onClick={copyKey}>
                 <Copy />
               </Button>
             </div>
-            <Button type="button" variant="ghost" size="sm" onClick={() => setNewKey(null)}>Dismiss</Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setNewKey(null)}>{t('settings.apiKeys.dismiss')}</Button>
           </section>
         )}
 
@@ -181,42 +201,38 @@ export default function SettingsPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:items-start">
           <section className="space-y-5 rounded-lg border bg-card p-5 sm:p-6" aria-labelledby="api-keys-title">
             <div className="space-y-2">
-              <h2 id="api-keys-title" className="text-base font-semibold">API keys</h2>
+              <h2 id="api-keys-title" className="text-base font-semibold">{t('settings.apiKeys.title')}</h2>
               <p className="max-w-prose text-sm text-body">
-                An API key is a password for a program, not for a person. A program that has it can read and
-                change this schedule without signing in as you. That is how an agent like Claude Code connects,
-                so you can ask it who works on Friday or to book next week&apos;s shifts.
+                {t('settings.apiKeys.intro')}
               </p>
             </div>
 
             <div role="note" className="flex gap-3 rounded-md border border-warning/40 bg-warning/10 p-4">
               <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden="true" />
               <div className="space-y-1">
-                <p className="text-sm font-medium">Treat this key like a password</p>
+                <p className="text-sm font-medium">{t('settings.apiKeys.warningTitle')}</p>
                 <p className="max-w-prose text-sm text-body">
-                  An API key gives the same access as your account: whoever holds it can read and change the
-                  schedule. It is shown only once, when you create it, and it expires on its own. Never paste it
-                  into a chat, a commit or a screenshot.
+                  {t('settings.apiKeys.warningBody')}
                 </p>
               </div>
             </div>
 
             <form onSubmit={createKey} className="max-w-prose space-y-4" aria-busy={loading}>
               <div className="space-y-2">
-                <Label htmlFor="key-name">Key name</Label>
-                <Input id="key-name" value={newKeyName} onChange={(event) => setNewKeyName(event.target.value)} required placeholder="Claude Code on my laptop" />
-                <p className="text-sm text-body">One key per agent. The name tells you later which one to revoke.</p>
+                <Label htmlFor="key-name">{t('settings.apiKeys.nameLabel')}</Label>
+                <Input id="key-name" value={newKeyName} onChange={(event) => setNewKeyName(event.target.value)} required placeholder={t('settings.apiKeys.namePlaceholder')} />
+                <p className="text-sm text-body">{t('settings.apiKeys.nameHint')}</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="key-expiry" id="key-expiry-label">Expires after</Label>
+                <Label htmlFor="key-expiry" id="key-expiry-label">{t('settings.apiKeys.expiryLabel')}</Label>
                 <Select value={expiryDays} onValueChange={setExpiryDays}>
                   <SelectTrigger id="key-expiry" aria-labelledby="key-expiry-label" className="w-full sm:w-56">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent position="popper">
                     {EXPIRY_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                      <SelectItem key={option.value} value={option.value}>{t(option.labelKey)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -224,49 +240,49 @@ export default function SettingsPage() {
               </div>
 
               <Button type="submit" disabled={loading} className="w-full sm:w-auto">
-                <Plus />{loading ? 'Creating…' : 'Create key'}
+                <Plus />{loading ? t('settings.apiKeys.creating') : t('settings.apiKeys.create')}
               </Button>
             </form>
 
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-sm font-medium">Your keys</h3>
+                <h3 className="text-sm font-medium">{t('settings.apiKeys.listTitle')}</h3>
                 <Button type="button" variant="ghost" size="sm" onClick={refreshKeys} disabled={listLoading}>
-                  <RefreshCw />Refresh
+                  <RefreshCw />{t('settings.apiKeys.refresh')}
                 </Button>
               </div>
 
               {listLoading ? (
-                <LoadingState label="Checking your keys" />
+                <LoadingState label={t('settings.apiKeys.listLoading')} />
               ) : listError ? (
                 <div role="alert">
                   <p className="text-sm text-body">{listError}</p>
-                  <Button variant="outline" className="mt-3" onClick={refreshKeys}>Try again</Button>
+                  <Button variant="outline" className="mt-3" onClick={refreshKeys}>{t('settings.apiKeys.retry')}</Button>
                 </div>
               ) : keys.length === 0 ? (
-                <p className="text-sm text-body">No API keys yet. Create one above to connect an agent.</p>
+                <p className="text-sm text-body">{t('settings.apiKeys.empty')}</p>
               ) : (
                 <ul className="divide-y">
                   {keys.map((key) => {
-                    const expiry = expiryLabel(key.expiresAt)
+                    const expiry = expiryLabel(key.expiresAt, locale)
                     return (
                       <li key={key._id} className="flex min-w-0 items-start justify-between gap-4 py-3">
                         <div className="min-w-0 space-y-1">
                           <p className="truncate text-sm font-medium">{key.name}</p>
                           <p className="text-xs text-body">
-                            Created {new Date(key.createdAt).toLocaleDateString()}
+                            {t('settings.apiKeys.created', { date: new Date(key.createdAt).toLocaleDateString() })}
                           </p>
                           <p className="text-xs text-body">
                             {key.expiresAt
                               ? `${expiry.label} (${new Date(key.expiresAt).toLocaleDateString()})`
                               : expiry.label}
                           </p>
-                          <p className="text-xs text-body">{lastUsedLabel(key.lastUsedAt)}</p>
+                          <p className="text-xs text-body">{lastUsedLabel(key.lastUsedAt, locale)}</p>
                           {expiry.expired && (
-                            <p className="text-xs font-medium text-destructive">Expired. This key no longer works.</p>
+                            <p className="text-xs font-medium text-destructive">{t('settings.apiKeys.expiredNote')}</p>
                           )}
                         </div>
-                        <Button type="button" variant="ghost" size="icon" aria-label={`Revoke ${key.name}`} onClick={() => setDeleteTarget(key)}>
+                        <Button type="button" variant="ghost" size="icon" aria-label={t('settings.apiKeys.revokeAria', { name: key.name })} onClick={() => setDeleteTarget(key)}>
                           <Trash2 />
                         </Button>
                       </li>
@@ -278,11 +294,10 @@ export default function SettingsPage() {
               {keys.length > 0 && (
                 <div className="flex flex-col gap-2 border-t pt-4">
                   <Button type="button" variant="destructive" size="sm" className="w-full sm:w-auto" onClick={() => setRevokeAllOpen(true)}>
-                    Revoke all keys
+                    {t('settings.apiKeys.revokeAll')}
                   </Button>
                   <p className="max-w-prose text-sm text-body">
-                    Use this only when you do not know which key leaked. It cuts off every agent at once, so
-                    each one needs a new key afterwards.
+                    {t('settings.apiKeys.revokeAllBody')}
                   </p>
                 </div>
               )}
@@ -296,9 +311,9 @@ export default function SettingsPage() {
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Revoke API key?"
-        description={`${deleteTarget?.name ?? 'This key'} will stop working immediately.`}
-        confirmLabel="Revoke key"
+        title={t('settings.apiKeys.revokeTitle')}
+        description={t('settings.apiKeys.revokeDescription', { name: deleteTarget?.name ?? t('settings.apiKeys.thisKey') })}
+        confirmLabel={t('settings.apiKeys.revokeConfirm')}
         loading={deleting}
         onConfirm={deleteKey}
       />
@@ -306,9 +321,9 @@ export default function SettingsPage() {
       <ConfirmDialog
         open={revokeAllOpen}
         onOpenChange={(open) => !open && setRevokeAllOpen(false)}
-        title="Revoke all API keys?"
-        description="Every key will stop working immediately. All the agents using them lose access at the same time and each one needs a new key."
-        confirmLabel="Revoke all keys"
+        title={t('settings.apiKeys.revokeAllTitle')}
+        description={t('settings.apiKeys.revokeAllDescription')}
+        confirmLabel={t('settings.apiKeys.revokeAllConfirm')}
         loading={revokingAll}
         onConfirm={revokeAllKeys}
       />

@@ -10,8 +10,10 @@ import { PrivacyConsent } from '@/components/auth/PrivacyConsent'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useLocale } from '@/lib/i18n/client'
 
 export default function LoginPage() {
+  const { t } = useLocale()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [consent, setConsent] = useState(false)
@@ -31,7 +33,7 @@ export default function LoginPage() {
       if (!response.ok) throw new Error('Consent not saved')
       return true
     } catch {
-      toast.error('Could not record your consent. Try again.')
+      toast.error(t('auth.consentError'))
       return false
     }
   }
@@ -43,13 +45,13 @@ export default function LoginPage() {
     try {
       const result = await signIn('credentials', { email, password, redirect: false })
       if (result?.error) {
-        toast.error('Invalid email or password')
+        toast.error(t('auth.invalidCredentials'))
         return
       }
       router.push('/home')
       router.refresh()
     } catch {
-      toast.error('Sign in failed. Try again.')
+      toast.error(t('auth.signInFailed'))
     } finally {
       setLoading(false)
     }
@@ -57,9 +59,9 @@ export default function LoginPage() {
 
   return (
     <AuthCard
-      title="Sign in"
-      subtitle="Plan who works and when, and keep your team's schedule in one place."
-      footer={<>Don&apos;t have an account? <Link href="/register" className="text-link underline-offset-4 can-hover:hover:underline">Create one</Link></>}
+      title={t('auth.login.title')}
+      subtitle={t('auth.login.subtitle')}
+      footer={<>{t('auth.login.footerQuestion')}<Link href="/register" className="text-link underline-offset-4 can-hover:hover:underline">{t('auth.login.footerLink')}</Link></>}
     >
       <PrivacyConsent checked={consent} onChange={handleConsentChange} />
       <OAuthButtons
@@ -69,22 +71,20 @@ export default function LoginPage() {
         beforeSignIn={ensureConsentCookie}
       />
       <p id="oauth-consent-hint" className="text-sm text-body">
-        {consent
-          ? 'Google and GitHub will sign you in.'
-          : 'Accept the privacy notice above to continue with Google or GitHub.'}
+        {consent ? t('auth.login.oauthReady') : t('auth.login.oauthNeedsConsent')}
       </p>
       <AuthSeparator />
       <form onSubmit={handleCredentials} className="space-y-4" aria-busy={loading}>
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t('auth.email')}</Label>
           <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" placeholder="you@example.com" />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{t('auth.password')}</Label>
           <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="current-password" placeholder="••••••••" />
         </div>
         <Button type="submit" disabled={loading} className="w-full">
-          {loading ? 'Signing in…' : 'Sign in'}
+          {loading ? t('auth.signingIn') : t('auth.signIn')}
         </Button>
       </form>
     </AuthCard>

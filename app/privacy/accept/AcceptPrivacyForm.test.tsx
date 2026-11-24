@@ -1,8 +1,12 @@
 import { createElement } from 'react'
 import type { ReactNode } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
+import { renderInLocale } from '@/lib/i18n/test-locale'
 import { AcceptPrivacyForm } from './AcceptPrivacyForm'
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}))
 
 vi.mock('next-auth/react', () => ({ signIn: vi.fn() }))
 
@@ -19,7 +23,7 @@ function oauthButton(html: string, label: string) {
 
 describe('AcceptPrivacyForm', () => {
   it('no deja terminar el alta hasta aceptar el aviso', () => {
-    const html = renderToStaticMarkup(createElement(AcceptPrivacyForm))
+    const html = renderInLocale('en', createElement(AcceptPrivacyForm))
 
     for (const label of ['Continue with Google', 'Continue with GitHub']) {
       const button = oauthButton(html, label)

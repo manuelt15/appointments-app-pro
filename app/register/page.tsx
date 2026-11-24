@@ -10,8 +10,10 @@ import { PrivacyConsent } from '@/components/auth/PrivacyConsent'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useLocale } from '@/lib/i18n/client'
 
 export default function RegisterPage() {
+  const { t } = useLocale()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -35,7 +37,7 @@ export default function RegisterPage() {
       if (!response.ok) throw new Error('Consent not saved')
       return true
     } catch {
-      toast.error('Could not record your consent. Try again.')
+      toast.error(t('auth.consentError'))
       return false
     }
   }
@@ -60,16 +62,16 @@ export default function RegisterPage() {
       })
       if (!response.ok) {
         const data = await response.json().catch(() => null)
-        throw new Error(data?.error ?? 'Registration failed')
+        throw new Error(data?.error ?? t('auth.registrationFailed'))
       }
 
       const result = await signIn('credentials', { email, password, redirect: false })
-      if (result?.error) throw new Error('Sign in failed after registration')
+      if (result?.error) throw new Error(t('auth.signInAfterRegistrationFailed'))
 
       router.push('/business/new')
       router.refresh()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Registration failed')
+      toast.error(error instanceof Error ? error.message : t('auth.registrationFailed'))
     } finally {
       setLoading(false)
     }
@@ -77,9 +79,9 @@ export default function RegisterPage() {
 
   return (
     <AuthCard
-      title="Create account"
-      subtitle="Set up your team's shift schedule: add employees, plan their hours and track time off."
-      footer={<>Already have an account? <Link href="/login" className="text-link underline-offset-4 can-hover:hover:underline">Sign in</Link></>}
+      title={t('auth.register.title')}
+      subtitle={t('auth.register.subtitle')}
+      footer={<>{t('auth.register.footerQuestion')}<Link href="/login" className="text-link underline-offset-4 can-hover:hover:underline">{t('auth.register.footerLink')}</Link></>}
     >
       <OAuthButtons
         callbackUrl="/business/new"
@@ -88,27 +90,25 @@ export default function RegisterPage() {
         beforeSignIn={ensureConsentCookie}
       />
       <p id="oauth-consent-hint" className="text-sm text-body">
-        {consent
-          ? 'Google and GitHub will create your account with the privacy notice accepted.'
-          : 'Accept the privacy notice below to continue with Google or GitHub.'}
+        {consent ? t('auth.register.oauthReady') : t('auth.register.oauthNeedsConsent')}
       </p>
       <AuthSeparator />
       <form onSubmit={handleRegister} className="space-y-4" aria-busy={loading}>
         <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" value={name} onChange={(event) => setName(event.target.value)} required autoComplete="name" placeholder="Your name" />
+          <Label htmlFor="name">{t('auth.name')}</Label>
+          <Input id="name" value={name} onChange={(event) => setName(event.target.value)} required autoComplete="name" placeholder={t('auth.namePlaceholder')} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t('auth.email')}</Label>
           <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" placeholder="you@example.com" />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} autoComplete="new-password" placeholder="Minimum 8 characters" />
+          <Label htmlFor="password">{t('auth.password')}</Label>
+          <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} autoComplete="new-password" placeholder={t('auth.passwordPlaceholder')} />
         </div>
         <PrivacyConsent checked={consent} error={consentError} onChange={handleConsentChange} inputRef={consentRef} />
         <Button type="submit" disabled={loading} className="w-full">
-          {loading ? 'Creating account…' : 'Create account'}
+          {loading ? t('auth.register.creating') : t('auth.register.submit')}
         </Button>
       </form>
     </AuthCard>

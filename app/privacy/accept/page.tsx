@@ -1,9 +1,13 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
+import { getLocale, t } from '@/lib/i18n'
 import { AcceptPrivacyForm } from './AcceptPrivacyForm'
 
-export const metadata: Metadata = { title: 'Accept the privacy notice' }
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale()
+  return { title: t(locale, 'auth.acceptPrivacy.title') }
+}
 
 /**
  * Landing page for a new OAuth account that arrived without a recorded

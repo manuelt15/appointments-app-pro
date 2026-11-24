@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import type { ReactNode } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
+import { renderInLocale } from '@/lib/i18n/test-locale'
 import LoginPage from './page'
 
 vi.mock('next/navigation', () => ({
@@ -21,9 +21,15 @@ function oauthButton(html: string, label: string) {
   return buttons.find((button) => button.includes(label))
 }
 
+// The app opens in Spanish; this screen has always been written in English, so
+// the assertions pin the English locale instead of the default one.
+function renderLogin() {
+  return renderInLocale('en', createElement(LoginPage))
+}
+
 describe('LoginPage', () => {
   it('arranca con Google y GitHub deshabilitados hasta aceptar el aviso', () => {
-    const html = renderToStaticMarkup(createElement(LoginPage))
+    const html = renderLogin()
 
     for (const label of ['Continue with Google', 'Continue with GitHub']) {
       const button = oauthButton(html, label)
@@ -38,10 +44,19 @@ describe('LoginPage', () => {
   })
 
   it('no exige la casilla para entrar con correo y contrasena', () => {
-    const html = renderToStaticMarkup(createElement(LoginPage))
+    const html = renderLogin()
 
     const signInButton = html.match(/<button\b[^>]*>\s*Sign in\s*<\/button>/)?.[0]
     expect(signInButton).toBeDefined()
     expect(signInButton).not.toMatch(/\sdisabled(=""|\s|>)/)
+  })
+
+  it('en espanol no deja restos de texto en ingles', () => {
+    const html = renderInLocale('es', createElement(LoginPage))
+
+    expect(html).toContain('Entrar')
+    expect(html).toContain('Acepta el aviso de privacidad de arriba para continuar con Google o GitHub.')
+    expect(html).not.toContain('Continue with Google')
+    expect(html).not.toContain('Sign in')
   })
 })

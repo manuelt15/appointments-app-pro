@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
+import { useLocale } from '@/lib/i18n/client'
 
 export function AuthCard({ title, subtitle, footer, children }: { title: string; subtitle: ReactNode; footer?: ReactNode; children: ReactNode }) {
   return (
@@ -31,6 +32,8 @@ export function OAuthButtons({
   descriptionId?: string
   beforeSignIn?: () => Promise<boolean>
 }) {
+  const { t } = useLocale()
+
   async function start(provider: 'google' | 'github') {
     if (disabled) return
     // Last chance to persist the consent before leaving for the provider.
@@ -49,7 +52,7 @@ export function OAuthButtons({
         onClick={() => start('google')}
       >
         <GoogleIcon />
-        Continue with Google
+        {t('auth.continueWithGoogle')}
       </Button>
       <Button
         type="button"
@@ -60,17 +63,18 @@ export function OAuthButtons({
         onClick={() => start('github')}
       >
         <GitHubIcon />
-        Continue with GitHub
+        {t('auth.continueWithGitHub')}
       </Button>
     </div>
   )
 }
 
 export function AuthSeparator() {
+  const { t } = useLocale()
   return (
     <div className="flex items-center gap-3" aria-hidden="true">
       <span className="h-px flex-1 bg-border" />
-      <span className="text-xs text-body">or</span>
+      <span className="text-xs text-body">{t('auth.or')}</span>
       <span className="h-px flex-1 bg-border" />
     </div>
   )

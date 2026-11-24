@@ -1,9 +1,13 @@
-import { describe, expect, it } from 'vitest'
-import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it, vi } from 'vitest'
+import { renderInLocale } from '@/lib/i18n/test-locale'
 import { AgentIconRow } from './AgentIconRow'
 import { AGENT_LOGOS } from './AgentLogos'
 
-const markup = renderToStaticMarkup(<AgentIconRow />)
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}))
+
+const markup = renderInLocale('en', <AgentIconRow />)
 
 describe('AgentIconRow', () => {
   it('is a list of the agents, not a row of pictures', () => {
@@ -34,5 +38,14 @@ describe('AgentIconRow', () => {
     expect(markup).not.toMatch(/border/)
     expect(markup).not.toMatch(/bg-muted/)
     expect(markup).not.toMatch(/rounded/)
+  })
+
+  it('names the row in both languages and never renames the agents', () => {
+    expect(markup).toContain('Works with')
+    const es = renderInLocale('es', <AgentIconRow />)
+    expect(es).toContain('Funciona con')
+    for (const agent of AGENT_LOGOS) {
+      expect(es).toContain(agent.name)
+    }
   })
 })

@@ -3,6 +3,7 @@
 import type { Ref } from 'react'
 import Link from 'next/link'
 import { Label } from '@/components/ui/label'
+import { useLocale } from '@/lib/i18n/client'
 
 export function PrivacyConsent({
   checked,
@@ -15,6 +16,8 @@ export function PrivacyConsent({
   onChange: (checked: boolean) => void
   inputRef?: Ref<HTMLInputElement>
 }) {
+  const { t } = useLocale()
+
   return (
     <div className="space-y-2">
       <div className="flex items-start gap-2.5">
@@ -29,16 +32,16 @@ export function PrivacyConsent({
           className="mt-0.5 size-4 shrink-0 accent-foreground"
         />
         <Label htmlFor="consent" className="block font-normal leading-5 text-body">
-          I have read and accept the{' '}
+          {t('auth.consentPrefix')}
           <Link href="/privacy" target="_blank" className="text-link underline-offset-4 can-hover:hover:underline">
-            privacy notice
+            {t('auth.consentLink')}
           </Link>
-          .
+          {t('auth.consentSuffix')}
         </Label>
       </div>
       {error && (
         <p id="consent-error" role="alert" className="text-sm text-destructive">
-          Please accept the privacy notice to continue.
+          {t('auth.consentRequired')}
         </p>
       )}
     </div>
