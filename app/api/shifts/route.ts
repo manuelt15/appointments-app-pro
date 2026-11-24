@@ -49,9 +49,14 @@ export async function POST(request: NextRequest) {
       }).session(session)
       if (!employee) return { kind: 'employeeNotFound' as const }
 
+      // The lookup casts _id to ObjectId, but Shift stores a String: use the
+      // employee's own id so the lock, the overlap check and the saved row all
+      // speak of the same person whatever spelling the client sent.
+      const employeeId = employee._id.toString()
+
       const conflict = await Shift.findOne(buildConflictFilter({
         businessId: auth.businessId,
-        employeeId: parsed.data.employeeId,
+        employeeId,
         startTime: parsed.data.startTime,
         endTime: parsed.data.endTime,
       })).session(session)
@@ -60,6 +65,7 @@ export async function POST(request: NextRequest) {
       await lease.assertOwned()
       const shift = new Shift({
         ...parsed.data,
+        employeeId,
         businessId: auth.businessId,
         startTime: new Date(parsed.data.startTime),
         endTime: new Date(parsed.data.endTime),

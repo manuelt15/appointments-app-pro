@@ -3,7 +3,7 @@ import { resolveAuth } from '@/lib/api/auth'
 import { apiSuccess, apiError } from '@/lib/api/response'
 import { buildConflictFilter } from '@/lib/shifts/conflicts'
 import { SchedulingBusyError, withSchedulingLock } from '@/lib/shifts/scheduling-lock'
-import { isValidTimeRange, UpdateShiftSchema } from '@/lib/shifts/validation'
+import { canonicalEmployeeId, isValidTimeRange, UpdateShiftSchema } from '@/lib/shifts/validation'
 import { connectDB } from '@/lib/mongodb/client'
 import { Employee } from '@/lib/mongodb/models/Employee'
 import { Shift } from '@/lib/mongodb/models/Shift'
@@ -32,14 +32,14 @@ export async function PUT(request: NextRequest, ctx: RouteContext<'/api/shifts/[
   const initial = await Shift.findOne({ _id: id, businessId: auth.businessId }).select('employeeId')
   if (!initial) return apiError('Not found', 404)
 
-  const lockEmployeeId = parsed.data.employeeId ?? initial.employeeId
+  const lockEmployeeId = parsed.data.employeeId ?? canonicalEmployeeId(initial.employeeId)
 
   try {
     const result = await withSchedulingLock(auth.businessId, lockEmployeeId, async (lease, session) => {
       const current = await Shift.findOne({ _id: id, businessId: auth.businessId }).session(session)
       if (!current) return { kind: 'notFound' as const }
 
-      const employeeId = parsed.data.employeeId ?? current.employeeId
+      const employeeId = parsed.data.employeeId ?? canonicalEmployeeId(current.employeeId)
       if (employeeId !== lockEmployeeId) return { kind: 'stale' as const }
 
       const startTime = parsed.data.startTime ? new Date(parsed.data.startTime) : current.startTime
@@ -53,9 +53,14 @@ export async function PUT(request: NextRequest, ctx: RouteContext<'/api/shifts/[
       }).session(session)
       if (!employee) return { kind: 'employeeNotFound' as const }
 
+      // Shift.employeeId is a String while the lookup casts _id to ObjectId:
+      // persist the resolved employee's canonical id so a row saved before this
+      // fix stops being a second identity for the same person.
+      const canonicalId = employee._id.toString()
+
       const conflict = await Shift.findOne(buildConflictFilter({
         businessId: auth.businessId,
-        employeeId,
+        employeeId: canonicalId,
         startTime,
         endTime,
         excludeShiftId: id,
@@ -66,7 +71,7 @@ export async function PUT(request: NextRequest, ctx: RouteContext<'/api/shifts/[
       const shift = await Shift.findOneAndUpdate(
         { _id: id, businessId: auth.businessId, __v: current.__v },
         {
-          $set: { ...parsed.data, employeeId, startTime, endTime },
+          $set: { ...parsed.data, employeeId: canonicalId, startTime, endTime },
           $inc: { __v: 1 },
         },
         { new: true, session }
@@ -99,7 +104,7 @@ export async function DELETE(request: NextRequest, ctx: RouteContext<'/api/shift
   if (!initial) return apiError('Not found', 404)
 
   try {
-    const result = await withSchedulingLock(auth.businessId, initial.employeeId, async (lease, session) => {
+    const result = await withSchedulingLock(auth.businessId, canonicalEmployeeId(initial.employeeId), async (lease, session) => {
       const current = await Shift.findOne({ _id: id, businessId: auth.businessId }).session(session)
       if (!current) return { kind: 'notFound' as const }
 

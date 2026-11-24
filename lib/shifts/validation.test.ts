@@ -73,4 +73,15 @@ describe('shift updates', () => {
   it('rejects malformed employee IDs before querying MongoDB', () => {
     expect(UpdateShiftSchema.safeParse({ employeeId: 'not-an-object-id' }).success).toBe(false)
   })
+
+  it('accepts uppercase IDs but canonicalizes them to lowercase hex', () => {
+    const uppercase = '507F1F77BCF86CD799439012'
+
+    expect(CreateShiftSchema.parse({ ...validShift, employeeId: uppercase }).employeeId).toBe(
+      uppercase.toLowerCase()
+    )
+    expect(UpdateShiftSchema.parse({ employeeId: uppercase }).employeeId).toBe(
+      uppercase.toLowerCase()
+    )
+  })
 })
