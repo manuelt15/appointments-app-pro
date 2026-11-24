@@ -6,12 +6,19 @@ import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import { clientPromise, connectDB } from '@/lib/mongodb/client'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import { createUserEvent } from '@/lib/legal/oauth-consent'
+import { createUserEvent, enforcePrivacyAtSignUp } from '@/lib/legal/oauth-consent'
 import { authConfig } from './auth.config'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: MongoDBAdapter(clientPromise),
+  callbacks: {
+    ...authConfig.callbacks,
+    // Blocks the sign-up of a new OAuth account until the notice is accepted,
+    // without touching existing accounts. Needs the database, so it cannot live
+    // in auth.config.ts, which the edge proxy also loads.
+    signIn: enforcePrivacyAtSignUp,
+  },
   events: {
     // OAuth creates the account outside the register form; record the consent
     // the browser carried through the short-lived cookie.
