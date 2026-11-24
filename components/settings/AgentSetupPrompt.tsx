@@ -40,9 +40,9 @@ export function AgentSetupPrompt({ origin }: { origin: string }) {
   }
 
   return (
-    <div className="space-y-4 border-t pt-5">
+    <div className="space-y-4 border-t pt-5 [&_p]:max-w-prose">
       <div className="space-y-2">
-        <h4 className="text-sm font-semibold">Let your agent set it up</h4>
+        <h3 className="text-sm font-semibold">Let your agent set it up</h3>
         <p className="text-sm text-body">
           Do not want to follow the steps yourself? Copy the text below and paste it into your agent.
           The agent does the setup for you.

@@ -13,14 +13,16 @@ export function ConnectAgentGuide({ origin }: { origin: string }) {
   return (
     <section className="space-y-5 rounded-lg border bg-card p-5 sm:p-6" aria-labelledby="connect-agent-title">
       <div className="space-y-2">
-        <h3 id="connect-agent-title" className="text-base font-semibold">Connect an agent</h3>
-        <p className="text-sm text-body">
+        <h2 id="connect-agent-title" className="text-base font-semibold">Connect an agent</h2>
+        <p className="max-w-prose text-sm text-body">
           An agent is a program like Claude Code that reads and changes your schedule for you.
           It needs an API key to know which schedule is yours. Follow these steps in order.
         </p>
       </div>
 
-      <ol className="space-y-5">
+      {/* [&_p] caps every paragraph at the same readable measure, while the
+          code blocks below keep the full width of the card. */}
+      <ol className="space-y-5 [&_p]:max-w-prose">
         <li className="space-y-2">
           <StepTitle step={1} title="Create the key" />
           <p className="text-sm text-body">
@@ -119,7 +121,7 @@ export function ConnectAgentGuide({ origin }: { origin: string }) {
 
 function StepTitle({ step, title }: { step: number; title: string }) {
   return (
-    <h4 className="flex items-center gap-2 text-sm font-semibold">
+    <h3 className="flex items-center gap-2 text-sm font-semibold">
       <span
         aria-hidden="true"
         className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-primary-foreground"
@@ -129,7 +131,7 @@ function StepTitle({ step, title }: { step: number; title: string }) {
       <span>
         Step {step}: {title}
       </span>
-    </h4>
+    </h3>
   )
 }
 
