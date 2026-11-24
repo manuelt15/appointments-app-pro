@@ -3,7 +3,13 @@
 Servidor MCP que permite a Claude Code gestionar los turnos vía la API REST de
 la app.
 
-El binario compilado está en `dist/` — no necesitas compilar nada para usarlo.
+El binario compilado **no está en el repo** (`mcp/dist` está en `.gitignore`):
+un `dist` versionado se ejecutaría sin revisar en cualquier clon. Compílalo
+antes de usarlo con un agente:
+
+```bash
+cd mcp && npm ci && npm run build
+```
 
 ## Uso
 

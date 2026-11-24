@@ -108,6 +108,15 @@ El build no puede correr con `npm run dev` levantado: ambos escriben en `.next`.
 
 ## MCP — Integración con Claude Code
 
+### Compilar el servidor
+
+`mcp/dist` no se versiona: un `dist` compilado dentro del repo se ejecutaría sin
+revisar en cualquier clon. Compílalo tú antes de usar el servidor con un agente:
+
+```bash
+cd mcp && npm ci && npm run build
+```
+
 ### Configuración
 
 Crea `.mcp.json` en la raíz (está en `.gitignore`, no se sube al repo):
