@@ -208,19 +208,19 @@ export const es = {
     'Este aviso explica, en lenguaje claro, qué datos personales trata esta aplicación, con qué finalidad, durante cuánto tiempo y a quién llegan. Cubre las cuentas de negocio del servicio y los empleados cuyos datos gestionan esas cuentas.',
   'privacy.controllerTitle': 'Quién es el responsable del tratamiento',
   'privacy.controllerBody':
-    'El responsable del tratamiento es **[RESPONSABLE LEGAL]**. El nombre legal, el NIF y los datos de contacto se publicarán en esta sección antes de que el servicio se abra al público.',
+    'El responsable del tratamiento es **[RESPONSABLE LEGAL]**, con NIF **[NIF]** y domicilio en **[DIRECCIÓN]**, España. Para cualquier cuestión sobre este aviso o sobre tus datos: **[EMAIL DE CONTACTO]**.',
   'privacy.dataTitle': 'Qué datos tratamos y para qué',
   'privacy.dataIntro': 'Solo tratamos los datos que el servicio necesita para funcionar.',
   'privacy.dataAccount':
     '**Tu cuenta de negocio.** Cuando creas una cuenta tratamos tu nombre, tu correo electrónico y la contraseña que eliges, que se guarda solo como un hash irreversible, además del nombre y la zona horaria de tu negocio. Finalidad: crear la cuenta, darte acceso y vincular el calendario a tu negocio. Base jurídica: el contrato contigo (art. 6.1.b del RGPD).',
   'privacy.dataEmployees':
-    '**Los datos de tus empleados.** Cuando añades un empleado al calendario tratamos su nombre completo y, de forma opcional, su correo electrónico, su teléfono, su fecha de nacimiento y su fecha de alta, junto con los turnos y las ausencias que tenga asignados: fechas, horas, tipo de ausencia y las notas que añadas. Finalidad: construir y mostrar el calendario de trabajo; el cumpleaños se marca en el calendario cada año. Base jurídica: el interés legítimo del negocio en organizar la planificación de su personal (art. 6.1.f del RGPD). Si gestionas una cuenta de negocio, informar a tus empleados y tener un motivo válido para añadirlos es responsabilidad tuya. Uno de los tipos de ausencia marca la ausencia como baja por enfermedad; esos datos se tratarán con la base jurídica que se defina en la revisión legal pendiente.',
+    '**Los datos de tus empleados.** Cuando añades un empleado al calendario tratamos su nombre completo y, de forma opcional, su correo electrónico, su teléfono, su fecha de nacimiento y su fecha de alta, junto con los turnos y las ausencias que tenga asignados: fechas, horas, tipo de ausencia y las notas que añadas. Finalidad: construir y mostrar el calendario de trabajo; el cumpleaños se marca en el calendario cada año. Base jurídica: el interés legítimo del negocio en organizar la planificación de su personal (art. 6.1.f del RGPD). Si gestionas una cuenta de negocio, informar a tus empleados y tener un motivo válido para añadirlos es responsabilidad tuya. Los datos de salud se tratan aparte: los explica el apartado de datos de salud, al final de este aviso.',
   'privacy.retentionTitle': 'Cuánto tiempo lo guardamos',
   'privacy.retentionBody':
-    'Los datos de la cuenta se guardan mientras la cuenta está activa. Cuando se borra un empleado, su ficha se anonimiza inmediatamente: se borran el correo electrónico, el teléfono y la fecha de nacimiento. Los turnos históricos se conservan y siguen vinculados a esa ficha anonimizada, para que el historial del calendario y las exportaciones en PDF sigan siendo legibles. Solo el nombre permanece asociado a esos turnos pasados.',
+    'Los datos de la cuenta se guardan mientras la cuenta está activa. Cuando se borra un empleado, su ficha se anonimiza inmediatamente: se borran el correo electrónico, el teléfono y la fecha de nacimiento, y los turnos futuros se eliminan. Los turnos pasados se conservan con el nombre, porque el art. 34.9 del Estatuto de los Trabajadores obliga a guardar el registro de jornada cuatro años y a tenerlo a disposición de la persona trabajadora y de la Inspección de Trabajo. Pasados cuatro años desde cada turno, se borra el turno y el nombre que lo acompañaba.',
   'privacy.recipientsTitle': 'Quién recibe tus datos',
   'privacy.recipientsBody':
-    'Los datos se guardan con los proveedores necesarios para prestar este servicio: el proveedor de alojamiento de la aplicación y el proveedor de la base de datos. Si entras con Google o GitHub, ese proveedor participa en identificarte. No vendemos datos personales, no los compartimos con fines publicitarios y no usamos analítica ni rastreadores de marketing.',
+    'Los datos se guardan con los proveedores necesarios para prestar el servicio: **Vercel** (alojamiento de la aplicación), **MongoDB Atlas** (base de datos) y **Resend** (envío de correos, cuando esté configurado). Si entras con Google o GitHub, ese proveedor participa en identificarte. Son proveedores establecidos fuera de España, y la garantía de sus transferencias internacionales se detalla en la revisión legal. No vendemos datos personales, no los compartimos con fines publicitarios y no usamos analítica ni rastreadores de marketing.',
   'privacy.rightsTitle': 'Tus derechos',
   'privacy.rightsBody':
     'Tienes derecho a acceder a tus datos, rectificarlos, suprimirlos, limitar su tratamiento, oponerte a él y solicitar su portabilidad. Para ejercer cualquiera de estos derechos, escribe a **[EMAIL DE CONTACTO]**. Todavía no hay autoservicio para estas solicitudes: se tramitan a mano y se responden por correo electrónico, normalmente en el plazo de un mes. Los empleados que aparecen en un calendario pueden usar la misma dirección.',
@@ -228,12 +228,12 @@ export const es = {
   'privacy.complaintPrefix':
     'Si crees que tus datos no se han tratado correctamente, puedes presentar una reclamación ante la Agencia Española de Protección de Datos (AEPD) en ',
   'privacy.complaintSuffix': '.',
-  'privacy.draftTitle': 'Aviso en borrador, pendiente de revisión legal',
+  'privacy.draftTitle': 'Faltan los datos del responsable y la revisión legal',
   'privacy.draftBody':
-    'Este texto no lo ha revisado ningún abogado. Antes de que el servicio se abra al público, los marcadores entre corchetes ([RESPONSABLE LEGAL] y [EMAIL DE CONTACTO]) se tienen que sustituir por valores reales y el aviso tiene que pasar una revisión legal. Mientras tanto, trata esta página como un borrador.',
+    'El texto está escrito, pero nadie con formación jurídica lo ha revisado todavía y los corchetes ([RESPONSABLE LEGAL], [NIF], [DIRECCIÓN] y [EMAIL DE CONTACTO]) siguen sin rellenar. Los dos pasos antes de abrir el servicio al público: sustituir esos cuatro valores y pasar una revisión legal. Hasta entonces, trata esta página como un borrador.',
   'privacy.healthBody':
-    '**Datos de salud.** El tipo de turno sick_leave revela que un empleado está de baja por enfermedad, lo que son datos de salud según el art. 9 del RGPD. Antes de que el servicio se abra al público, se tiene que decidir la base jurídica del art. 9.2 del RGPD (consentimiento explícito del empleado o normativa laboral aplicable), documentar el acceso restringido y confirmar que no se guarda ningún detalle clínico.',
-  'privacy.lastUpdated': 'Última actualización: 24 de noviembre de 2026.',
+    '**Datos de salud.** El tipo de turno sick_leave revela que un empleado está de baja por enfermedad, y eso son datos de salud según el art. 9 del RGPD. Base jurídica: el art. 9.2.b del RGPD, cumplir las obligaciones y ejercer los derechos del responsable en el ámbito del Derecho laboral, porque el negocio necesita saber quién no puede cubrir un turno. Solo lo ve la cuenta de negocio a la que pertenece el empleado, no se comparte con nadie más y no se guarda ningún detalle clínico: ni diagnóstico, ni parte médico, ni duración más allá de las fechas del turno.',
+  'privacy.lastUpdated': 'Última actualización: 25 de noviembre de 2026.',
   'privacy.backPrefix': 'Volver a ',
   'privacy.backLink': 'entrar',
   'privacy.backSuffix': '.',

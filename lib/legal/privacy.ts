@@ -3,7 +3,7 @@
  * Bump it when the notice changes so the accepted version stays on record.
  * The public notice (app/privacy/page.tsx) shows the matching "last updated" date.
  */
-export const PRIVACY_NOTICE_VERSION = '2026-11-24'
+export const PRIVACY_NOTICE_VERSION = '2026-11-25'
 
 /**
  * Short-lived, HttpOnly cookie that carries the consent from the register or login

@@ -66,7 +66,10 @@ describe('POST /api/register', () => {
     const response = await POST(request())
 
     expect(response.status).toBe(201)
-    expect(findOne).toHaveBeenCalledWith({ email: 'ana@example.com' })
+    expect(findOne).toHaveBeenCalledWith(
+      { email: 'ana@example.com' },
+      { collation: { locale: 'es', strength: 2 } },
+    )
     const saved = insertOne.mock.calls[0][0]
     expect(saved).toMatchObject({ name: 'Ana', email: 'ana@example.com', emailVerified: null })
     expect(saved.createdAt).toBeInstanceOf(Date)
@@ -95,6 +98,30 @@ describe('POST /api/register', () => {
 
     expect(response.status).toBe(201)
     expect(await response.json()).toEqual({ success: true, data: { ok: true } })
+  })
+
+  it('normaliza el correo a minusculas antes de buscar y de guardar', async () => {
+    findOne.mockResolvedValue(null)
+
+    const response = await POST(request({ email: 'Ana@Example.COM' }))
+
+    expect(response.status).toBe(201)
+    // La collation es lo que hace que una cuenta antigua en mayusculas se
+    // encuentre al dar de alta la misma direccion en minusculas.
+    expect(findOne).toHaveBeenCalledWith(
+      { email: 'ana@example.com' },
+      { collation: { locale: 'es', strength: 2 } },
+    )
+    expect(insertOne.mock.calls[0][0]).toMatchObject({ email: 'ana@example.com' })
+  })
+
+  it('encuentra una cuenta antigua guardada con mayusculas y no crea otra', async () => {
+    findOne.mockResolvedValue({ _id: 'u-legacy', email: 'Ana@Example.COM' })
+
+    const response = await POST(request({ email: 'ana@example.com' }))
+
+    expect(response.status).toBe(201)
+    expect(insertOne).not.toHaveBeenCalled()
   })
 
   it('no crea la cuenta si falta la aceptacion del aviso o no es true', async () => {

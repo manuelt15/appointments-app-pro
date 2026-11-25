@@ -210,19 +210,19 @@ export const en: typeof es = {
     'This notice explains, in plain language, what personal data this application handles, for what purpose, for how long and who it reaches. It covers the business accounts of the service and the employees whose data those accounts manage.',
   'privacy.controllerTitle': 'Who is the data controller',
   'privacy.controllerBody':
-    'The data controller is **[RESPONSABLE LEGAL]**. The legal name, tax ID and contact details will be published in this section before the service opens to the public.',
+    'The data controller is **[RESPONSABLE LEGAL]**, tax ID **[NIF]**, with its address at **[DIRECCIÓN]**, Spain. For any question about this notice or about your data: **[EMAIL DE CONTACTO]**.',
   'privacy.dataTitle': 'What data we process and why',
   'privacy.dataIntro': 'We only process the data the service needs to work.',
   'privacy.dataAccount':
     '**Your business account.** When you create an account we process your name, your email address and the password you choose, stored only as an irreversible hash, plus the name and time zone of your business. Purpose: to create the account, sign you in and link the schedule to your business. Legal basis: the contract with you (GDPR art. 6.1.b).',
   'privacy.dataEmployees':
-    '**Your employees\' data.** When you add an employee to the schedule we process their full name and, optionally, their email address, phone number, birthday and start date, together with the shifts and absences assigned to them: dates, times, type of absence and any notes you add. Purpose: to build and show the work schedule; the birthday is marked on the schedule every year. Legal basis: the legitimate interest of the business in organizing its staff schedule (GDPR art. 6.1.f). If you manage a business account, informing your employees and having a valid reason to add them is your responsibility. One of the absence types marks the absence as a sick leave; that data will be processed under the legal basis defined in the pending legal review.',
+    '**Your employees\' data.** When you add an employee to the schedule we process their full name and, optionally, their email address, phone number, birthday and start date, together with the shifts and absences assigned to them: dates, times, type of absence and any notes you add. Purpose: to build and show the work schedule; the birthday is marked on the schedule every year. Legal basis: the legitimate interest of the business in organizing its staff schedule (GDPR art. 6.1.f). If you manage a business account, informing your employees and having a valid reason to add them is your responsibility. One of the absence types marks the absence as a sick leave; that data is explained in the health-data section at the end of this notice.',
   'privacy.retentionTitle': 'How long we keep it',
   'privacy.retentionBody':
-    'Account data is kept while the account is active. When an employee is deleted, their record is anonymized immediately: email, phone number and birthday are erased. Historical shifts are kept and stay linked to that anonymized record, so the schedule history and the PDF exports remain readable. Only the name remains attached to those past shifts.',
+    'Account data is kept while the account is active. When an employee is deleted, their record is anonymized immediately: email, phone number and birthday are erased, and upcoming shifts are deleted. Past shifts are kept with the name, because art. 34.9 of the Spanish Workers Statute requires the working-time record to be kept for four years and to stay available to the employee and the Labour Inspectorate. Four years after each shift, the shift and the name attached to it are deleted.',
   'privacy.recipientsTitle': 'Who receives your data',
   'privacy.recipientsBody':
-    'The data is stored with the providers needed to run this service: the application hosting provider and the database provider. If you sign in with Google or GitHub, that provider takes part in identifying you. We do not sell personal data, we do not share it for advertising, and we do not use analytics or marketing trackers.',
+    'The data is stored with the providers needed to run the service: **Vercel** (application hosting), **MongoDB Atlas** (database) and **Resend** (sending email, once configured). If you sign in with Google or GitHub, that provider takes part in identifying you. All of them are established outside Spain, and the guarantee for their international transfers is detailed in the legal review. We do not sell personal data, we do not share it for advertising, and we do not use analytics or marketing trackers.',
   'privacy.rightsTitle': 'Your rights',
   'privacy.rightsBody':
     'You have the right to access your data, rectify it, delete it, restrict its processing, object to it and request its portability. To exercise any of these rights, write to **[EMAIL DE CONTACTO]**. There is no self-service for these requests yet: they are handled manually and answered by email, normally within a month. Employees who appear in a schedule can use the same address.',
@@ -230,12 +230,12 @@ export const en: typeof es = {
   'privacy.complaintPrefix':
     'If you believe your data has not been handled correctly, you can file a complaint with the Spanish data protection authority, the Agencia Española de Protección de Datos (AEPD), at ',
   'privacy.complaintSuffix': '.',
-  'privacy.draftTitle': 'Draft notice, pending legal review',
+  'privacy.draftTitle': 'The controller details and the legal review are still missing',
   'privacy.draftBody':
-    'This text has not been reviewed by a lawyer. Before the service opens to the public, the placeholders between brackets ([RESPONSABLE LEGAL] and [EMAIL DE CONTACTO]) must be replaced with real values and the notice must pass a legal review. Until then, treat this page as a draft.',
+    'The text is written, but nobody with legal training has reviewed it yet and the brackets ([RESPONSABLE LEGAL], [NIF], [DIRECCIÓN] and [EMAIL DE CONTACTO]) are still empty. Two steps before opening the service to the public: fill in those four values and get a legal review. Until then, treat this page as a draft.',
   'privacy.healthBody':
-    '**Health data.** The sick_leave shift type reveals that an employee is on sick leave, which is health data under GDPR art. 9. Before the service opens to the public, the legal basis of GDPR art. 9.2 (explicit consent from the employee or applicable labor law) must be decided, restricted access must be documented and it must be confirmed that no clinical detail is stored.',
-  'privacy.lastUpdated': 'Last updated: 24 November 2026.',
+    '**Health data.** The sick_leave shift type reveals that an employee is on sick leave, which is health data under GDPR art. 9. Legal basis: GDPR art. 9.2.b, carrying out the controller obligations and exercising its rights in the field of employment law, because the business needs to know who cannot cover a shift. Only the business account the employee belongs to can see it, it is shared with nobody else, and no clinical detail is stored: no diagnosis, no medical certificate, no length beyond the dates of the shift.',
+  'privacy.lastUpdated': 'Last updated: 25 November 2026.',
   'privacy.backPrefix': 'Back to ',
   'privacy.backLink': 'sign in',
   'privacy.backSuffix': '.',
