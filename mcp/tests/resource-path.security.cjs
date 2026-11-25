@@ -35,6 +35,12 @@ for (const file of ['mcp/src/index.ts', 'mcp/dist/index.js'].filter(candidate =>
       '@/lib/api/response': { apiSuccess: data => Response.json({ data }), apiError: (error, status) => Response.json({ error }, { status }) },
       '@/lib/mongodb/client': { connectDB: async () => {} },
       '@/lib/shifts/calendar-date': { isCalendarDate: () => true },
+      '@/lib/shifts/validation': {
+        employeeIdParam: { safeParse: (value) => ({ success: true, data: value }) },
+        canonicalEmployeeId: (value) => value,
+      },
+      '@/lib/i18n/request': { requestLocale: () => 'es' },
+      '@/lib/i18n/translate': { t: (_locale, key) => key },
       '@/lib/shifts/scheduling-lock': {
         SchedulingBusyError: class extends Error {},
         withSchedulingLock: async (_business, _employee, operation) => operation({ assertOwned: async () => {} }, null),
@@ -85,6 +91,9 @@ for (const file of ['mcp/src/index.ts', 'mcp/dist/index.js'].filter(candidate =>
     }
     const valid = tool.schema.parse({ id: employeeId })
     await tool.callback(valid)
+    // Un id de empleado es un ObjectId valido: pasa el esquema, pero solo puede
+    // llegar a /api/shifts/:id. El borrado de empleados no se toca.
+    assert.deepEqual(effects, [], 'An employee ObjectId must not reach the employee route')
     assert.deepEqual(calls, [{ path: `/api/shifts/${employeeId}`, method: 'DELETE' }])
   })
 }
