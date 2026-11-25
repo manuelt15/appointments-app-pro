@@ -11,7 +11,8 @@ vi.mock('@/lib/mongodb/models/ApiKey', () => ({
 
 const MINUTE_MS = 60 * 1000
 
-const request = () => new NextRequest('http://localhost/api/shifts', {
+const request = (method = 'GET') => new NextRequest('http://localhost/api/shifts', {
+  method,
   headers: { 'x-api-key': 'sk_test' },
 })
 
@@ -30,30 +31,39 @@ describe('resolveAuth con API key', () => {
     vi.mocked(ApiKey.updateOne).mockReset()
   })
 
-  it('no escribe lastUsedAt si se uso hace menos de 5 minutos', async () => {
-    storedKey(new Date(Date.now() - 2 * MINUTE_MS))
+  it('no escribe lastUsedAt en una lectura, aunque la clave lleve una hora sin usarse', async () => {
+    storedKey(new Date(Date.now() - 60 * MINUTE_MS))
 
-    const context = await resolveAuth(request())
+    const context = await resolveAuth(request('GET'))
 
     expect(context).toEqual({ businessId: 'b1', authType: 'api_key' })
     expect(ApiKey.updateOne).not.toHaveBeenCalled()
   })
 
-  it('escribe lastUsedAt si el guardado tiene mas de 5 minutos', async () => {
-    storedKey(new Date(Date.now() - 10 * MINUTE_MS))
+  it('escribe lastUsedAt en una escritura si la clave nunca se uso', async () => {
+    storedKey(undefined)
 
-    await resolveAuth(request())
+    const context = await resolveAuth(request('POST'))
 
+    expect(context).toEqual({ businessId: 'b1', authType: 'api_key' })
     expect(ApiKey.updateOne).toHaveBeenCalledTimes(1)
     const [filter, update] = vi.mocked(ApiKey.updateOne).mock.calls[0]
     expect(filter).toEqual({ _id: 'key-1' })
     expect((update as { $set: { lastUsedAt: Date } }).$set.lastUsedAt).toBeInstanceOf(Date)
   })
 
-  it('escribe lastUsedAt si la clave nunca se uso', async () => {
-    storedKey(undefined)
+  it('no repite la escritura dentro del mismo minuto', async () => {
+    storedKey(new Date(Date.now() - 30 * 1000))
 
-    await resolveAuth(request())
+    await resolveAuth(request('PUT'))
+
+    expect(ApiKey.updateOne).not.toHaveBeenCalled()
+  })
+
+  it('vuelve a escribir pasados mas de un minuto desde la ultima escritura', async () => {
+    storedKey(new Date(Date.now() - 2 * MINUTE_MS))
+
+    await resolveAuth(request('DELETE'))
 
     expect(ApiKey.updateOne).toHaveBeenCalledTimes(1)
   })
@@ -66,7 +76,7 @@ describe('resolveAuth con API key', () => {
       expiresAt: new Date(Date.now() - MINUTE_MS),
     } as never)
 
-    const context = await resolveAuth(request())
+    const context = await resolveAuth(request('POST'))
 
     expect(context).toBeNull()
     expect(ApiKey.updateOne).not.toHaveBeenCalled()

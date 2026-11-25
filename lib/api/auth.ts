@@ -11,7 +11,12 @@ export type AuthContext = {
   authType: 'session' | 'api_key'
 }
 
-const LAST_USED_THROTTLE_MS = 5 * 60 * 1000
+const LAST_USED_THROTTLE_MS = 60 * 1000
+
+// Solo las escrituras refrescan `lastUsedAt`. Una lectura no deja rastro: el
+// sello delataba cuando alguien consultaba con la clave, y ademas convertia cada
+// GET en un write.
+const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
 export async function resolveAuth(request: NextRequest): Promise<AuthContext | null> {
   await connectDB()
@@ -23,8 +28,12 @@ export async function resolveAuth(request: NextRequest): Promise<AuthContext | n
     if (!keyRow) return null
     if (keyRow.expiresAt && keyRow.expiresAt < new Date()) return null
     // lastUsedAt is bookkeeping, not security: writing it on every request
-    // turned reads into writes. Refresh it at most once every 5 minutes.
-    if (!keyRow.lastUsedAt || Date.now() - keyRow.lastUsedAt.getTime() > LAST_USED_THROTTLE_MS) {
+    // turned reads into writes. Only a write refreshes it, at most once a minute.
+    const isWrite = !READ_METHODS.has(request.method.toUpperCase())
+    if (
+      isWrite &&
+      (!keyRow.lastUsedAt || Date.now() - keyRow.lastUsedAt.getTime() > LAST_USED_THROTTLE_MS)
+    ) {
       await ApiKey.updateOne({ _id: keyRow._id }, { $set: { lastUsedAt: new Date() } })
     }
     return { businessId: keyRow.businessId, authType: 'api_key' }
