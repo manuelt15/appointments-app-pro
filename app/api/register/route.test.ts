@@ -97,6 +97,16 @@ describe('POST /api/register', () => {
     expect(await response.json()).toEqual({ success: true, data: { ok: true } })
   })
 
+  it('normaliza el correo a minusculas antes de buscar y de guardar', async () => {
+    findOne.mockResolvedValue(null)
+
+    const response = await POST(request({ email: 'Ana@Example.COM' }))
+
+    expect(response.status).toBe(201)
+    expect(findOne).toHaveBeenCalledWith({ email: 'ana@example.com' })
+    expect(insertOne.mock.calls[0][0]).toMatchObject({ email: 'ana@example.com' })
+  })
+
   it('no crea la cuenta si falta la aceptacion del aviso o no es true', async () => {
     findOne.mockResolvedValue(null)
 

@@ -25,7 +25,11 @@ export async function POST(request: NextRequest) {
   const db = client.db()
   const users = db.collection('users')
 
-  const existing = await users.findOne({ email: parsed.data.email })
+  // El indice unico compara la cadena exacta, asi que dos formas de escribir la
+  // misma direccion pasarian como dos cuentas. Se guarda y se busca en minusculas.
+  const email = parsed.data.email.trim().toLowerCase()
+
+  const existing = await users.findOne({ email })
   const hashedPassword = await bcrypt.hash(parsed.data.password, 12)
 
   // Same status and body whether the email is taken or not: answering 409
@@ -39,7 +43,7 @@ export async function POST(request: NextRequest) {
       const now = new Date()
       await users.insertOne({
         name: parsed.data.name,
-        email: parsed.data.email,
+        email,
         password: hashedPassword,
         emailVerified: null,
         createdAt: now,
