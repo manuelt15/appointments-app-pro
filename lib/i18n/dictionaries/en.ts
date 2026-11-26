@@ -438,6 +438,10 @@ export const en: typeof es = {
   'history.pdfError': 'Could not build the PDF',
   'history.hoursValue': '{hours} h',
 
+  // PDFs: the schedule and the history follow the session language
+  'pdf.history': 'History',
+  'pdf.generated': 'Generated {date}',
+
   // Shifts: types, states and the errors that reach the screen
   'shifts.type.shift': 'Shift',
   'shifts.type.vacation': 'Vacation',

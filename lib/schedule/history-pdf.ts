@@ -1,5 +1,7 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib'
-import { format } from 'date-fns'
+import { formatDate } from '@/lib/i18n/dates'
+import type { Locale } from '@/lib/i18n/locales'
+import { t } from '@/lib/i18n/translate'
 
 const PAGE = { width: 595, height: 842 } // A4 portrait
 const MARGIN = 40
@@ -11,6 +13,7 @@ const SOFT = rgb(0.45, 0.45, 0.45)
 const LINE = rgb(0.88, 0.88, 0.88)
 
 export interface HistoryPdfInput {
+  locale: Locale
   businessName: string
   monthLabel: string
   filters: string[]
@@ -46,6 +49,7 @@ function fit(text: string, font: PDFFont, size: number, width: number) {
 }
 
 export async function buildHistoryPdf(input: HistoryPdfInput) {
+  const { locale } = input
   const pdf = await PDFDocument.create()
   const font = await pdf.embedFont(StandardFonts.Helvetica)
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold)
@@ -114,7 +118,7 @@ export async function buildHistoryPdf(input: HistoryPdfInput) {
   // Title block
   text(input.businessName, MARGIN, cursor - 12, { size: 16, font: bold, width: contentWidth })
   cursor -= 30
-  text(`History · ${input.monthLabel}`, MARGIN, cursor, { size: 11, color: SOFT })
+  text(`${t(locale, 'pdf.history')} - ${input.monthLabel}`, MARGIN, cursor, { size: 11, color: SOFT })
   cursor -= 14
   text(input.filters.join('  ·  '), MARGIN, cursor, { size: 8, color: SOFT, width: contentWidth })
   cursor -= 16
@@ -130,42 +134,42 @@ export async function buildHistoryPdf(input: HistoryPdfInput) {
   })
   cursor -= 62
 
-  heading('By employee')
+  heading(t(locale, 'history.byEmployee'))
   if (input.employees.length === 0) {
-    text('Nobody worked in this month.', MARGIN, cursor - 12, { color: SOFT })
+    text(t(locale, 'history.nobodyWorked', { month: input.monthLabel }), MARGIN, cursor - 12, { color: SOFT })
     cursor -= ROW_HEIGHT
   } else {
     table(
       [
-        { label: 'Employee', width: contentWidth - 4 * 80 },
-        { label: 'Shifts', width: 80, align: 'right' },
-        { label: 'Hours', width: 80, align: 'right' },
-        { label: 'Days worked', width: 80, align: 'right' },
-        { label: 'Absences', width: 80, align: 'right' },
+        { label: t(locale, 'history.colEmployee'), width: contentWidth - 4 * 80 },
+        { label: t(locale, 'history.colShifts'), width: 80, align: 'right' },
+        { label: t(locale, 'history.colHours'), width: 80, align: 'right' },
+        { label: t(locale, 'history.colDaysWorked'), width: 80, align: 'right' },
+        { label: t(locale, 'history.colAbsences'), width: 80, align: 'right' },
       ],
       input.employees.map((row) => [row.name, String(row.shifts), row.hours, String(row.days), String(row.absences)]),
       input.employees.map((row) => row.color)
     )
   }
 
-  heading(`All entries (${input.entries.length})`)
+  heading(`${t(locale, 'history.allEntries')} (${input.entries.length})`)
   if (input.entries.length === 0) {
-    text('No entries in this month.', MARGIN, cursor - 12, { color: SOFT })
+    text(t(locale, 'history.noEntries', { month: input.monthLabel }), MARGIN, cursor - 12, { color: SOFT })
   } else {
     table(
       [
-        { label: 'Date', width: 72 },
-        { label: 'Employee', width: 112 },
-        { label: 'Time', width: 92 },
-        { label: 'Hours', width: 44, align: 'right' },
-        { label: 'Type', width: 66 },
-        { label: 'Notes', width: contentWidth - 386 },
+        { label: t(locale, 'history.colDate'), width: 72 },
+        { label: t(locale, 'history.colEmployee'), width: 112 },
+        { label: t(locale, 'history.colTime'), width: 92 },
+        { label: t(locale, 'history.colHours'), width: 44, align: 'right' },
+        { label: t(locale, 'history.colType'), width: 66 },
+        { label: t(locale, 'history.colNotes'), width: contentWidth - 386 },
       ],
       input.entries.map((entry) => [entry.date, entry.employee, entry.time, entry.hours, entry.type, entry.notes])
     )
   }
 
-  const generated = `Generated ${format(new Date(), 'd MMM yyyy HH:mm')}`
+  const generated = t(locale, 'pdf.generated', { date: formatDate(new Date(), 'd MMM yyyy HH:mm', locale) })
   const pages = pdf.getPages()
   pages.forEach((current, index) => {
     current.drawText(generated, { x: MARGIN, y: MARGIN - 18, size: 7.5, font, color: SOFT })

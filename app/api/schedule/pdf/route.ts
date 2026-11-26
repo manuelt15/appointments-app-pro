@@ -7,6 +7,7 @@ import { Business } from '@/lib/mongodb/models/Business'
 import { Employee } from '@/lib/mongodb/models/Employee'
 import { Shift } from '@/lib/mongodb/models/Shift'
 import { buildSchedulePdf } from '@/lib/schedule/pdf'
+import { getLocale, t } from '@/lib/i18n'
 import { toPlainEmployee, toPlainShift } from '@/lib/schedule/serialize'
 import { buildEmployeeWeeks, resolveWeekStart, weekEnd } from '@/lib/schedule/week'
 
@@ -19,6 +20,7 @@ export async function GET(request: NextRequest) {
     .select('name timezone')
     .lean<{ name: string; timezone?: string }>()
   const timeZone = business?.timezone ?? 'Europe/Madrid'
+  const locale = await getLocale()
   const weekStart = resolveWeekStart(new URL(request.url).searchParams.get('week'), timeZone)
   const end = weekEnd(weekStart, timeZone)
 
@@ -35,9 +37,16 @@ export async function GET(request: NextRequest) {
     employees.map(toPlainEmployee),
     shifts.map(toPlainShift),
     weekStart,
-    timeZone
+    timeZone,
+    locale
   )
-  const pdf = await buildSchedulePdf(business?.name ?? 'Schedule', weekStart, timeZone, weeks)
+  const pdf = await buildSchedulePdf(
+    business?.name ?? t(locale, 'history.defaultBusiness'),
+    weekStart,
+    timeZone,
+    weeks,
+    locale
+  )
   const fileName = `schedule-${moment(weekStart).tz(timeZone).format('YYYY-MM-DD')}.pdf`
 
   return new Response(pdf as BodyInit, {

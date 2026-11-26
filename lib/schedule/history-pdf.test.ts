@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { PDFDocument } from 'pdf-lib'
 import { buildHistoryPdf, type HistoryPdfInput } from './history-pdf'
+import { pageTexts } from './pdf-test-text'
 
 const base: HistoryPdfInput = {
+  locale: 'en',
   businessName: 'Shift SL',
   monthLabel: 'September 2026',
   filters: ['All employees', 'All types', 'Only employees who worked'],
@@ -17,12 +18,25 @@ const base: HistoryPdfInput = {
 }
 
 async function pageCount(bytes: Uint8Array) {
-  return (await PDFDocument.load(bytes)).getPageCount()
+  return (await pageTexts(bytes)).length
 }
 
 describe('history pdf', () => {
   it('builds a one-page document for an empty month', async () => {
     expect(await pageCount(await buildHistoryPdf({ ...base, employees: [] }))).toBe(1)
+  })
+
+  it('writes its fixed labels in the selected language', async () => {
+    const [spanish] = await pageTexts(await buildHistoryPdf({ ...base, locale: 'es' }))
+    expect(spanish).toContain('Historial')
+    expect(spanish).toContain('Por empleado')
+    expect(spanish).toContain('Días trabajados')
+    expect(spanish).toContain('Generado el')
+    expect(spanish).not.toContain('By employee')
+
+    const [english] = await pageTexts(await buildHistoryPdf({ ...base, locale: 'en' }))
+    expect(english).toContain('History')
+    expect(english).toContain('By employee')
   })
 
   it('spills long entry lists onto more pages', async () => {

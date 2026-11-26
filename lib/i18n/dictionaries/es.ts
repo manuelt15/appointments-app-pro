@@ -436,6 +436,10 @@ export const es = {
   'history.pdfError': 'No se ha podido generar el PDF',
   'history.hoursValue': '{hours} h',
 
+  // PDF: el cuadrante y el historial siguen el idioma de la sesión
+  'pdf.history': 'Historial',
+  'pdf.generated': 'Generado el {date}',
+
   // Turnos: tipos, estados y errores que llegan a la pantalla
   'shifts.type.shift': 'Turno',
   'shifts.type.vacation': 'Vacaciones',

@@ -38,7 +38,7 @@ export default async function HomePage() {
     Employee.find({ businessId, isActive: true }).sort({ fullName: 1 }).lean(),
     Shift.find({ businessId, startTime: { $lt: range.end }, endTime: { $gt: range.start } }).lean(),
   ])
-  const week = buildHomeWeek(employees.map(toPlainEmployee), shifts.map(toPlainShift), now, timeZone)
+  const week = buildHomeWeek(employees.map(toPlainEmployee), shifts.map(toPlainShift), now, timeZone, locale)
 
   const today = moment(now).tz(timeZone).format('YYYY-MM-DD')
   const weekEnd = moment(range.end).tz(timeZone).subtract(1, 'day').toDate()

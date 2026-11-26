@@ -1,12 +1,9 @@
 import moment from 'moment-timezone'
-import type { Employee, Shift, ShiftType } from '@/types'
-
-export const TYPE_LABELS: Record<ShiftType, string> = {
-  shift: 'Shift',
-  vacation: 'Vacation',
-  sick_leave: 'Sick leave',
-  time_off: 'Time off',
-}
+import type { Employee, Shift } from '@/types'
+import { formatInZone } from '@/lib/i18n/dates'
+import type { Locale } from '@/lib/i18n/locales'
+import { t } from '@/lib/i18n/translate'
+import { shiftTypeKey } from '@/lib/shifts/labels'
 
 export interface WeekDayEntry {
   day: Date
@@ -37,7 +34,12 @@ export function buildEmployeeWeeks(
   employees: Employee[],
   shifts: Shift[],
   weekStart: Date,
-  timeZone: string
+  timeZone: string,
+  /**
+   * El correo del cuadrante llama sin locale y sigue saliendo en inglés: no se
+   * toca aquí. El PDF le pasa el idioma de la sesión.
+   */
+  locale: Locale = 'en'
 ): EmployeeWeek[] {
   const days = Array.from({ length: 7 }, (_, index) => moment(weekStart).tz(timeZone).add(index, 'day'))
   const time = (date: Date) => moment(date).tz(timeZone).format('HH:mm')
@@ -62,11 +64,16 @@ export function buildEmployeeWeeks(
           hours += (to.getTime() - from.getTime()) / 3_600_000
           entries.push(`${time(from)} - ${time(to)}`)
         } else {
-          entries.push(TYPE_LABELS[shift.type])
+          entries.push(t(locale, shiftTypeKey(shift.type)))
         }
       }
 
-      return { day: dayStart, label: day.format('ddd D'), fullLabel: day.format('dddd D MMMM'), entries }
+      return {
+        day: dayStart,
+        label: formatInZone(dayStart, timeZone, 'EEE d', locale),
+        fullLabel: formatInZone(dayStart, timeZone, 'EEEE d MMMM', locale),
+        entries,
+      }
     })
 
     return {
@@ -78,9 +85,9 @@ export function buildEmployeeWeeks(
   })
 }
 
-export function weekRangeLabel(weekStart: Date, timeZone: string) {
-  const start = moment(weekStart).tz(timeZone)
-  return `${start.format('D MMM')} - ${start.clone().add(6, 'day').format('D MMM YYYY')}`
+export function weekRangeLabel(weekStart: Date, timeZone: string, locale: Locale = 'en') {
+  const end = moment(weekStart).tz(timeZone).add(6, 'day').toDate()
+  return `${formatInZone(weekStart, timeZone, 'd MMM', locale)} - ${formatInZone(end, timeZone, 'd MMM yyyy', locale)}`
 }
 
 /** Monday 00:00 of the week holding `value`, in the business's time zone. */
