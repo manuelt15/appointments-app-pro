@@ -17,6 +17,8 @@ import { toPlainEmployee, toPlainShift } from '@/lib/schedule/serialize'
 import { buildEmployeeWeeks, resolveWeekStart, weekEnd } from '@/lib/schedule/week'
 
 export async function POST(request: NextRequest) {
+  // Idioma de la cookie que escribe la interfaz. Sin cookie (cron o tarea
+  // interna) requestLocale devuelve el idioma por defecto de la app: español.
   const locale = requestLocale(request)
   const auth = await resolveAuth(request)
   if (!auth) return apiError('Unauthorized', 401)
@@ -43,9 +45,16 @@ export async function POST(request: NextRequest) {
     employees.map(toPlainEmployee),
     shifts.map(toPlainShift),
     weekStart,
-    timeZone
+    timeZone,
+    locale
   )
-  const { ready, skipped } = prepareWeeklyEmails(business?.name ?? 'the team', weekStart, timeZone, weeks)
+  const { ready, skipped } = prepareWeeklyEmails(
+    business?.name ?? t(locale, 'email.schedule.defaultBusiness'),
+    weekStart,
+    timeZone,
+    weeks,
+    locale
+  )
 
   if (!isEmailConfigured()) {
     return apiSuccess({

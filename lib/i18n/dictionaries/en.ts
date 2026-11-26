@@ -438,6 +438,18 @@ export const en: typeof es = {
   'history.pdfError': 'Could not build the PDF',
   'history.hoursValue': '{hours} h',
 
+  // PDFs: the schedule and the history follow the session language
+  'pdf.history': 'History',
+  'pdf.generated': 'Generated {date}',
+
+  // Schedule email: follows the session language, like the PDFs
+  'email.schedule.subject': 'Your schedule for {range}',
+  'email.schedule.greeting': 'Hi {name},',
+  'email.schedule.intro': 'Here is your schedule at {business} for {range}.',
+  'email.schedule.defaultBusiness': 'the team',
+  'email.schedule.off': 'Off',
+  'email.schedule.total': 'Total: {hours} hours.',
+
   // Shifts: types, states and the errors that reach the screen
   'shifts.type.shift': 'Shift',
   'shifts.type.vacation': 'Vacation',

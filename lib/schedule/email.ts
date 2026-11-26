@@ -1,6 +1,8 @@
 import type { EmployeeWeek } from './week'
 import { weekRangeLabel } from './week'
 import { employeeEmail } from '../employees/fields'
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/locales'
+import { t } from '@/lib/i18n/translate'
 
 /**
  * El nombre y el negocio acaban en el asunto y en el cuerpo del mensaje. Un salto
@@ -27,15 +29,21 @@ export interface EmailPreparation {
 /**
  * Builds one message per employee from their own week. Kept separate from
  * delivery so plugging a provider in later touches only `sendEmail`.
+ *
+ * Todo el texto sale del diccionario en `locale`, el mismo que usan los PDF.
+ * Sin locale se usa el idioma por defecto de la app: una tarea sin sesión no
+ * tiene cookie de idioma y el correo sale en español.
  */
 export function prepareWeeklyEmails(
   businessName: string,
   weekStart: Date,
   timeZone: string,
-  weeks: EmployeeWeek[]
+  weeks: EmployeeWeek[],
+  locale: Locale = DEFAULT_LOCALE
 ): EmailPreparation {
   const ready: PreparedEmail[] = []
   const skipped: { employeeName: string; reason: string }[] = []
+  const range = weekRangeLabel(weekStart, timeZone, locale)
 
   for (const week of weeks) {
     const safeName = headerSafe(week.employee.fullName)
@@ -56,7 +64,7 @@ export function prepareWeeklyEmails(
     }
 
     const lines = week.days.map((day) => {
-      const what = day.entries.length > 0 ? day.entries.join(', ') : 'Off'
+      const what = day.entries.length > 0 ? day.entries.join(', ') : t(locale, 'email.schedule.off')
       return `${day.fullLabel}: ${what}`
     })
 
@@ -64,15 +72,15 @@ export function prepareWeeklyEmails(
       employeeId: week.employee._id,
       employeeName: safeName,
       to: parsedEmail.data,
-      subject: `Your schedule for ${weekRangeLabel(weekStart, timeZone)}`,
+      subject: t(locale, 'email.schedule.subject', { range }),
       body: [
-        `Hi ${safeName},`,
+        t(locale, 'email.schedule.greeting', { name: safeName }),
         '',
-        `Here is your schedule at ${headerSafe(businessName)} for ${weekRangeLabel(weekStart, timeZone)}.`,
+        t(locale, 'email.schedule.intro', { business: headerSafe(businessName), range }),
         '',
         ...lines,
         '',
-        `Total: ${week.hours} hours.`,
+        t(locale, 'email.schedule.total', { hours: week.hours }),
       ].join('\n'),
     })
   }

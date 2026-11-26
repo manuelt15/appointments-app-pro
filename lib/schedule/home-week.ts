@@ -1,6 +1,8 @@
 import moment from 'moment-timezone'
-import { TYPE_LABELS } from './week'
 import type { Employee, Shift, ShiftType } from '@/types'
+import type { Locale } from '@/lib/i18n/locales'
+import { t } from '@/lib/i18n/translate'
+import { shiftTypeKey } from '@/lib/shifts/labels'
 
 export interface HomeDayEntry {
   type: ShiftType
@@ -35,7 +37,14 @@ export function businessWeekRange(now: Date, timeZone: string) {
   return { start: start.toDate(), end: start.clone().add(1, 'week').toDate() }
 }
 
-export function buildHomeWeek(employees: Employee[], shifts: Shift[], now: Date, timeZone: string): HomeWeek {
+export function buildHomeWeek(
+  employees: Employee[],
+  shifts: Shift[],
+  now: Date,
+  timeZone: string,
+  /** El texto de las ausencias sale del diccionario: un solo sitio, no un mapa aparte. */
+  locale: Locale = 'en'
+): HomeWeek {
   const { start, end } = businessWeekRange(now, timeZone)
   const days = Array.from({ length: 7 }, (_, index) => {
     const day = moment(start).tz(timeZone).add(index, 'day')
@@ -64,7 +73,7 @@ export function buildHomeWeek(employees: Employee[], shifts: Shift[], now: Date,
             text: `${moment(from).tz(timeZone).format('HH:mm')}–${moment(to).tz(timeZone).format('HH:mm')}`,
           })
         } else {
-          entries.push({ type: shift.type, text: TYPE_LABELS[shift.type] })
+          entries.push({ type: shift.type, text: t(locale, shiftTypeKey(shift.type)) })
         }
       }
       return { date: day.date, label: day.label, entries }

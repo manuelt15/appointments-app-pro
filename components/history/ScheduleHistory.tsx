@@ -153,6 +153,7 @@ export default function ScheduleHistory({ businessName, timeZone, employees, cur
       const { buildHistoryPdf } = await import('@/lib/schedule/history-pdf')
       const employeeName = (id: string) => employeesById.get(id)?.fullName ?? t('history.removedEmployee')
       const bytes = await buildHistoryPdf({
+        locale,
         businessName,
         monthLabel,
         filters: [
