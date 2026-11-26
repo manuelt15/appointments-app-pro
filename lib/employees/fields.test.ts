@@ -37,9 +37,13 @@ function week(fullName: string, email: string | undefined, hasAnything = true): 
 
 describe('prepareWeeklyEmails sanea lo que escribe la cabecera', () => {
   it('no deja pasar saltos de línea heredados en el nombre', () => {
-    const { ready } = prepareWeeklyEmails('Bar\r\nX-Injected: 1', new Date('2026-11-17'), 'Europe/Madrid', [
-      week('Marta\r\nBcc: otro@ejemplo.com', 'marta@ejemplo.com'),
-    ])
+    const { ready } = prepareWeeklyEmails(
+      'Bar\r\nX-Injected: 1',
+      new Date('2026-11-17'),
+      'Europe/Madrid',
+      [week('Marta\r\nBcc: otro@ejemplo.com', 'marta@ejemplo.com')],
+      'en'
+    )
     expect(ready).toHaveLength(1)
     expect(ready[0].employeeName).toBe('Marta Bcc: otro@ejemplo.com')
     expect(ready[0].body).toContain('Hi Marta Bcc: otro@ejemplo.com,')
@@ -49,18 +53,25 @@ describe('prepareWeeklyEmails sanea lo que escribe la cabecera', () => {
   })
 
   it('descarta un empleado con un email heredado inválido', () => {
-    const { ready, skipped } = prepareWeeklyEmails('Bar', new Date('2026-11-17'), 'Europe/Madrid', [
-      week('Marta', 'inventado'),
-    ])
+    const { ready, skipped } = prepareWeeklyEmails(
+      'Bar',
+      new Date('2026-11-17'),
+      'Europe/Madrid',
+      [week('Marta', 'inventado')],
+      'en'
+    )
     expect(ready).toHaveLength(0)
     expect(skipped).toEqual([{ employeeName: 'Marta', reason: 'Invalid email address' }])
   })
 
   it('sigue distinguiendo al que no tiene email del que lo tiene mal', () => {
-    const { skipped } = prepareWeeklyEmails('Bar', new Date('2026-11-17'), 'Europe/Madrid', [
-      week('Sin correo', undefined),
-      week('Con correo roto', 'arroba@'),
-    ])
+    const { skipped } = prepareWeeklyEmails(
+      'Bar',
+      new Date('2026-11-17'),
+      'Europe/Madrid',
+      [week('Sin correo', undefined), week('Con correo roto', 'arroba@')],
+      'en'
+    )
     expect(skipped.map(s => s.reason)).toEqual(['No email address', 'Invalid email address'])
   })
 })

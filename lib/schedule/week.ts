@@ -1,7 +1,7 @@
 import moment from 'moment-timezone'
 import type { Employee, Shift } from '@/types'
 import { formatInZone } from '@/lib/i18n/dates'
-import type { Locale } from '@/lib/i18n/locales'
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/locales'
 import { t } from '@/lib/i18n/translate'
 import { shiftTypeKey } from '@/lib/shifts/labels'
 
@@ -36,10 +36,11 @@ export function buildEmployeeWeeks(
   weekStart: Date,
   timeZone: string,
   /**
-   * El correo del cuadrante llama sin locale y sigue saliendo en inglés: no se
-   * toca aquí. El PDF le pasa el idioma de la sesión.
+   * El PDF y el correo del cuadrante le pasan el idioma de la sesión. Sin locale
+   * se usa el idioma por defecto de la app, el mismo que resuelve `requestLocale`
+   * cuando la llamada no trae cookie (cron o tarea interna): español.
    */
-  locale: Locale = 'en'
+  locale: Locale = DEFAULT_LOCALE
 ): EmployeeWeek[] {
   const days = Array.from({ length: 7 }, (_, index) => moment(weekStart).tz(timeZone).add(index, 'day'))
   const time = (date: Date) => moment(date).tz(timeZone).format('HH:mm')
@@ -85,7 +86,7 @@ export function buildEmployeeWeeks(
   })
 }
 
-export function weekRangeLabel(weekStart: Date, timeZone: string, locale: Locale = 'en') {
+export function weekRangeLabel(weekStart: Date, timeZone: string, locale: Locale = DEFAULT_LOCALE) {
   const end = moment(weekStart).tz(timeZone).add(6, 'day').toDate()
   return `${formatInZone(weekStart, timeZone, 'd MMM', locale)} - ${formatInZone(end, timeZone, 'd MMM yyyy', locale)}`
 }

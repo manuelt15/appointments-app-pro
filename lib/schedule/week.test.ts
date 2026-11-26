@@ -63,7 +63,8 @@ describe('building the week for export', () => {
         endTime: '2026-09-17T00:00:00.000Z',
       })],
       weekStart,
-      MADRID
+      MADRID,
+      'en'
     )
 
     const withEntries = weeks[0].days.filter((day) => day.entries.length > 0)
@@ -89,7 +90,7 @@ describe('building the week for export', () => {
 
 describe('business time zone', () => {
   it('labels days and times in business time, whatever the server runs in', () => {
-    const weeks = buildEmployeeWeeks([ana], [shift({})], weekStart, MADRID)
+    const weeks = buildEmployeeWeeks([ana], [shift({})], weekStart, MADRID, 'en')
 
     expect(weeks[0].days[0].label).toBe('Mon 14')
     expect(weeks[0].days[0].fullLabel).toBe('Monday 14 September')
@@ -120,7 +121,8 @@ describe('business time zone', () => {
       // Sunday 25 October, 23:00 to 23:30 CET.
       [shift({ startTime: '2026-10-25T22:00:00.000Z', endTime: '2026-10-25T22:30:00.000Z' })],
       dstWeek,
-      MADRID
+      MADRID,
+      'en'
     )
 
     expect(weekEnd(dstWeek, MADRID).toISOString()).toBe('2026-10-25T23:00:00.000Z')
@@ -153,6 +155,6 @@ describe('week boundaries', () => {
   })
 
   it('labels the range from Monday to Sunday', () => {
-    expect(weekRangeLabel(weekStart, MADRID)).toBe('14 Sep - 20 Sep 2026')
+    expect(weekRangeLabel(weekStart, MADRID, 'en')).toBe('14 Sep - 20 Sep 2026')
   })
 })

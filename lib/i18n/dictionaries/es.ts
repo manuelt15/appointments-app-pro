@@ -440,6 +440,14 @@ export const es = {
   'pdf.history': 'Historial',
   'pdf.generated': 'Generado el {date}',
 
+  // Correo del cuadrante: sigue el idioma de la sesión, igual que los PDF
+  'email.schedule.subject': 'Tu horario del {range}',
+  'email.schedule.greeting': 'Hola {name},',
+  'email.schedule.intro': 'Este es tu horario en {business} del {range}.',
+  'email.schedule.defaultBusiness': 'el equipo',
+  'email.schedule.off': 'Libre',
+  'email.schedule.total': 'Total: {hours} horas.',
+
   // Turnos: tipos, estados y errores que llegan a la pantalla
   'shifts.type.shift': 'Turno',
   'shifts.type.vacation': 'Vacaciones',
